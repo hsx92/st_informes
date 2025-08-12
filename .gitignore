@@ -1,0 +1,11 @@
+circuitos_bsas_FULL.csv
+utils.py
+__pycache__/
+.streamlit/
+evaluaciones.csv
+evaluaciones.py
+Listado becas CLEAN.csv
+toJson.txt
+pages/2_🗺️_Mapa Bs As.py
+pages/5_🙋‍♂️_Control de usuarios.py
+pages/6_⚙️_Config.py
