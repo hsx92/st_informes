@@ -13,6 +13,8 @@ import streamlit_authenticator as stauth
 from streamlit_authenticator.utilities import LoginError
 import yaml
 from yaml import SafeLoader
+from copy import deepcopy
+from typing import Dict
 import logging
 
 logging.basicConfig(filename='InformesApp-dh.log', level=logging.INFO)
@@ -76,11 +78,59 @@ class Cursor:
         if exception_value:
             self._conn.rollback()
             st.error('Ha ocurrido un error, la transacción ha sido cancelada.')
-            st.write(f'Detalles: {exception_type} /// {exception_value} /// {exception_traceback}')
+            logger.info(f'Detalles: {exception_type} /// {exception_value} /// {exception_traceback}')
         else:
             self._conn.commit()
         self._cursor.close()
         Conexion.free_conn(self._conn)
+
+
+def _render_str(value: str, params: dict) -> str:
+    try:
+        return Template(value).render(params)
+    except Exception:
+        return value
+
+
+def render_obj(obj, params):
+    if isinstance(obj, dict):
+        new_dict = {}
+        for k, v in obj.items():
+            rendered_key = _render_str(k, params) if isinstance(k, str) else k
+            new_dict[rendered_key] = render_obj(v, params)
+        return new_dict
+    if isinstance(obj, list):
+        return [render_obj(i, params) for i in obj]
+    if isinstance(obj, str):
+        return _render_str(obj, params)
+    return obj
+
+
+def insertar_saltos(cadena):
+    if not isinstance(cadena, str):
+        return cadena
+
+    cadena_restante = cadena
+    partes = []
+    corte_despues_de = 35
+
+    while len(cadena_restante) > corte_despues_de:
+        try:
+            # Busca el primer espacio a partir del caracter n°35
+            indice_espacio = cadena_restante.index(' ', corte_despues_de)
+            # Guarda la parte hasta el espacio
+            partes.append(cadena_restante[:indice_espacio])
+            # La cadena restante es lo que viene después del espacio
+            cadena_restante = cadena_restante[indice_espacio + 1:]
+        except ValueError:
+            # Si no hay más espacios después de 35 caracteres, sal del bucle
+            break
+
+    # Agrega la última parte que queda de la cadena
+    partes.append(cadena_restante)
+
+    # Une todas las partes con el tag <br>
+    return '<br>'.join(partes)
 
 
 def get_provincias():
@@ -140,6 +190,44 @@ def ejecutar_consulta_parametrizada(plantilla_sql: str, params: dict) -> pd.Data
     except Exception as e:
         logger.error(f"Error al ejecutar la consulta SQL con Pandas: {e}")
         return pd.DataFrame()
+
+
+def get_informe(nombre_informe: str, params: Dict[str, object]) -> Dict[str, object]:
+    with open("informes.yml", "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+
+    informes = data.get("informe")
+    if isinstance(informes, dict):
+        informes = [informes]
+
+    for informe in informes:
+        if informe.get("nombre") == nombre_informe:
+            informe_render = render_obj(deepcopy(informe), params)
+            resultado = {"nombre": informe_render["nombre"], "componentes": {}}
+
+            for comp_nombre, comp in informe_render.get("componentes", {}).items():
+                params_comp = {k: params[k] for k in comp.get("parametros", []) if k in params}
+                plantilla = comp.pop("plantilla_sql", None)
+                if plantilla:
+                    df = ejecutar_consulta_parametrizada(plantilla, params_comp)
+                    comp["resultado_sql"] = df
+                resultado["componentes"][comp_nombre] = comp
+            return resultado
+
+    raise KeyError(f"Informe '{nombre_informe}' no encontrado")
+
+
+def procesar_kpi(df: pd.DataFrame, config: dict) -> str:
+    if df.empty or pd.isna(df.iloc[0, 0]):
+        return "N/A"
+    valor = df.iloc[0, 0]
+    formato = config.get('format', 'raw')
+    sufijo = config.get('suffix', '')
+    if formato == 'int':
+        return f"{int(float(valor)):,}{sufijo}".replace(",", ".")
+    if formato == 'float':
+        return f"{float(valor):,.2f}{sufijo}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"{valor}{sufijo}"
 
 
 def login():

@@ -1,13 +1,10 @@
 # import plotly.express as px
 import streamlit as st
-import pandas as pd
-import numpy as np
 import plotly.express as px
-from great_tables import GT
-from great_tables.data import sp500
+# from great_tables import GT
+# from streamlit_extras.great_tables import great_tables
 from streamlit_extras.metric_cards import style_metric_cards
-from streamlit_extras.great_tables import great_tables
-from data_handler import get_provincias
+from data_handler import get_provincias, get_informe, procesar_kpi, insertar_saltos
 
 
 st.set_page_config(page_title="Consulta", page_icon=":bar_chart:", layout="wide")
@@ -68,7 +65,58 @@ def panomProvincial():
     if provincia:
         st.session_state.provincia = provincia
         st.session_state.provincia_id = provinciasDF[provinciasDF['nombre_iso'] == provincia]['id'].values[0]
+        st.session_state.region = provinciasDF[provinciasDF['nombre_iso'] == provincia]['region'].values[0]
+        st.session_state.pais = 'Argentina'
         st.session_state.anio = '2023'
+
+        DFs = get_informe("ficha_provincial", {
+            "provincia_id": st.session_state.provincia_id,
+            "provincia": st.session_state.provincia,
+            "anio": st.session_state.anio
+        })
+
+        kpi_poblacion_prov = {'nombre': DFs["componentes"]["kpi_poblacion_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_poblacion_prov"]["resultado_sql"], DFs["componentes"]["kpi_poblacion_prov"]["config"])}
+        kpi_densidad_prov = {'nombre': DFs["componentes"]["kpi_densidad_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_densidad_prov"]["resultado_sql"], DFs["componentes"]["kpi_densidad_prov"]["config"])}
+        kpi_tasa_actividad_prov = {'nombre': DFs["componentes"]["kpi_tasa_actividad_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_actividad_prov"]["resultado_sql"], DFs["componentes"]["kpi_tasa_actividad_prov"]["config"])}
+        kpi_tasa_actividad_nac = {'nombre': DFs["componentes"]["kpi_tasa_actividad_nac"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_actividad_nac"]["resultado_sql"], DFs["componentes"]["kpi_tasa_actividad_nac"]["config"])}
+        kpi_tasa_desempleo_prov = {'nombre': DFs["componentes"]["kpi_tasa_desempleo_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_desempleo_prov"]["resultado_sql"], DFs["componentes"]["kpi_tasa_desempleo_prov"]["config"])}
+        kpi_tasa_desempleo_nac = {'nombre': DFs["componentes"]["kpi_tasa_desempleo_nac"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_desempleo_nac"]["resultado_sql"], DFs["componentes"]["kpi_tasa_desempleo_nac"]["config"])}
+        grafico_expo_top5 = DFs["componentes"]["grafico_expo_top5"]
+        grafico_evolucion_regional = DFs["componentes"]["grafico_evolucion_regional"]
+        grafico_inv_por_investigador = DFs["componentes"]["grafico_inv_por_investigador"]
+        grafico_inv_empresaria_sector = DFs["componentes"]["grafico_inv_empresaria_sector"]
+        kpi_pfi_nacional = {'nombre': DFs["componentes"]["kpi_pfi_nacional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_nacional"]["resultado_sql"], DFs["componentes"]["kpi_pfi_nacional"]["config"])}
+        kpi_pfi_regional = {'nombre': DFs["componentes"]["kpi_pfi_regional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_regional"]["resultado_sql"], DFs["componentes"]["kpi_pfi_regional"]["config"])}
+        kpi_pfi_provincial = {'nombre': DFs["componentes"]["kpi_pfi_provincial"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_provincial"]["resultado_sql"], DFs["componentes"]["kpi_pfi_provincial"]["config"])}
+        kpi_porc_privada_nacional = {'nombre': DFs["componentes"]["kpi_porc_privada_nacional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_nacional"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_nacional"]["config"])}
+        kpi_porc_privada_regional = {'nombre': DFs["componentes"]["kpi_porc_privada_regional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_regional"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_regional"]["config"])}
+        kpi_porc_privada_provincial = {'nombre': DFs["componentes"]["kpi_porc_privada_provincial"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_provincial"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_provincial"]["config"])}
+        tabla_pfi_cruce = DFs["componentes"]["tabla_pfi_cruce"]
+        grafico_expo_intensidad = DFs["componentes"]["grafico_expo_intensidad"]
+        grafico_expo_evolucion = DFs["componentes"]["grafico_expo_evolucion"]
+        grafico_expo_destino = DFs["componentes"]["grafico_expo_destino"]
+        kpi_patentes_arg = {'nombre': DFs["componentes"]["kpi_patentes_arg"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_arg"]["resultado_sql"], DFs["componentes"]["kpi_patentes_arg"]["config"])}
+        kpi_patentes_cyt_arg = {'nombre': DFs["componentes"]["kpi_patentes_cyt_arg"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_cyt_arg"]["resultado_sql"], DFs["componentes"]["kpi_patentes_cyt_arg"]["config"])}
+        kpi_patentes_cyt_prov = {'nombre': DFs["componentes"]["kpi_patentes_cyt_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_cyt_prov"]["resultado_sql"], DFs["componentes"]["kpi_patentes_cyt_prov"]["config"])}
+        grafico_patentes_evolucion = DFs["componentes"]["grafico_patentes_evolucion"]
+        tabla_patentes_sector = DFs["componentes"]["tabla_patentes_sector"]
+        grafico_produccion_evolucion = DFs["componentes"]["grafico_produccion_evolucion"]
+        grafico_produccion_tipo = DFs["componentes"]["grafico_produccion_tipo"]
+        tabla_articulos_q1_q2 = DFs["componentes"]["tabla_articulos_q1_q2"]
+        grafico_publicaciones_area = DFs["componentes"]["grafico_publicaciones_area"]
+        kpi_unidades_id_prov = {'nombre': DFs["componentes"]["kpi_unidades_id_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_unidades_id_prov"]["resultado_sql"], DFs["componentes"]["kpi_unidades_id_prov"]["config"])}
+        grafico_unidades_por_inst = DFs["componentes"]["grafico_unidades_por_inst"]
+        kpi_equipos_nacional = {'nombre': DFs["componentes"]["kpi_equipos_nacional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_nacional"]["resultado_sql"], DFs["componentes"]["kpi_equipos_nacional"]["config"])}
+        kpi_equipos_regional = {'nombre': DFs["componentes"]["kpi_equipos_regional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_regional"]["resultado_sql"], DFs["componentes"]["kpi_equipos_regional"]["config"])}
+        kpi_equipos_provincial = {'nombre': DFs["componentes"]["kpi_equipos_provincial"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_provincial"]["resultado_sql"], DFs["componentes"]["kpi_equipos_provincial"]["config"])}
+        grafico_equipos_por_tipo = DFs["componentes"]["grafico_equipos_por_tipo"]
+        grafico_distribucion_investigadores = DFs["componentes"]["grafico_distribucion_investigadores"]
+        kpi_tasa_pea_provincial = {'nombre': DFs["componentes"]["kpi_tasa_pea_provincial"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_provincial"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_provincial"]["config"])}
+        kpi_tasa_pea_regional = {'nombre': DFs["componentes"]["kpi_tasa_pea_regional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_regional"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_regional"]["config"])}
+        kpi_tasa_pea_nacional = {'nombre': DFs["componentes"]["kpi_tasa_pea_nacional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_nacional"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_nacional"]["config"])}
+        tabla_personas_por_funcion = DFs["componentes"]["tabla_personas_por_funcion"]
+        grafico_evolucion_investigadores = DFs["componentes"]["grafico_evolucion_investigadores"]
+        grafico_percepcion_calidad_vida = DFs["componentes"]["grafico_percepcion_calidad_vida"]
 
         st.markdown(f"### {provincia}")
 
@@ -77,208 +125,198 @@ def panomProvincial():
         )
 
         with indicadoresTab:
+            st.markdown("")
             col1, col2, col3, col4, col5 = st.columns([1, 3.75, .5, 3.75, 1])
             with col2:
-                st.metric(label=f":primary[Población de {provincia}]", value="5000000", delta=None)
-                st.metric(label=":primary[Población Provincial]", value="5000000", delta=None)
-                st.metric(label=":primary[Población Provincial]", value="5000000", delta=None)
+                st.metric(label=f":primary[{kpi_poblacion_prov["nombre"]}]", value=kpi_poblacion_prov["valor"], delta=None)
+                st.metric(label=f":primary[{kpi_tasa_actividad_prov["nombre"]}]", value=kpi_tasa_actividad_prov["valor"], delta=None)
+                st.metric(label=f":primary[{kpi_tasa_desempleo_prov["nombre"]}]", value=kpi_tasa_desempleo_prov["valor"], delta=None)
 
             with col4:
-                st.metric(label=":primary[Densidad Poblacional Provincial]", value="5000"+" hab/km²", delta=None)
-                st.metric(label=":primary[Densidad Poblacional Provincial]", value="5000"+" hab/km²", delta=None)
-                st.metric(label=":primary[Densidad Poblacional Provincial]", value="5000"+" hab/km²", delta=None)
+                st.metric(label=f":primary[{kpi_densidad_prov["nombre"]}]", value=kpi_densidad_prov["valor"], delta=None)
+                st.metric(label=f":primary[{kpi_tasa_actividad_nac["nombre"]}]", value=kpi_tasa_actividad_nac["valor"], delta=None)
+                st.metric(label=f":primary[{kpi_tasa_desempleo_nac["nombre"]}]", value=kpi_tasa_desempleo_nac["valor"], delta=None)
+
+            grafico_expo_top5['resultado_sql'].iloc[:, 0] = grafico_expo_top5['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
 
             top5_exportaciones_fig = px.bar(
-                y=["Producto A", "Producto B", "Producto C", "Producto D", "Producto E"],
-                x=[100, 200, 300, 400, 500],
-                labels={"x": "Exportaciones (en millones de USD)", "y": "Productos"},
-                title=f"Top 5 Exportaciones ({st.session_state.anio})",
+                data_frame=grafico_expo_top5['resultado_sql'],
+                x=grafico_expo_top5['config']['plot_mapping']['x'],
+                y=grafico_expo_top5['config']['plot_mapping']['y'],
+                labels=grafico_expo_top5['config']['plot_mapping']['labels'],
+                title=grafico_expo_top5['nombre'],
                 template="seaborn",
-                orientation='h'
+                orientation='h',
+                color=grafico_expo_top5['config']['plot_mapping']['y'],
+                color_discrete_sequence=["#4D7AAE", "#B9422D", "#B2713F", "#198769", "#5C3C7D", "#F2C94C", "#E26D5C", "#9B51E0", "#56CCF2", "#27AE60"]
             )
-            top5_exportaciones_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            top5_exportaciones_fig.update_layout(grafico_expo_top5['config']['layout'])
+            top5_exportaciones_fig.update_layout(showlegend=False)
+
             st.markdown("---")
             st.plotly_chart(top5_exportaciones_fig, use_container_width=True)
 
         with inversionTab:
             inversionID_fig = px.line(
-                x=["2020", "2021", "2022", "2023"],
-                y=[100, 200, 300, 400],
-                labels={"x": "Año", "y": "Inversión en I+D (en millones de USD)"},
-                title="Evolución de la Inversión en I+D",
-                template="seaborn"
+                data_frame=grafico_evolucion_regional['resultado_sql'],
+                x=grafico_evolucion_regional['config']['plot_mapping']['x'],
+                y=grafico_evolucion_regional['config']['plot_mapping']['y'],
+                labels=grafico_evolucion_regional['config']['plot_mapping']['labels'],
+                title=grafico_evolucion_regional['nombre'],
+                template="seaborn",
+                color=grafico_evolucion_regional['config']['plot_mapping']['color']
             )
-            inversionID_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            inversionID_fig.update_layout(grafico_evolucion_regional['config']['layout'])
 
             inversionInvestigador_fig = px.bar(
-                y=["Provincia A", "Provincia B", "Provincia C"],
-                x=[50, 100, 150],
-                labels={"x": "Inversión (en millones de USD)", "y": "Provincia"},
-                title=f"Inversión por investigador en la Región ({st.session_state.anio})",
+                data_frame=grafico_inv_por_investigador['resultado_sql'],
+                y=grafico_inv_por_investigador['config']['plot_mapping']['y'],
+                x=grafico_inv_por_investigador['config']['plot_mapping']['x'],
+                labels=grafico_inv_por_investigador['config']['plot_mapping']['labels'],
+                title=grafico_inv_por_investigador['nombre'],
                 template="seaborn",
                 orientation='h'
             )
-            inversionInvestigador_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            inversionInvestigador_fig.update_layout(grafico_inv_por_investigador['config']['layout'])
+
+            # Tomar primer columna del DF y aplicar insertar_salto()
+            grafico_inv_empresaria_sector['resultado_sql'].iloc[:, 0] = grafico_inv_empresaria_sector['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
 
             inversionEmpresas_fig = px.bar(
-                y=["Sector A", "Sector B", "Sector C"],
-                x=[200, 300, 400],
-                labels={"x": "Inversión (en millones de USD)", "y": "Sector"},
-                title=f"Inversión privada por sector en {provincia} ({st.session_state.anio})",
+                data_frame=grafico_inv_empresaria_sector['resultado_sql'],
+                y=grafico_inv_empresaria_sector['config']['plot_mapping']['y'],
+                x=grafico_inv_empresaria_sector['config']['plot_mapping']['x'],
+                labels=grafico_inv_empresaria_sector['config']['plot_mapping']['labels'],
+                title=grafico_inv_empresaria_sector['nombre'],
                 template="seaborn",
-                orientation='h'
+                orientation='h',
+                color=grafico_inv_empresaria_sector['config']['plot_mapping']['y'],
+                color_discrete_sequence=["#4D7AAE", "#B9422D", "#B2713F", "#198769", "#5C3C7D", "#F2C94C", "#E26D5C", "#9B51E0", "#56CCF2", "#27AE60"]
             )
-            inversionEmpresas_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+
+            inversionEmpresas_fig.update_layout(grafico_inv_empresaria_sector['config']['layout'])
+            inversionEmpresas_fig.update_layout(showlegend=False)
 
             st.plotly_chart(inversionID_fig, use_container_width=True)
             st.markdown("---")
             st.plotly_chart(inversionInvestigador_fig, use_container_width=True)
             st.markdown("---")
             st.plotly_chart(inversionEmpresas_fig, use_container_width=True)
+
         with proyectosTab:
+            st.markdown("")
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric(label=":primary[Proyectos en curso]", value=150, delta=None)
-                st.metric(label=":primary[Proyectos en curso]", value=150, delta=None)
+                st.metric(label=f":primary[{kpi_pfi_provincial["nombre"]}]", value=kpi_pfi_provincial["valor"], delta=None)
+                st.metric(label=f":primary[{kpi_porc_privada_provincial["nombre"]}]", value=kpi_porc_privada_provincial["valor"], delta=None)
             with col2:
-                st.metric(label=":primary[Proyectos finalizados]", value=75, delta=None)
-                st.metric(label=":primary[Proyectos en curso]", value=150, delta=None)
+                st.metric(label=f":primary[{kpi_pfi_regional["nombre"]}]", value=kpi_pfi_regional["valor"], delta=None)
+                st.metric(label=f":primary[{kpi_porc_privada_regional["nombre"]}]", value=kpi_porc_privada_regional["valor"], delta=None)
             with col3:
-                st.metric(label=":primary[Proyectos en colaboración]", value=30, delta=None)
-                st.metric(label=":primary[Proyectos en curso]", value=150, delta=None)
+                st.metric(label=f":primary[{kpi_pfi_nacional["nombre"]}]", value=kpi_pfi_nacional["valor"], delta=None)
+                st.metric(label=f":primary[{kpi_porc_privada_nacional["nombre"]}]", value=kpi_porc_privada_nacional["valor"], delta=None)
+            st.caption("* PFI: Proyectos Federales de Innovación")
             st.markdown("---")
 
-            # Define the start and end dates for the data range
-            start_date = "2010-06-07"
-            end_date = "2010-06-14"
-
-            # Filter sp500 using Pandas to dates between `start_date` and `end_date`
-            sp500_mini = sp500[(sp500["date"] >= start_date) & (sp500["date"] <= end_date)]
-
-            # Create a display table based on the `sp500_mini` table data
-            table = (
-                GT(sp500_mini)
-                .tab_header(title=f"S&P 500", subtitle=f"{start_date} to {end_date}")
-                .fmt_currency(columns=["open", "high", "low", "close"])
-                .fmt_date(columns="date", date_style="wd_m_day_year")
-                .fmt_number(columns="volume", compact=True)
-                .cols_hide(columns="adj_close")
-            )
-
-            great_tables(table, width="stretch")
+            st.table(tabla_pfi_cruce['resultado_sql'])
 
         with infraestructuraTab:
             st.markdown("")
-            col1, col2 = st.columns([2, 8])
+            col0, col1, col2 = st.columns([.25, 2.5, 7.25], vertical_alignment="center")
             with col1:
-                st.markdown("###")
-                st.markdown("###")
-                st.metric(label=f":primary[Unidades de I+D]", value=120, delta=None)
+                st.metric(label=f":primary[{kpi_unidades_id_prov['nombre']}]", value=kpi_unidades_id_prov['valor'], delta=None)
             with col2:
-                unidadesIDxinstitucion_fig = px.bar(
-                    y=["Institución A", "Institución B", "Institución C", "Institución D"],
-                    x=[10, 20, 30, 40],
-                    labels={"x": "Unidades de I+D", "y": "Institución"},
-                    title=f"Unidades de I+D por institución en {provincia} ({st.session_state.anio})",
-                    template="seaborn",
-                    orientation='h'
-                )
-                unidadesIDxinstitucion_fig.update_layout(
-                    title_x=.2,
-                    title_font=dict(size=20),
-                    margin=dict(l=20, r=20, t=50, b=20)
-                )
-                st.plotly_chart(unidadesIDxinstitucion_fig, use_container_width=True)
+                st.markdown(f"#### {grafico_unidades_por_inst['nombre']}")
+
+            grafico_unidades_por_inst['resultado_sql'].iloc[:, 0] = grafico_unidades_por_inst['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
+
+            unidadesIDxinstitucion_fig = px.bar(
+                data_frame=grafico_unidades_por_inst['resultado_sql'],
+                y=grafico_unidades_por_inst['config']['plot_mapping']['y'],
+                x=grafico_unidades_por_inst['config']['plot_mapping']['x'],
+                labels=grafico_unidades_por_inst['config']['plot_mapping']['labels'],
+                title=None,  # grafico_unidades_por_inst['nombre'],
+                template="seaborn",
+                orientation='h',
+                color=grafico_unidades_por_inst['config']['plot_mapping']['y'],
+                color_discrete_sequence=["#4D7AAE", "#B9422D", "#B2713F", "#198769", "#5C3C7D", "#F2C94C", "#E26D5C", "#9B51E0", "#56CCF2", "#27AE60"]
+            )
+            unidadesIDxinstitucion_fig.update_layout(grafico_unidades_por_inst['config']['layout'])
+            unidadesIDxinstitucion_fig.update_layout(margin=dict(l=0, r=20, t=0, b=20), showlegend=False)
+            st.plotly_chart(unidadesIDxinstitucion_fig, use_container_width=True)
             st.markdown("---")
 
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric(label=f":primary[Unidades de I+D en {provincia}]", value=120, delta=None)
+                st.metric(label=f":primary[{kpi_equipos_provincial['nombre']}]", value=kpi_equipos_provincial['valor'], delta=None)
             with col2:
-                st.metric(label=f":primary[Unidades de I+D en {provincia}]", value=120, delta=None)
+                st.metric(label=f":primary[{kpi_equipos_regional['nombre']}]", value=kpi_equipos_regional['valor'], delta=None)
             with col3:
-                st.metric(label=f":primary[Unidades de I+D en {provincia}]", value=120, delta=None)
-            
+                st.metric(label=f":primary[{kpi_equipos_nacional['nombre']}]", value=kpi_equipos_nacional['valor'], delta=None)
+
             equiposIDxTipo_fig = px.bar(
-                y=["Equipo A", "Equipo B", "Equipo C"],
-                x=[50, 100, 150],
-                labels={"x": "", "y": ""},
-                title=f"Equipos de I+D por tipo en {provincia} ({st.session_state.anio})",
+                data_frame=grafico_equipos_por_tipo['resultado_sql'],
+                y=grafico_equipos_por_tipo['config']['plot_mapping']['y'],
+                x=grafico_equipos_por_tipo['config']['plot_mapping']['x'],
+                labels=grafico_equipos_por_tipo['config']['plot_mapping']['labels'],
+                title=grafico_equipos_por_tipo['nombre'],
+                color=grafico_equipos_por_tipo['config']['plot_mapping']['y'],
                 template="seaborn",
                 orientation='h'
             )
-            equiposIDxTipo_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            equiposIDxTipo_fig.update_layout(grafico_equipos_por_tipo['config']['layout'])
+            equiposIDxTipo_fig.update_layout(showlegend=False)
             st.markdown("")
             st.plotly_chart(equiposIDxTipo_fig, use_container_width=True)
         with capitalHumanoTab:
-            investigadoresxArea_fig = px.bar(
-                y=["Area A", "Area B", "Area C"],
-                x=[50, 100, 150],
-                labels={"x": "", "y": ""},
-                title=f"Investigadores por área de conocimiento (%) ({st.session_state.anio})",
-                template="seaborn",
-                orientation='h'
+            investigadoresxArea_fig = px.treemap(
+                title=grafico_distribucion_investigadores['nombre'],
+                data_frame=grafico_distribucion_investigadores['resultado_sql'],
+                path=grafico_distribucion_investigadores['config']['plot_mapping']['path'],
+                values=grafico_distribucion_investigadores['config']['plot_mapping']['values'],
+                labels=grafico_distribucion_investigadores['config']['plot_mapping']['labels'],
+                color=grafico_distribucion_investigadores['config']['plot_mapping']['color'],
+                color_discrete_sequence=["#4D7AAE", "#B9422D", "#B2713F", "#198769", "#5C3C7D", "#F2C94C", "#E26D5C", "#9B51E0", "#56CCF2", "#27AE60"],
             )
+            investigadoresxArea_fig.update_traces(
+                textinfo=grafico_distribucion_investigadores['config']['traces']['textinfo'],
+                textposition=grafico_distribucion_investigadores['config']['traces']['textposition'],
+                marker=dict(cornerradius=5))
+
             investigadoresxArea_fig.update_layout(
                 title_font=dict(size=20),
                 margin=dict(l=20, r=20, t=50, b=20)
             )
+
             st.markdown("")
             st.plotly_chart(investigadoresxArea_fig, use_container_width=True)
             st.markdown("")
 
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3 = st.columns(3, border=True)
             with col1:
-                st.metric(label=f":primary[Cantidad de investigadores por cada 1000 hab. de la PEA en {provincia}]", value=120, delta=None)
+                st.markdown(f"#### {st.session_state.provincia}")
+                st.metric(label=":primary[Investigadores cada 1000 habs.]", value=kpi_tasa_pea_provincial['valor'], delta=None)
             with col2:
-                st.metric(label=f":primary[Cantidad de investigadores por cada 1000 hab. de la PEA en la región]", value=120, delta=None)
+                st.markdown(f"#### {st.session_state.region}")
+                st.metric(label=":primary[Investigadores cada 1000 habs.]", value=kpi_tasa_pea_regional['valor'], delta=None)
             with col3:
-                st.metric(label=f":primary[Cantidad de investigadores por cada 1000 hab. de la PEA en Argentina]", value=120, delta=None)
-            st.markdown("---")
+                st.markdown(f"#### {st.session_state.pais}")
+                st.metric(label=":primary[Investigadores cada 1000 habs.]", value=kpi_tasa_pea_nacional['valor'], delta=None)
+            st.markdown("")
 
-            # Define the start and end dates for the data range
-            start_date = "2010-06-07"
-            end_date = "2010-06-14"
-
-            # Filter sp500 using Pandas to dates between `start_date` and `end_date`
-            sp500_mini = sp500[(sp500["date"] >= start_date) & (sp500["date"] <= end_date)]
-
-            # Create a display table based on the `sp500_mini` table data
-            table = (
-                GT(sp500_mini)
-                .tab_header(title=f"S&P 500", subtitle=f"{start_date} to {end_date}")
-                .fmt_currency(columns=["open", "high", "low", "close"])
-                .fmt_date(columns="date", date_style="wd_m_day_year")
-                .fmt_number(columns="volume", compact=True)
-                .cols_hide(columns="adj_close")
-            )
-
-            great_tables(table, width="stretch")
+            st.table(tabla_personas_por_funcion['resultado_sql'])
 
             st.markdown("---")
 
             evolucionInvestigadores_fig = px.line(
-                x=["2020", "2021", "2022", "2023"],
-                y=[100, 200, 300, 400],
-                labels={"x": "", "y": "Cantidad de investigadores"},
-                title=f"Evolución de la cantidad de investigadores (2019 - {st.session_state.anio})",
+                data_frame=grafico_evolucion_investigadores['resultado_sql'],
+                x=grafico_evolucion_investigadores['config']['plot_mapping']['x'],
+                y=grafico_evolucion_investigadores['config']['plot_mapping']['y'],
+                labels=grafico_evolucion_investigadores['config']['plot_mapping']['labels'],
+                title=grafico_evolucion_investigadores['nombre'],
                 template="seaborn"
             )
+            evolucionInvestigadores_fig.update_layout(grafico_evolucion_investigadores['config']['layout'])
             evolucionInvestigadores_fig.update_layout(
                 title_font=dict(size=20),
                 margin=dict(l=20, r=20, t=50, b=20)
@@ -288,131 +326,144 @@ def panomProvincial():
         with resultadosTab:
             st.markdown("")
             exportacionesIntensidad_fig = px.pie(
-                names=["Alta Tecnología", "Media Alta Tecnología", "Media Baja Tecnología", "Baja Tecnología"],
-                values=[400, 300, 200, 100],
-                labels={"values": "Exportaciones (en millones de USD)", "names": "Intensidad Tecnológica"},
-                title=f"Exportaciones provinciales por intensidad tecnológica ({st.session_state.anio})",
+                data_frame=grafico_expo_intensidad['resultado_sql'],
+                names=grafico_expo_intensidad['config']['plot_mapping']['names'],
+                values=grafico_expo_intensidad['config']['plot_mapping']['values'],
+                labels=grafico_expo_intensidad['config']['plot_mapping']['labels'],
+                title=grafico_expo_intensidad['nombre'],
                 template="seaborn",
                 hole=0.4
             )
+            exportacionesIntensidad_fig.update_layout(grafico_expo_intensidad['config']['layout'])
             exportacionesIntensidad_fig.update_layout(
                 title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20),
-                legend_title_text="Intensidad Tecnológica"
+                margin=dict(l=20, r=20, t=50, b=20)
             )
             st.plotly_chart(exportacionesIntensidad_fig)
-            st.markdown("")
+            st.markdown("---")
 
             evolucionExportaciones_fig = px.line(
-                x=["2020", "2021", "2022", "2023"],
-                y=[100, 200, 300, 400],
-                labels={"x": "", "y": "Millones de USD (FOB)"},
-                title=f"Evolución de las exportaciones tecnológicas (2019 - {st.session_state.anio})",
+                data_frame=grafico_expo_evolucion['resultado_sql'],
+                x=grafico_expo_evolucion['config']['plot_mapping']['x'],
+                y=grafico_expo_evolucion['config']['plot_mapping']['y'],
+                labels=grafico_expo_evolucion['config']['plot_mapping']['labels'],
+                title=grafico_expo_evolucion['nombre'],
+                color=grafico_expo_evolucion['config']['plot_mapping']['color'],
                 template="seaborn"
             )
+            evolucionExportaciones_fig.update_layout(grafico_expo_evolucion['config']['layout'])
             evolucionExportaciones_fig.update_layout(
                 title_font=dict(size=20),
                 margin=dict(l=20, r=20, t=50, b=20)
             )
             st.plotly_chart(evolucionExportaciones_fig)
+            st.markdown("---")
 
-            exportaciones_pais_df = pd.DataFrame({
-                "País": ["China", "Brasil", "Chile", "Uruguay"],
-                "Exportaciones": [400, 300, 200, 100]
-            })
             exportacionesxPais_fig = px.treemap(
-                data_frame=exportaciones_pais_df,
-                path=["País"],
-                values="Exportaciones",
-                template="seaborn"
+                data_frame=grafico_expo_destino['resultado_sql'],
+                path=grafico_expo_destino['config']['plot_mapping']['path'],
+                values=grafico_expo_destino['config']['plot_mapping']['values'],
+                color=grafico_expo_destino['config']['plot_mapping']['color'],
+                title=grafico_expo_destino['nombre'],
+                template="seaborn",
+                color_discrete_sequence=["#4D7AAE", "#B9422D", "#B2713F", "#198769", "#5C3C7D", "#F2C94C", "#E26D5C", "#D4BCEA", "#93D8EF", "#27AE60"]
             )
+            exportacionesxPais_fig.update_traces(grafico_expo_destino['config']['traces'])
             exportacionesxPais_fig.update_layout(
-                title=f"Exportaciones provinciales por país ({st.session_state.anio})",
                 title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
+                margin=dict(l=20, r=20, t=50, b=0)
             )
             st.plotly_chart(exportacionesxPais_fig)
             st.markdown("---")
 
-            col1, col2, col3 = st.columns(3)
+            col1, col2, col3 = st.columns([6, 1, 3], vertical_alignment="center")
             with col1:
-                st.metric(label=f":primary[Cantidad de patentes de solicitantes argentinos]", value=120, delta=None)
-            with col2:
-                st.metric(label=f":primary[Cantidad de patentes de solicitantes argentinos]", value=120, delta=None)
-            with col3:
-                st.metric(label=f":primary[Cantidad de patentes de solicitantes argentinos]", value=120, delta=None)
-            st.markdown("")
+                st.metric(label=f":primary[{kpi_patentes_cyt_prov['nombre']}]", value=kpi_patentes_cyt_prov['valor'], delta=None)
+            col1b, col2b, col3b = st.columns([2, 6, 2])
+            with col2b:
+                st.metric(label=f":primary[{kpi_patentes_cyt_arg['nombre']}]", value=kpi_patentes_cyt_arg['valor'], delta=None)
+            col1c, col2c, col3c = st.columns([2, 2, 6])
+            with col3c:
+                st.metric(label=f":primary[{kpi_patentes_arg['nombre']}]", value=kpi_patentes_arg['valor'], delta=None)
+            st.markdown("---")
 
             evolucionPatentes_fig = px.line(
-                x=["2020", "2021", "2022", "2023"],
-                y=[100, 200, 300, 400],
-                labels={"x": "", "y": "Cantidad de Patentes"},
-                title=f"Evolución de las cantidad de patentes solicitadas por instituciones provinciales de CyT (2019 - {st.session_state.anio})",
+                data_frame=grafico_patentes_evolucion['resultado_sql'],
+                x=grafico_patentes_evolucion['config']['plot_mapping']['x'],
+                y=grafico_patentes_evolucion['config']['plot_mapping']['y'],
+                labels=grafico_patentes_evolucion['config']['plot_mapping']['labels'],
+                title=grafico_patentes_evolucion['nombre'],
                 template="seaborn"
             )
+            evolucionPatentes_fig.update_layout(grafico_patentes_evolucion['config']['layout'])
             evolucionPatentes_fig.update_layout(
                 title_font=dict(size=20),
                 margin=dict(l=20, r=20, t=50, b=20)
             )
-            st.plotly_chart(evolucionPatentes_fig)
-            st.markdown("")
+            # Si el dataframe no tiene info, no mostrar
+            if grafico_patentes_evolucion['resultado_sql'] is not None and not grafico_patentes_evolucion['resultado_sql'].empty:
+                st.plotly_chart(evolucionPatentes_fig)
+                st.markdown("---")
 
-            df = pd.DataFrame(
-                np.random.randn(10, 5), columns=("col %d" % i for i in range(5))
-            )
-            st.table(df)
-            st.markdown("")
+            st.table(tabla_patentes_sector['resultado_sql'])
+            st.markdown("---")
 
             produccionProvincial_fig = px.line(
-                x=["2020", "2021", "2022", "2023"],
-                y=[100, 200, 300, 400],
-                labels={"x": "", "y": "Producción científica"},
-                title=f"Evolución de la producción científica provincial (2019 - {st.session_state.anio})",
+                data_frame=grafico_produccion_evolucion['resultado_sql'],
+                x=grafico_produccion_evolucion['config']['plot_mapping']['x'],
+                y=grafico_produccion_evolucion['config']['plot_mapping']['y'],
+                labels=grafico_produccion_evolucion['config']['plot_mapping']['labels'],
+                title=grafico_produccion_evolucion['nombre'],
+                color=grafico_produccion_evolucion['config']['plot_mapping']['color'],
                 template="seaborn"
             )
+            produccionProvincial_fig.update_layout(grafico_produccion_evolucion['config']['layout'])
             produccionProvincial_fig.update_layout(
                 title_font=dict(size=20),
                 margin=dict(l=20, r=20, t=50, b=20)
             )
             st.plotly_chart(produccionProvincial_fig)
-            st.markdown("")
-
-            publicaciones_df = pd.DataFrame({
-                "Tipo": ["Articulo", "Capitulo de libro", "Libro"],
-                "Publicaciones": [400, 150, 50]
-            })
+            st.markdown("---")
 
             distribucionPublicaciones_fig = px.treemap(
-                data_frame=publicaciones_df,
-                path=["Tipo"],
-                values="Publicaciones",
+                data_frame=grafico_produccion_tipo['resultado_sql'],
+                path=grafico_produccion_tipo['config']['plot_mapping']['path'],
+                values=grafico_produccion_tipo['config']['plot_mapping']['values'],
+                labels=grafico_produccion_tipo['config']['plot_mapping']['labels'],
+                color=grafico_produccion_tipo['config']['plot_mapping']['color'],
+                title=grafico_produccion_tipo['nombre'],
                 template="seaborn"
             )
+            distribucionPublicaciones_fig.update_traces(
+                textinfo=grafico_produccion_tipo['config']['traces']['textinfo'],
+                textposition=grafico_produccion_tipo['config']['traces']['textposition'],
+                marker=dict(cornerradius=5)
+            )
             distribucionPublicaciones_fig.update_layout(
-                title=f"Distribución de publicaciones científicas por tipo ({st.session_state.anio})",
                 title_font=dict(size=20),
                 margin=dict(l=20, r=20, t=50, b=20)
             )
             st.plotly_chart(distribucionPublicaciones_fig)
-            st.markdown("")
+            st.markdown("---")
 
-            df2 = pd.DataFrame(
-                np.random.randn(10, 5), columns=("col %d" % i for i in range(5))
-            )
-            st.table(df2)
-            st.markdown("")
+            st.table(tabla_articulos_q1_q2['resultado_sql'])
+            st.markdown("---")
 
             publicacionesArea_fig = px.bar(
-                x=[100, 200, 300, 400, 500],
-                y=["Área 1", "Área 2", "Área 3", "Área 4", "Área 5"],
-                labels={"x": r"% de Publicaciones", "y": ""},
-                title=f"Publicaciones científicas por área de conocimiento ({st.session_state.anio})",
-                template="seaborn",
+                data_frame=grafico_publicaciones_area['resultado_sql'],
+                x=grafico_publicaciones_area['config']['plot_mapping']['x'],
+                y=grafico_publicaciones_area['config']['plot_mapping']['y'],
+                labels=grafico_publicaciones_area['config']['plot_mapping']['labels'],
+                title=grafico_publicaciones_area['nombre'],
+                color=grafico_publicaciones_area['config']['plot_mapping']['color'],
+                color_discrete_sequence=["#4D7AAE", "#B9422D", "#B2713F", "#198769", "#5C3C7D", "#EBD081", "#E26D5C", "#9B51E0", "#56CCF2", "#27AE60"],
                 orientation='h',
             )
+            publicacionesArea_fig.update_traces(showlegend=False)
+            publicacionesArea_fig.update_layout(grafico_publicaciones_area['config']['layout'])
             publicacionesArea_fig.update_layout(
                 title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
+                margin=dict(l=20, r=40, t=50, b=20)
             )
             st.plotly_chart(publicacionesArea_fig)
             st.markdown("")
@@ -424,27 +475,21 @@ def panomProvincial():
             altura = 20 * nBarras + 150
 
             percepcionPublica_fig = px.bar(
-                y=provinciasDF['nombre_iso'],
-                x=[70, 60, 50, 40, 80, 70, 60, 50, 40, 80, 70, 60, 50, 40, 80, 70, 60, 50, 40, 80, 70, 60, 50, 40],
-                labels={"x": "Porcentaje que considera que contribuye totalmente", "y": "Provincia"},
-                title=f"Percepción pública de la contribución de la ciencia a la calidad de vida por Provincia ({st.session_state.anio})",
+                data_frame=grafico_percepcion_calidad_vida['resultado_sql'],
+                y=grafico_percepcion_calidad_vida['config']['plot_mapping']['y'],
+                x=grafico_percepcion_calidad_vida['config']['plot_mapping']['x'],
+                labels=grafico_percepcion_calidad_vida['config']['plot_mapping']['labels'],
+                title=None,
                 template="seaborn",
                 orientation='h',
                 height=altura
             )
+            percepcionPublica_fig.update_layout(grafico_percepcion_calidad_vida['config']['layout'])
             percepcionPublica_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20),
-                barcornerradius=15
+                margin=dict(l=20, r=40, t=20, b=20)
             )
-            percepcionPublica_fig.update_yaxes(automargin=True)
-            percepcionPublica_fig.update_xaxes(
-                range=[0, 100],
-                tick0=0,
-                dtick=10,
-                ticksuffix=" %",
-                title_standoff=10  # un poco de espacio entre ticks y etiqueta
-            )
+
+            st.markdown(f"### {grafico_percepcion_calidad_vida['nombre']}")
             st.plotly_chart(percepcionPublica_fig)
             st.markdown("")
 

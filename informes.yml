@@ -18,7 +18,7 @@ informe:
 
     kpi_densidad_prov: &kpi_densidad_prov
       orden: 1002
-      nombre: "Densidad Poblacional Provincial (hab/km²)"
+      nombre: "Densidad Poblacional Provincial"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
@@ -32,13 +32,13 @@ informe:
 
     kpi_tasa_actividad_prov: &kpi_tasa_actividad_prov
       orden: 1003
-      nombre: "Tasa de Actividad Económica Provincial (%)"
+      nombre: "Tasa de Actividad Económica Provincial"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
       config:
         format: "float"
-        suffix: "%"
+        suffix: " %"
       plantilla_sql: |
         SELECT tasas_actividad_eph_3trim_2024
         FROM indicadores_contexto_y_sicytar
@@ -46,13 +46,13 @@ informe:
 
     kpi_tasa_desempleo_prov: &kpi_tasa_desempleo_prov
       orden: 1005
-      nombre: "Tasa de Desempleo Provincial (%)"
+      nombre: "Tasa de Desempleo Provincial"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
       config:
         format: "float"
-        suffix: "%"
+        suffix: " %"
       plantilla_sql: |
         SELECT tasa_desocupacion_eph_3trim_2024
         FROM indicadores_contexto_y_sicytar
@@ -61,13 +61,13 @@ informe:
     # --- KPIs que usan unidad_territorial para 'Total País' ---
     kpi_tasa_actividad_nac: &kpi_tasa_actividad_nac
       orden: 1004
-      nombre: "Tasa de Actividad Económica Nacional (%)"
+      nombre: "Tasa de Actividad Económica Nacional"
       tipo_componente: "KPI"
       estado: true
       parametros: []
       config:
         format: "float"
-        suffix: "%"
+        suffix: " %"
       plantilla_sql: |
         SELECT tasas_actividad_eph_3trim_2024
         FROM indicadores_contexto_y_sicytar
@@ -75,13 +75,13 @@ informe:
 
     kpi_tasa_desempleo_nac: &kpi_tasa_desempleo_nac
       orden: 1006
-      nombre: "Tasa de Desempleo Nacional (%)"
+      nombre: "Tasa de Desempleo Nacional"
       tipo_componente: "KPI"
       estado: true
       parametros: []
       config:
         format: "float"
-        suffix: "%"
+        suffix: " %"
       plantilla_sql: |
         SELECT tasa_desocupacion_eph_3trim_2024
         FROM indicadores_contexto_y_sicytar
@@ -99,20 +99,15 @@ informe:
         plot_mapping:
           x: "{{ anio }}"
           y: "gran_rubro"
+          labels: {"{{ anio }}": "Millones de USD (FOB)", "gran_rubro": "Producto"}
         layout:
-          title:
-            text: "Top 5 Rubros de Exportaciones ({{ anio }})"
-            align: "left"
-            x: 0
           xaxis:
             title:
               text: "Millones de USD (FOB)"
           yaxis:
             title:
               text: ""
-            autorange: "reversed"
-            automargin: True
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
+            categoryorder: "total descending"
       plantilla_sql: |
         SELECT "{{ anio }}", gran_rubro
         FROM expo_por_provincia_top5
@@ -125,7 +120,7 @@ informe:
     # --- SECCIÓN 2: Inversión en I+D en la Prov ---
     grafico_evolucion_regional: &grafico_evolucion_regional
       orden: 2006
-      nombre: "Evolución de la inversión en I+D regional y provincial (Histórico, millones de pesos constantes 2004)"
+      nombre: "Evolución de la inversión en I+D regional y provincial (en millones de pesos constantes 2004)"
       tipo_componente: "GRAFICO"
       tipo_grafico: "line"
       estado: true
@@ -134,20 +129,15 @@ informe:
         plot_mapping:
           x: "anio"
           y: "inversion_constante"
+          labels: {"anio": "Año", "inversion_constante": "Inversión en I+D (MPC)", "unidad_territorial": "Región"}
           color: "unidad_territorial"
         layout:
-          title:
-            text: "Evolución de la inversión I+D (Millones de Pesos Constantes 2004)"
-            align: "left"
-            x: 0
           xaxis:
+            title:
+                text: ""
             tickformat: "d"
             dtick: 1
-          yaxis:
-            title:
-              text: "Monto (Pesos Constantes)"
           colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
-          color_discrete_sequence: "colorway"
       plantilla_sql: |
         SELECT anio, unidad_territorial, SUM(monto_inversion_constante_2004) as inversion_constante
         FROM inversion_id_ract_esid_provincia_region_pais
@@ -159,7 +149,7 @@ informe:
 
     grafico_inv_por_investigador: &grafico_inv_por_investigador
       orden: 2007
-      nombre: "Inversión por investigador en las provincias de la región ({{ anio }})"
+      nombre: "Inversión por investigador en las provincias de la región (millones de pesos constantes 2004) ({{ anio }})"
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
@@ -168,19 +158,12 @@ informe:
         plot_mapping:
           x: "inversion_investigador"
           y: "unidad_territorial"
+          labels: {"inversion_investigador": "Inversión (MPC)", "unidad_territorial": "Provincia"}
         layout:
-          title:
-            text: "Inversión por investigador en la región ({{ anio }})"
-            align: "left"
-            x: 0
-          xaxis:
-            title:
-              text: "Inversión por Investigador (Millones de Pesos Constantes 2004)"
           yaxis:
             title:
               text: ""
-            autorange: "reversed"
-            automargin: True
+            categoryorder: "total descending"
       plantilla_sql: |
         SELECT unidad_territorial, inversion_investigador
         FROM inversion_y_articulos_por_investigador_provincia_region_pais
@@ -194,30 +177,22 @@ informe:
 
     grafico_inv_empresaria_sector: &grafico_inv_empresaria_sector
       orden: 2008
-      nombre: "Inversión de empresas en I+D por sector ({{ anio }})"
+      nombre: "Inversión de empresas en I+D por sector en {{ provincia }} ({{ anio }})"
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
-      parametros: ["provincia_id", "anio"]
+      parametros: ["provincia_id", "provincia", "anio"]
       config:
         plot_mapping:
           x: "monto_inversion"
           y: "sector_clae"
+          labels: {"monto_inversion": "Inversión (MPC)", "sector_clae": "Sector"}
         layout:
-          title:
-            text: "Inversión de empresas por sector ({{ anio }})"
-            align: "left"
-            x: 0
-          xaxis:
-            title:
-              text: "Monto (Millones de Pesos Constantes 2004)"
           yaxis:
             title:
               text: ""
-            autorange: "reversed"
-            automargin: True
+            categoryorder: "total descending"
           colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
-          color_discrete_sequence: "colorway"
       plantilla_sql: |
         SELECT
             SUBSTRING(sector_clae, 5) AS sector_clae,
@@ -232,7 +207,7 @@ informe:
     # --- SECCIÓN 3: Proyectos de Federales de Innovación (PFI) ---
     kpi_pfi_nacional: &kpi_pfi_nacional
       orden: 3001
-      nombre: "KPI: Cantidad de proyectos PFI a nivel nacional"
+      nombre: "PFI a nivel nacional"
       tipo_componente: "KPI"
       estado: true
       parametros: []
@@ -242,7 +217,7 @@ informe:
 
     kpi_pfi_regional: &kpi_pfi_regional
       orden: 3002
-      nombre: "KPI: Cantidad de proyectos PFI a nivel regional"
+      nombre: "PFI a nivel regional"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
@@ -257,7 +232,7 @@ informe:
 
     kpi_pfi_provincial: &kpi_pfi_provincial
       orden: 3003
-      nombre: "KPI: Cantidad de proyectos PFI a nivel provincial"
+      nombre: "PFI a nivel provincial"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
@@ -272,26 +247,26 @@ informe:
 
     kpi_porc_privada_nacional: &kpi_porc_privada_nacional
       orden: 3004
-      nombre: "KPI: % de proyectos PFI nacionales con contraparte privada"
+      nombre: "PFI nacionales con contraparte privada"
       tipo_componente: "KPI"
       estado: true
       parametros: []
       config:
         format: "float"
-        suffix: "%"
+        suffix: " %"
       plantilla_sql: |
         SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
         FROM proyectos_pfi;
 
     kpi_porc_privada_regional: &kpi_porc_privada_regional
       orden: 3005
-      nombre: "KPI: % de proyectos PFI regionales con contraparte privada"
+      nombre: "PFI regionales con contraparte privada"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
       config:
         format: "float"
-        suffix: "%"
+        suffix: " %"
       plantilla_sql: |
         SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
         FROM proyectos_pfi WHERE region_cofecyt ILIKE (
@@ -301,13 +276,13 @@ informe:
 
     kpi_porc_privada_provincial: &kpi_porc_privada_provincial
       orden: 3006
-      nombre: "KPI: % de proyectos PFI provinciales con contraparte privada"
+      nombre: "PFI provinciales con contraparte privada"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
       config:
         format: "float"
-        suffix: "%"
+        suffix: " %"
       plantilla_sql: |
         SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
         FROM proyectos_pfi WHERE provincia ILIKE (
@@ -317,7 +292,7 @@ informe:
 
     tabla_pfi_cruce: &tabla_pfi_cruce
       orden: 3007
-      nombre: "Tabla: Cantidad de proyectos PFI provinciales por Eje y Tecnología Estratégica"
+      nombre: "Tabla: Proyectos PFI provinciales por Eje y Tecnología Estratégica"
       tipo_componente: "TABLA"
       estado: true
       parametros: ["provincia_id"]
@@ -342,27 +317,22 @@ informe:
     # --- SECCIÓN 4: Capacidades en investigación y desarrollo ---
     grafico_expo_intensidad: &grafico_expo_intensidad
       orden: 4101
-      nombre: "Composición de las exportaciones provinciales según intensidad tecnológica (%) ({{anio}})"
+      nombre: "Composición de las exportaciones provinciales según intensidad tecnológica ({{anio}})"
       tipo_componente: "GRAFICO"
       tipo_grafico: "pie"
       estado: true
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
-          labels: "ITEnfoqueindustria"
+          names: "ITEnfoqueindustria"
+          labels: {"ITEnfoqueindustria": "Intensidad Tecnológica", "fob_millones_uss": "Exportaciones (millones USD FOB)"}
           values: "fob_millones_uss"
           hole: 0.4
-          automargin: True
         layout:
-          title:
-            text: "Exportaciones provinciales por Intensidad Tecnológica ({{anio}})"
-            text-align: "left"
-            x: 0
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
           hoverlabel:
-            textcase: "word caps"
+            # textcase: "word caps"
             font_family: "Arial"
-          hoverinfo: "label+percent"
+          # hoverinfo: "label+percent"
       plantilla_sql: |
         SELECT INITCAP(LOWER("ITEnfoqueindustria")) as "ITEnfoqueindustria", SUM(fob_millones_uss) as fob_millones_uss
         FROM expo_nivel_tecnologico_provincia_region_pais
@@ -379,24 +349,22 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "line"
       estado: true
-      parametros: ["provincia_id", "anio"]
+      parametros: ["provincia_id", "anio", "provincia"]
       config:
         plot_mapping:
           x: "anio"
           y: "total_fob"
+          labels: {"unidad_territorial": "Región", "total_fob": "Millones de USD (FOB)", "anio": "Año"}
           color: "unidad_territorial"
         layout:
-          title:
-            text: "Evolución de las Exportaciones Tecnológicas (2019 - {{anio}})"
-            align: "left"
-            x: 0
           yaxis:
             title:
               text: "Millones de USD (FOB)"
           xaxis:
+            title:
+              text: ""
             tickformat: "d"
             dtick: 1
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
       plantilla_sql: |
         SELECT anio, unidad_territorial, SUM(fob_millones_uss) as total_fob
         FROM expo_nivel_tecnologico_provincia_region_pais
@@ -413,22 +381,19 @@ informe:
 
     grafico_expo_destino: &grafico_expo_destino
       orden: 4103
-      nombre: "Distribución de exportaciones con intensidad tecnológica por país de destino (%) ({{anio}})"
+      nombre: "Distribución de exportaciones con intensidad tecnológica por país de destino ({{anio}})"
       tipo_componente: "GRAFICO"
       tipo_grafico: "treemap"
       estado: true
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
-          names: "pais_destino"
+          path: ["pais_destino"]
           values: "fob_total"
-        layout:
-          title:
-            text: "Exportaciones Tecnológicas por País de Destino ({{anio}})"
-            align: "left"
-            x: 0
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F", "#F2C94C", "#A3D9B1", "#F5B7B1", "#D7BDE2", "#F7DC6F"]
-          textinfo: "label+percent entry"
+          labels: {"fob_total": "Exportaciones (millones USD FOB)", "pais_destino": "País de Destino"}
+          color: "pais_destino"
+        traces:
+          textinfo: "label+percent parent"
           textposition: "middle center"
       plantilla_sql: |
         SELECT pais_destino, SUM(fob_millones_sum) as fob_total
@@ -442,7 +407,7 @@ informe:
 
     kpi_patentes_arg: &kpi_patentes_arg
       orden: 4104
-      nombre: "Cantidad de patentes de solicitantes argentinos (2014-{{anio}})"
+      nombre: "Patentes de solicitantes argentinos (2014-{{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: ["anio"]
@@ -454,7 +419,7 @@ informe:
 
     kpi_patentes_cyt_arg: &kpi_patentes_cyt_arg
       orden: 4105
-      nombre: "Cantidad de patentes solicitadas por instituciones de CyT argentinas (2014-{{anio}})"
+      nombre: "Patentes solicitadas por instituciones de CyT argentinas (2014-{{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: ["anio"]
@@ -467,7 +432,7 @@ informe:
 
     kpi_patentes_cyt_prov: &kpi_patentes_cyt_prov
       orden: 4106
-      nombre: "Cantidad de patentes solicitadas por instituciones de CyT provinciales (2014-{{anio}})"
+      nombre: "Patentes solicitadas por instituciones de CyT provinciales (2014-{{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id", "anio"]
@@ -485,7 +450,7 @@ informe:
 
     grafico_patentes_evolucion: &grafico_patentes_evolucion
       orden: 4107
-      nombre: "Evolución de la cantidad de patentes solicitadas por instituciones de CTI provinciales (2014-{{anio}})"
+      nombre: "Evolución de la cantidad de patentes solicitadas por instituciones de CyT provinciales (2014-{{anio}})"
       tipo_componente: "GRAFICO"
       tipo_grafico: "line"
       estado: true
@@ -494,18 +459,13 @@ informe:
         plot_mapping:
           x: "anio"
           y: "cantidad"
+          labels: {"anio": "Año", "cantidad": "Patentes Solicitadas"}
         layout:
-          title:
-            text: "Evolución de la cantidad de patentes solicitadas por instituciones de CTI provinciales (2014-{{anio}})"
-            align: "left"
-            x: 0
-          yaxis:
-            title:
-              text: "Patentes Solicitadas"
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
           xaxis:
             tickformat: "d"
             dtick: 1
+            title:
+              text: ""
       plantilla_sql: |
         SELECT anio, COUNT(DISTINCT lens_id) as cantidad
         FROM patentes_desagregadas_ipc_provincia_region_pais
@@ -556,19 +516,14 @@ informe:
         plot_mapping:
           x: "anio_publica"
           y: "cantidad"
+          labels: {"anio_publica": "Año", "cantidad": "Cantidad de Productos", "unidad_territorial": "Región"}
           color: "unidad_territorial"
         layout:
-          title:
-            text: "Evolución de la producción científica provincial (2019 - {{anio}})"
-            align: "left"
-            x: 0
-          yaxis:
-            title:
-              text: "Cantidad de Productos"
           xaxis:
             tickformat: "d"
             dtick: 1
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
+            title:
+              text: ""
       plantilla_sql: |
         SELECT anio_publica, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
         FROM productos_provincia_region_pais_renaprod
@@ -589,14 +544,13 @@ informe:
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
-          names: "tipo_producto_cientifico"
+          path: ["tipo_producto_cientifico"]
           values: "cantidad"
-        layout:
-          title:
-            text: "Distribución de publicaciones científicas por tipo ({{anio}})"
-            align: "left"
-            x: 0
-          colorway: ["#198769", "#5C3C7D", "#B2713F", "#F2C94C", "#A3D9B1", "#F5B7B1"]
+          labels: { "tipo_producto_cientifico": "Tipo de Producto Científico", "cantidad": "Publicaciones" }
+          color: "tipo_producto_cientifico"
+        traces:
+          textinfo: "label+percent parent"
+          textposition: "middle center"
       plantilla_sql: |
         SELECT tipo_producto_cientifico, COUNT(DISTINCT producto_id) as cantidad
         FROM productos_provincia_region_pais_renaprod
@@ -645,16 +599,16 @@ informe:
         plot_mapping:
           y: "gran_area"
           x: "porcentaje"
+          labels: {"gran_area": "Área de Conocimiento", "porcentaje": "% de Publicaciones"}
+          color: "gran_area"
         layout:
-          title:
-            text: "Publicaciones científicas por área de conocimiento ({{anio}})"
-            align: "left"
-            x: 0
           xaxis:
-            ticksuffix: "%"
+            ticksuffix: " %"
+            title:
+              text: ""
           yaxis:
-            automargin: True
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
+            title:
+              text: ""
       plantilla_sql: |
         WITH total_general AS (
             SELECT COUNT(producto_id) as total FROM productos_provincia_region_pais_renaprod
@@ -675,7 +629,7 @@ informe:
     # --- SECCIÓN 4.2: Infraestructura clave ---
     kpi_unidades_id_prov: &kpi_unidades_id_prov
       orden: 4201
-      nombre: "Cantidad de Unidades de I+D provinciales ({{anio}})"
+      nombre: "Unidades de I+D provinciales ({{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id", "anio"]
@@ -687,7 +641,7 @@ informe:
 
     grafico_unidades_por_inst: &grafico_unidades_por_inst
       orden: 4202
-      nombre: "Cantidad de unidades de I+D provinciales por institución de CyT ({{anio}})"
+      nombre: "Unidades de I+D provinciales por institución de CyT ({{anio}})"
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
@@ -696,15 +650,11 @@ informe:
         plot_mapping:
           y: "nivel_1"
           x: "cantidad"
+          labels: {"cantidad": "Unidades de I+D", "nivel_1": "Institución"}
         layout:
-          title:
-            text: "Unidades de I+D por Institución ({{anio}})"
-            align: "left"
-            x: 0
           yaxis:
-            automargin: True
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
-          color_discrete_sequence: "colorway"
+            title:
+              text: ""
       plantilla_sql: |
         SELECT nivel_1, COUNT(organizacion_id) as cantidad
         FROM listado_unidades_de_id
@@ -713,7 +663,7 @@ informe:
 
     kpi_equipos_nacional: &kpi_equipos_nacional
       orden: 4203
-      nombre: "Cantidad de equipos I+D a nivel nacional ({{anio}})"
+      nombre: "Equipos I+D a nivel nacional ({{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: []
@@ -723,7 +673,7 @@ informe:
 
     kpi_equipos_regional: &kpi_equipos_regional
       orden: 4204
-      nombre: "Cantidad de equipos I+D a nivel regional ({{anio}})"
+      nombre: "Equipos I+D a nivel regional ({{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
@@ -737,7 +687,7 @@ informe:
 
     kpi_equipos_provincial: &kpi_equipos_provincial
       orden: 4205
-      nombre: "Cantidad de equipos I+D a nivel provincial ({{anio}})"
+      nombre: "Equipos I+D a nivel provincial ({{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
@@ -751,24 +701,20 @@ informe:
 
     grafico_equipos_por_tipo: &grafico_equipos_por_tipo
       orden: 4206
-      nombre: "Cantidad de equipos I+D por tipo ({{anio}})"
+      nombre: "Equipos I+D por tipo en {{ provincia }} ({{anio}})"
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
-      parametros: ["provincia_id"]
+      parametros: ["provincia_id", "provincia"]
       config:
         plot_mapping:
           y: "sistema_nacional"
           x: "total_equipos"
+          labels: {"total_equipos": "Cantidad de Equipos de I+D", "sistema_nacional": "Sistema Nacional"}
         layout:
-          title:
-            text: "Equipos de I+D por Tipo ({{anio}})"
-            align: "left"
-            x: 0
           yaxis:
-            automargin: True
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
-          color_discrete_sequence: "colorway"
+            title:
+              text: ""
       plantilla_sql: |
         SELECT sistema_nacional, SUM(cant_equipos) as total_equipos
         FROM equipos_ssnn_provincia_region_pais
@@ -780,26 +726,20 @@ informe:
     # --- SECCIÓN 4.3: Talento en Acción ---
     grafico_distribucion_investigadores: &grafico_distribucion_investigadores
       orden: 4301
-      nombre: "Distribución de investigadores por gran área de conocimiento (%) ({{anio}})"
+      nombre: "Distribución de investigadores por gran área de conocimiento ({{anio}})"
       tipo_componente: "GRAFICO"
-      tipo_grafico: "barh"
+      tipo_grafico: "treemap"
       estado: true
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
-          y: "gran_area_experticia"
-          x: "porcentaje"
-        layout:
-          title:
-            text: "Investigadores por Área de Conocimiento (%) ({{anio}})"
-            align: "left"
-            x: 0
-          xaxis:
-            ticksuffix: "%"
-          yaxis:
-            automargin: True
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
-          color_discrete_sequence: "colorway"
+          path: ["gran_area_experticia"]
+          values: "porcentaje"
+          labels: {"porcentaje": "Porcentaje", "gran_area_experticia": "Gran Área de Experticia"}
+          color: "gran_area_experticia"
+        traces:
+          textinfo: "label+percent parent"
+          textposition: "middle center"
       plantilla_sql: |
         WITH total_general AS (
             SELECT SUM(cant_personas) as total FROM rrhh_sicytar_agregado_provincia_region_pais
@@ -816,7 +756,7 @@ informe:
 
     kpi_tasa_pea_provincial: &kpi_tasa_pea_provincial
       orden: 4302
-      nombre: "Cantidad de investigadores por cada 1.000 habitantes de la PEA provincial ({{anio}})"
+      nombre: "Investigadores cada 1.000 habs de la PEA provincial ({{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id", "anio"]
@@ -839,7 +779,7 @@ informe:
 
     kpi_tasa_pea_regional: &kpi_tasa_pea_regional
       orden: 4303
-      nombre: "Cantidad de investigadores por cada 1.000 habitantes de la PEA regional ({{anio}})"
+      nombre: "Investigadores cada 1.000 habs de la PEA regional ({{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id", "anio"]
@@ -867,7 +807,7 @@ informe:
 
     kpi_tasa_pea_nacional: &kpi_tasa_pea_nacional
       orden: 4304
-      nombre: "Cantidad de investigadores por cada 1.000 habitantes de la PEA nacional ({{anio}})"
+      nombre: "Investigadores cada 1.000 habs de la PEA nacional ({{anio}})"
       tipo_componente: "KPI"
       estado: true
       parametros: ["anio"]
@@ -912,28 +852,22 @@ informe:
 
     grafico_evolucion_investigadores: &grafico_evolucion_investigadores
       orden: 4306
-      nombre: "Evolución de cantidad de investigadores (2019-{{anio}})"
+      nombre: "Evolución de cantidad de investigadores en {{ provincia }} (2019-{{ anio }})"
       tipo_componente: "GRAFICO"
       tipo_grafico: "line"
       estado: true
-      parametros: ["provincia_id", "anio"]
+      parametros: ["provincia_id", "anio", "provincia"]
       config:
         plot_mapping:
           x: "anio"
           y: "cantidad_investigadores"
+          labels: {"anio": "Año", "cantidad_investigadores": "Investigadores"}
         layout:
-          title:
-            text: "Evolución de la Cantidad de Investigadores (2019-{{anio}})"
-            align: "left"
-            x: 0
           xaxis:
+            title:
+              text: ""
             tickformat: "d"
             dtick: 1
-          yaxis:
-            title:
-              text: "Investigadores"
-          colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
-          color_discrete_sequence: "colorway"
       plantilla_sql: |
         SELECT anio, SUM(cant_personas) as cantidad_investigadores
         FROM rrhh_sicytar_agregado_provincia_region_pais
@@ -946,7 +880,7 @@ informe:
     # --- SECCIÓN 5: Ciencia y Sociedad ---
     grafico_percepcion_calidad_vida: &grafico_percepcion_calidad_vida
       orden: 5001
-      nombre: "Porcentaje de población que considera que la CTI contribuye totalmente a la calidad de vida por provincia (%) ({{anio}})"
+      nombre: "Porcentaje de población que considera que la Ciencia, la Tecnología y la Innovación contribuyen totalmente a la calidad de vida ({{anio}})"
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
@@ -955,20 +889,21 @@ informe:
         plot_mapping:
           y: "unidad_territorial"
           x: "valor"
-          width: 0.4
+          labels: {"unidad_territorial": "Provincia", "valor": "% que cree que contribuye totalmente"}
         layout:
-          title:
-            text: "Percepción de la población respecto de contribución de la CTI a la Calidad de Vida ({{anio}})"
-            align: "left"
-            x: 0
           xaxis:
-            ticksuffix: "%"
+            range: [0, 100]
+            tick0: 0
+            dtick: 10
+            ticksuffix: " %"
+            title_standoff: 10
             title:
-              text: "% que cree que contribuye totalmente"
+              text: ""
           yaxis:
-            autorange: "reversed"
+            categoryorder: "total ascending"
             automargin: True
-          height: 800
+            title:
+              text: ""
           barcornerradius: 15
       plantilla_sql: |
         SELECT unidad_territorial, valor * 100.0 AS valor
