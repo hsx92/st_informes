@@ -15,6 +15,7 @@ import yaml
 from yaml import SafeLoader
 from copy import deepcopy
 from typing import Dict
+from great_tables import GT, style, loc
 import logging
 
 logging.basicConfig(filename='InformesApp-dh.log', level=logging.INFO)
@@ -230,6 +231,111 @@ def procesar_kpi(df: pd.DataFrame, config: dict) -> str:
     return f"{valor}{sufijo}"
 
 
+def tabla_pivot(componente: dict) -> GT:
+    """
+    Crea una tabla dinámica (pivot table) y la formatea con great_tables.
+
+    Args:
+        componente (dict): Un diccionario con los datos y la configuración.
+                          Debe contener 'resultado_sql' (DataFrame) y 'config'.
+
+    Returns:
+        GT: Un objeto de great_tables listo para ser visualizado.
+    """
+    # 1. Extraer el DataFrame de los datos
+    df = componente['resultado_sql']
+
+    # 2. Crear la tabla dinámica usando la configuración del componente
+    pivot_config = componente['config']['pivot']
+    if 'index' in pivot_config:
+        tabla = (
+            df
+            .pivot_table(
+                index=pivot_config['index'],
+                columns=pivot_config['columns'],
+                values=pivot_config['values'],
+                aggfunc=pivot_config['aggfunc']
+            )
+            .reset_index()
+        )
+        # Borrar el contenido del column_header de la columna índice
+        tabla.columns = tabla.columns.where(tabla.columns != pivot_config['index'], '')
+        col_str = tabla.columns.tolist()
+        col_str = col_str[1:] if col_str else []
+    else:
+        tabla = df.pivot_table(
+            columns=pivot_config['columns'],
+            values=pivot_config['values'],
+            aggfunc=pivot_config['aggfunc']
+        )
+        col_str = tabla.columns.tolist()
+
+    # 3. Construcción del objeto GT con el formato deseado
+    try:
+        gt = (
+            GT(tabla)
+            .tab_header(title=componente['nombre'])
+            .tab_stubhead(label='')
+            # 1. Formato para el cuerpo de la primera columna (el índice)
+            .tab_style(
+                style.css("padding-top: 25px; padding-bottom: 25px;"),  # El primer valor es el padding vertical (top/bottom)
+                locations=loc.body()
+            )
+            .tab_style(
+                style.css("padding-top: 15px; padding-bottom: 15px;"),  # El primer valor es el padding vertical (top/bottom)
+                locations=loc.column_header()
+            )
+            .tab_style(
+                style.css("padding-top: 15px; padding-bottom: 15px;"),  # El primer valor es el padding vertical (top/bottom)
+                locations=loc.header()
+            )
+            .tab_style(
+                style.fill(color="#4D7AAE"),
+                locations=loc.body(columns='')
+            )
+            # 2. Formato para el encabezado de la primera columna
+            .tab_style(
+                style.text(weight="bold", color="white", align="center"),
+                locations=loc.body(columns='')
+            )
+            # 3. Formato para el encabezado de las otras columnas
+            .tab_style(
+                style.text(weight="bold", color="white", align="center"),
+                locations=loc.column_labels()
+            )
+            .tab_style(
+                style=style.text(align="center", color="gray", weight="lighter"),
+                locations=loc.body(columns=col_str)
+            )
+            .data_color(
+                na_color="white",
+                palette=[
+                    "#FDF8E7", "#FBF5E0", "#F9F2DA", "#F7EFD4", "#F5EDCE", "#F3EAC8",
+                    "#F1E7C2", "#EFE4BC", "#EFE1B6", "#ECE4B1", "#EAE2AC", "#E8DFAB",
+                    "#E6DC9F", "#E4D999", "#E2D693", "#E0D38D", "#DED087", "#DCCDA1"
+                ],
+                domain=[df[pivot_config['values']].min(), df[pivot_config['values']].max()],
+            )
+            .fmt_integer(
+                columns=col_str,
+                use_seps=True,
+                sep_mark="."
+            )
+            .tab_options(
+                heading_background_color="#54698B",
+                column_labels_background_color="#54698B",  # Nuevo: Color de fondo para encabezados
+                table_border_top_color="#54698B",
+                table_border_bottom_color="#54698B",
+                row_striping_include_stub=True,
+                table_font_names="Poppins"
+            )
+        )
+        return gt
+    except Exception as e:
+        st.error(f"Error al crear la tabla: {e}")
+        return None
+
+
 def login():
     with open('/home/hsx2/dev/proyectos/st_informes/portalInformes/.streamlit/credentials.yaml', 'r', encoding='utf-8') as file:
         config = yaml.load(file, Loader=SafeLoader)
@@ -260,181 +366,3 @@ def login():
 
     elif st.session_state["authentication_status"] is False:
         st.error('Usuario/contraseña incorrectos')
-
-
-"""
-def get_credentials(fulldata: bool):
-    if not fulldata:
-        usuario = st.session_state['username', '']
-        where = f"WHERE username = '{usuario}'"
-    else:
-        where = ''
-
-    with Cursor() as cursor:
-        try:
-            cursor.execute(f"SELECT name, username, pass, role, createdby, email FROM public.auth {where}")
-            users = cursor.fetchall()
-            if not users:
-                print("No se encontraron usuarios en la base de datos")
-                return {"usernames": {}}
-
-            credentials = {"usernames": {}}
-
-            # Add usernames and hashed passwords to the credentials dictionary
-            for name, username, password, role, parent, email in users:
-                # hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-                user_dict = {"name": name, "password": password, "role": role, "parent": parent, "email": email}
-                credentials["usernames"].update({username: user_dict})
-                print(f"Usuario: {username}, Contraseña: {password[:10]}..., Nombre: {name}, Rol: {role}, Parent: {parent}, Email: {email}")
-
-            print("Diccionario de credenciales:", credentials)
-            return credentials
-        except psycopg2.Error as e:
-            st.exception(e)
-            st.stop()
-        except Exception as e:
-            st.exception(e)
-            st.stop()
-
-
-def validate_password(password):
-    # Regular expression to validate the password format
-    pattern = r"^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?/&-.])[A-Za-z\d@$!%*#?/&-.]{8,}$"
-
-    # Validate if the password matches the format
-    if re.match(pattern, password):
-        return True
-    else:
-        return False
-
-
-def create_user(userdict):
-    password = userdict['pass']
-    hashed_pwd = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-
-    with Cursor() as cursor:
-        try:
-            query = '''
-            INSERT INTO public.auth (username, name, pass, role, createdby, email)
-            VALUES (%s, %s, %s, %s, %s, %s)
-            '''
-            values = (
-                userdict['username'],
-                userdict['name'],
-                hashed_pwd,
-                userdict['role'],
-                userdict['createdby'],
-                userdict['email']
-            )
-            cursor.execute(query, values)
-            return True
-        except psycopg2.Error:
-            return False
-        except Exception as e:
-            st.exception(e)
-            st.stop()
-
-
-def delete_user(userdict):
-    with Cursor() as cursor:
-        try:
-            if st.session_state['role'] == 'admin':
-                query = f'''
-                    DELETE FROM public.auth
-                    WHERE username = '{userdict['username']}';
-                '''
-                cursor.execute(query)
-            else:
-                query = f'''
-                    DELETE FROM public.auth
-                    WHERE username = '{userdict['username']}' AND createdby = '{userdict['user']}';
-                '''
-                cursor.execute(query)
-            deleted_rows = cursor.rowcount
-            return deleted_rows > 0
-        except psycopg2.Error as e:
-            st.exception(e)
-            st.stop()
-        except Exception as e:
-            st.exception(e)
-            st.stop()
-
-
-def upgrade_user_director(userdict):
-    with Cursor() as cursor:
-        try:
-            query = f'''
-                UPDATE public.auth
-                SET role = 'director'
-                WHERE username = '{userdict['username']}' AND createdby = '{userdict['user']}';
-            '''
-            cursor.execute(query)
-            deleted_rows = cursor.rowcount
-            return deleted_rows > 0
-        except psycopg2.Error as e:
-            st.exception(e)
-            st.stop()
-        except Exception as e:
-            st.exception(e)
-            st.stop()
-
-
-def change_password(old_pass: str, new_pass: str):
-    credential = get_credentials(fulldata=False)
-    username = list(credential['usernames'].keys())[0]
-    old_pass_hash = credential['usernames'][username]['password']
-
-    if bcrypt.checkpw(old_pass.encode(), old_pass_hash.encode()):
-        new_hashed_pwd = bcrypt.hashpw(new_pass.encode(), bcrypt.gensalt()).decode()
-        with Cursor() as cursor:
-            try:
-                query = '''
-                UPDATE public.auth
-                SET pass = %s
-                WHERE username = %s
-                    AND name = %s
-                    AND role = %s
-                    AND createdby = %s
-                '''
-                values = (
-                    new_hashed_pwd,
-                    username,
-                    credential['usernames'][username]['name'],
-                    credential['usernames'][username]['role'],
-                    credential['usernames'][username]['parent']
-                )
-                cursor.execute(query, values)
-                return True
-            except psycopg2.Error:
-                return False
-            except Exception as e:
-                st.exception(e)
-                st.stop()
-    else:
-        return False
-
-
-def show_users(username):
-    with Cursor() as cursor:
-        where = ''
-        if st.session_state['role'] != 'admin':
-            where = f"WHERE createdby = '{username}'"
-        try:
-            query = f'''
-            SELECT name AS Nombre, username AS Usuario, role AS Rol
-            FROM public.auth
-            {where};
-            '''
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            column_names = [desc[0] for desc in cursor.description]
-            df = pd.DataFrame(rows, columns=column_names)
-            df = df.dropna(axis=1, how='all')
-            return df
-        except psycopg2.Error as e:
-            st.exception(e)
-            st.stop()
-        except Exception as e:
-            st.exception(e)
-            st.stop()
-"""

@@ -301,11 +301,7 @@ informe:
           index: "tecnologias"
           columns: "vertical"
           values: "cantidad"
-        layout:
-          title:
-            text: "Proyectos federales de innovación por Eje y Tecnología en {{ provincia_nombre }}"
-            align: "left"
-            x: 0
+          aggfunc: "sum"
       plantilla_sql: |
         SELECT tecnologias, vertical, COUNT(id_pfi) as cantidad
         FROM proyectos_pfi WHERE provincia ILIKE (
@@ -489,11 +485,7 @@ informe:
           index: "institucion"
           columns: "letra_ipc_descripcion"
           values: "cantidad"
-        layout:
-          title:
-            text: "Cantidad de patentes solicitadas por inst. de CTI provinciales por sector de tecnología (2014-{{anio}})"
-            align: "left"
-            x: 0
+          aggfunc: "sum"
       plantilla_sql: |
         SELECT institucion, letra_ipc_descripcion, COUNT(DISTINCT lens_id) as cantidad
         FROM patentes_desagregadas_ipc_provincia_region_pais
@@ -562,15 +554,17 @@ informe:
 
     tabla_articulos_q1_q2: &tabla_articulos_q1_q2
       orden: 4111
-      nombre: "Cantidad de artículos publicados en revistas Q1-Q2 (2019 - {{anio}})"
+      nombre: "Cantidad de artículos publicados en revistas Q1 y Q2 (2019 - {{anio}})"
       tipo_componente: "TABLA"
       estado: true
       parametros: ["provincia_id", "anio"]
       config:
         pivot:
           index: "revista_sjr"
+          stubhead: "Revista SJR"
           columns: "unidad_territorial"
           values: "cantidad"
+          aggfunc: "sum"
         layout:
           title:
             text: "Artículos publicados en revistas Q1 y Q2 (2019 - {{anio}})"
@@ -830,15 +824,10 @@ informe:
       estado: true
       parametros: ["provincia_id", "anio"]
       config:
-        headers:
-          values: "tipo_personal_sicytar"
-        cells:
+        pivot:
+          columns: "tipo_personal_sicytar"
           values: "cantidad"
-        layout:
-          title:
-            text: "Personas dedicadas a I+D por Función ({{anio}})"
-            align: "left"
-            x: 0
+          aggfunc: "sum"
       plantilla_sql: |
         SELECT tipo_personal_sicytar, SUM(cant_personas) as cantidad
         FROM rrhh_sicytar_agregado_provincia_region_pais

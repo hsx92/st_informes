@@ -2,9 +2,9 @@
 import streamlit as st
 import plotly.express as px
 # from great_tables import GT
-# from streamlit_extras.great_tables import great_tables
+from streamlit_extras.great_tables import great_tables
 from streamlit_extras.metric_cards import style_metric_cards
-from data_handler import get_provincias, get_informe, procesar_kpi, insertar_saltos
+from data_handler import get_provincias, get_informe, procesar_kpi, insertar_saltos, tabla_pivot
 
 
 st.set_page_config(page_title="Consulta", page_icon=":bar_chart:", layout="wide")
@@ -218,7 +218,8 @@ def panomProvincial():
             st.caption("* PFI: Proyectos Federales de Innovación")
             st.markdown("---")
 
-            st.table(tabla_pfi_cruce['resultado_sql'])
+            tabla_pfi_cruce_fig = tabla_pivot(tabla_pfi_cruce)
+            great_tables(tabla_pfi_cruce_fig)
 
         with infraestructuraTab:
             st.markdown("")
@@ -304,7 +305,8 @@ def panomProvincial():
                 st.metric(label=":primary[Investigadores cada 1000 habs.]", value=kpi_tasa_pea_nacional['valor'], delta=None)
             st.markdown("")
 
-            st.table(tabla_personas_por_funcion['resultado_sql'])
+            tabla_personas_por_funcion_fig = tabla_pivot(tabla_personas_por_funcion)
+            great_tables(tabla_personas_por_funcion_fig)
 
             st.markdown("---")
 
@@ -405,7 +407,8 @@ def panomProvincial():
                 st.plotly_chart(evolucionPatentes_fig)
                 st.markdown("---")
 
-            st.table(tabla_patentes_sector['resultado_sql'])
+            tabla_patentes_sector_fig = tabla_pivot(tabla_patentes_sector)
+            great_tables(tabla_patentes_sector_fig)
             st.markdown("---")
 
             produccionProvincial_fig = px.line(
@@ -443,10 +446,8 @@ def panomProvincial():
                 title_font=dict(size=20),
                 margin=dict(l=20, r=20, t=50, b=20)
             )
-            st.plotly_chart(distribucionPublicaciones_fig)
-            st.markdown("---")
 
-            st.table(tabla_articulos_q1_q2['resultado_sql'])
+            st.plotly_chart(distribucionPublicaciones_fig)
             st.markdown("---")
 
             publicacionesArea_fig = px.bar(
@@ -463,10 +464,13 @@ def panomProvincial():
             publicacionesArea_fig.update_layout(grafico_publicaciones_area['config']['layout'])
             publicacionesArea_fig.update_layout(
                 title_font=dict(size=20),
-                margin=dict(l=20, r=40, t=50, b=20)
+                margin=dict(l=20, r=40, t=50, b=0)
             )
             st.plotly_chart(publicacionesArea_fig)
-            st.markdown("")
+            st.markdown("---")
+
+            tabla_articulos_q1_q2_fig = tabla_pivot(tabla_articulos_q1_q2)
+            great_tables(tabla_articulos_q1_q2_fig)
 
         with ciencia_sociedadTab:
             st.markdown("")
