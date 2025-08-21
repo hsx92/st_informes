@@ -3,7 +3,7 @@ from data_handler import login
 
 
 st.set_page_config(page_title="Portal - SICyT", page_icon=st.secrets["LOGO_CORTO"], layout="wide", initial_sidebar_state="collapsed")
-logo = 'https://www.argentina.gob.ar/profiles/argentinagobar/themes/argentinagobar/argentinagobar_theme/logo_argentina-blanco.svg'
+# logo = 'https://www.argentina.gob.ar/profiles/argentinagobar/themes/argentinagobar/argentinagobar_theme/logo_argentina-blanco.svg'
 st.logo(image=st.secrets['LOGO_LARGO'], size="large")
 
 with open("static/iconos/dist/css/icono-arg.css", "r") as css_file:
