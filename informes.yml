@@ -292,7 +292,7 @@ informe:
 
     tabla_pfi_cruce: &tabla_pfi_cruce
       orden: 3007
-      nombre: "Tabla: Proyectos PFI provinciales por Eje y Tecnología Estratégica"
+      nombre: "Proyectos PFI provinciales por Eje y Tecnología Estratégica"
       tipo_componente: "TABLA"
       estado: true
       parametros: ["provincia_id"]
@@ -623,7 +623,7 @@ informe:
     # --- SECCIÓN 4.2: Infraestructura clave ---
     kpi_unidades_id_prov: &kpi_unidades_id_prov
       orden: 4201
-      nombre: "Unidades de I+D provinciales ({{anio}})"
+      nombre: "Unidades de I+D provinciales"
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id", "anio"]

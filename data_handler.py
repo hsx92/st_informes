@@ -276,6 +276,9 @@ def tabla_pivot(componente: dict) -> GT:
             GT(tabla)
             .tab_header(title=componente['nombre'])
             .tab_stubhead(label='')
+            .opt_table_font(
+                stack="geometric-humanist"
+            )
             # 1. Formato para el cuerpo de la primera columna (el índice)
             .tab_style(
                 style.css("padding-top: 25px; padding-bottom: 25px;"),  # El primer valor es el padding vertical (top/bottom)
@@ -330,7 +333,7 @@ def tabla_pivot(componente: dict) -> GT:
                 table_font_names="Poppins"
             )
         )
-        return gt
+        return gt, tabla
     except Exception as e:
         st.error(f"Error al crear la tabla: {e}")
         return None
