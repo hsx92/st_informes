@@ -18,8 +18,22 @@ from copy import deepcopy
 from typing import Dict
 from great_tables import GT, style, loc
 import logging
+from logging.handlers import RotatingFileHandler
+import os
+import textwrap
 
-logging.basicConfig(filename='InformesApp-dh.log', level=logging.INFO)
+log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+log_level = getattr(logging, log_level_name, logging.INFO)
+
+handler = RotatingFileHandler(
+    "InformesApp-dh.log", maxBytes=5 * 1024 * 1024, backupCount=5
+)
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+handler.setFormatter(formatter)
+
+root_logger = logging.getLogger()
+root_logger.setLevel(log_level)
+root_logger.addHandler(handler)
 logger = logging.getLogger(__name__)
 
 
@@ -73,6 +87,7 @@ class Cursor:
 
     def __enter__(self):
         self._conn = Conexion.get_conn()
+        self._conn.autocommit = True
         self._cursor = self._conn.cursor()
         return self._cursor
 
@@ -82,7 +97,16 @@ class Cursor:
             st.error('Ha ocurrido un error, la transacción ha sido cancelada.')
             logger.info(f'Detalles: {exception_type} /// {exception_value} /// {exception_traceback}')
         else:
-            self._conn.commit()
+            query = getattr(self._cursor, "query", None)
+            is_read_only = False
+            if query:
+                if isinstance(query, (bytes, bytearray)):
+                    query_text = query.decode()
+                else:
+                    query_text = str(query)
+                is_read_only = query_text.strip().lower().startswith("select")
+            if not self._conn.autocommit and not is_read_only:
+                self._conn.commit()
         self._cursor.close()
         Conexion.free_conn(self._conn)
 
@@ -112,27 +136,7 @@ def insertar_saltos(cadena):
     if not isinstance(cadena, str):
         return cadena
 
-    cadena_restante = cadena
-    partes = []
-    corte_despues_de = 35
-
-    while len(cadena_restante) > corte_despues_de:
-        try:
-            # Busca el primer espacio a partir del caracter n°35
-            indice_espacio = cadena_restante.index(' ', corte_despues_de)
-            # Guarda la parte hasta el espacio
-            partes.append(cadena_restante[:indice_espacio])
-            # La cadena restante es lo que viene después del espacio
-            cadena_restante = cadena_restante[indice_espacio + 1:]
-        except ValueError:
-            # Si no hay más espacios después de 35 caracteres, sal del bucle
-            break
-
-    # Agrega la última parte que queda de la cadena
-    partes.append(cadena_restante)
-
-    # Une todas las partes con el tag <br>
-    return '<br>'.join(partes)
+    return textwrap.fill(cadena, width=35).replace('\n', '<br>')
 
 
 def get_provincias():
@@ -194,9 +198,14 @@ def ejecutar_consulta_parametrizada(plantilla_sql: str, params: dict) -> pd.Data
         return pd.DataFrame()
 
 
-def get_informe(nombre_informe: str, params: Dict[str, object]) -> Dict[str, object]:
+@st.cache_data
+def _load_informes() -> Dict[str, object]:
     with open("informes.yml", "r", encoding="utf-8") as f:
-        data = yaml.safe_load(f)
+        return yaml.safe_load(f)
+
+
+def get_informe(nombre_informe: str, params: Dict[str, object]) -> Dict[str, object]:
+    data = _load_informes()
 
     informes = data.get("informe")
     if isinstance(informes, dict):
@@ -230,6 +239,19 @@ def procesar_kpi(df: pd.DataFrame, config: dict) -> str:
     if formato == 'float':
         return f"{float(valor):,.2f}{sufijo}".replace(",", "X").replace(".", ",").replace("X", ".")
     return f"{valor}{sufijo}"
+
+
+# helper to build KPI dictionaries
+def build_kpi(componentes: dict, key: str) -> dict:
+    """Construye un diccionario KPI a partir de los componentes."""
+    componente = componentes.get(key, {})
+    return {
+        "nombre": componente.get("nombre"),
+        "valor": procesar_kpi(
+            componente.get("resultado_sql"), componente.get("config")
+        ),
+        "fuente": componente.get("fuente"),
+    }
 
 
 def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame, GT, None]:

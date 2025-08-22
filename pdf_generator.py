@@ -1,6 +1,7 @@
 from data_handler import procesar_kpi
 from fpdf import FPDF, XPos, YPos, enums
 from fpdf.fonts import FontFace
+from PIL import Image
 
 
 HEADER = "static/logo/letterhead.png"
@@ -11,11 +12,26 @@ FUENTES_COLOR_CLARO = "#666666"
 COLOR_BASE = "#2C3C5F"
 COLOR_CLARO = "#7589A3"
 
+IMAGE_DIMS_CACHE = {}
+
+
+def precache_images(paths):
+    """Store image dimensions to avoid repeated calculations."""
+    for path in set(filter(None, paths)):
+        if path not in IMAGE_DIMS_CACHE:
+            try:
+                with Image.open(path) as img:
+                    IMAGE_DIMS_CACHE[path] = img.size
+            except Exception:
+                continue
+
 
 class PDF(FPDF):
     def __init__(self, provincia=None):
         super().__init__()
         self.provincia = provincia
+        # Reference global cache to reuse precalculated dimensions
+        self.image_dims = IMAGE_DIMS_CACHE
 
     def footer(self):
         # Set position of the footer
@@ -61,9 +77,10 @@ class PDF(FPDF):
         if title != "":
             self.set_font("Poppins regular", size=14)
             self.set_text_color("#0000008A")
-            self.multi_cell(0, 10, title, border=0, align="C", new_y=YPos.NEXT, new_x=XPos.LMARGIN, max_line_height=5)
+            self.multi_cell(0, 10, title, border=0, align="C", new_y=YPos.NEXT, new_x=XPos.LMARGIN, max_line_height=8)
             self.ln(2)
-        self.image(grafico, x=x, w=w)
+        # Use cached dimensions and keep loaded image in cache to avoid recomputation
+        self.image(grafico, x=x, w=w, dims=self.image_dims.get(grafico))
         self.set_font("Poppins regular", size=6)
         self.set_text_color(FUENTES_COLOR_CLARO)
         self.set_x(w - 20)
@@ -134,6 +151,15 @@ class PDF(FPDF):
 
 
 def ficha_provincial_pdf(provincia: str, content: dict, filename):
+    # Preload dimensions for all static images to avoid repeated size calculations
+    image_paths = [HEADER]
+    image_paths += [
+        comp.get("img")
+        for comp in content.get("componentes", {}).values()
+        if isinstance(comp, dict) and comp.get("img")
+    ]
+    precache_images(image_paths)
+
     pdf = PDF(provincia=provincia)
     # Agregamos las fuentes
     pdf.add_font("Poppins regular", "", "static/fonts/Poppins/Poppins-Regular.ttf")
@@ -144,7 +170,7 @@ def ficha_provincial_pdf(provincia: str, content: dict, filename):
     pdf.set_top_margin(20)
 
     pdf.add_page()
-    pdf.image(HEADER, x=0, y=0, w=WIDTH)
+    pdf.image(HEADER, x=0, y=0, w=WIDTH, dims=IMAGE_DIMS_CACHE.get(HEADER))
     pdf.set_y(60)
     pdf.informe_title(fuente="Dirección Nacional de Informes y Estudios")
 

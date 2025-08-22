@@ -771,6 +771,7 @@ informe:
             tickfont_size: 16
           yaxis:
             ticklabelstandoff: 10
+            ticklabelposition: "inside"
             title:
               font_size: 18
               text: ""

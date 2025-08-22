@@ -1,10 +1,17 @@
-# import plotly.express as px
+"""Streamlit page for displaying provincial dashboards.
+
+This module defines the :func:`panomProvincial` function, which renders
+key metrics, tables, and charts for a selected province and allows
+exporting the report to PDF.
+"""
+
 import streamlit as st
 import plotly.express as px
 from streamlit_extras.great_tables import great_tables
 from streamlit_extras.metric_cards import style_metric_cards
-from data_handler import get_provincias, get_informe, procesar_kpi, insertar_saltos, tabla_pivot
+from data_handler import get_provincias, get_informe, build_kpi, insertar_saltos, tabla_pivot
 from pdf_generator import ficha_provincial_pdf
+from css_utils import load_css
 
 
 st.set_page_config(page_title="Portal - SICyT", page_icon=st.secrets["LOGO_CORTO"], layout="wide")
@@ -21,16 +28,15 @@ custom_streamlit_css = """
     }
     """
 # Leer el archivo CSS de icono-arg
-with open("static/iconos/dist/css/icono-arg.css", "r") as css_file:
-    css = css_file.read()
+css = load_css("static/iconos/dist/css/icono-arg.css")
 
-# Combine the icono-arg.css with the custom Streamlit CSS
-    combined_css = f"""
-    <style>
-    {css}
-    {custom_streamlit_css}
-    </style>
-    """
+# Combine the icono-arg.css with el custom Streamlit CSS
+combined_css = f"""
+<style>
+{css}
+{custom_streamlit_css}
+</style>
+"""
 
 # Inyectar el CSS en la aplicación
 st.markdown(combined_css, unsafe_allow_html=True)
@@ -38,6 +44,14 @@ st.markdown(combined_css, unsafe_allow_html=True)
 
 # ---- MAINPAGE ----
 def panomProvincial():
+    """Render the provincial dashboard page.
+
+    Loads provincial data, displays metrics and tables, and provides the
+    option to export the report as a PDF.
+
+    Returns:
+        None: This function renders the page but does not return a value.
+    """
     provinciasDF = get_provincias()
 
     col1, col2 = st.columns([1, 9], vertical_alignment='center')
@@ -76,121 +90,32 @@ def panomProvincial():
         })
 
         # ################################## COMPONENTES #######################################
-        kpi_poblacion_prov = {
-            'nombre': DFs["componentes"]["kpi_poblacion_prov"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_poblacion_prov"]["resultado_sql"], DFs["componentes"]["kpi_poblacion_prov"]["config"]),
-            'fuente': DFs["componentes"]["kpi_poblacion_prov"]["fuente"]
-        }
-        kpi_densidad_prov = {
-            'nombre': DFs["componentes"]["kpi_densidad_prov"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_densidad_prov"]["resultado_sql"], DFs["componentes"]["kpi_densidad_prov"]["config"]),
-            'fuente': DFs["componentes"]["kpi_densidad_prov"]["fuente"]
-        }
-        kpi_tasa_actividad_prov = {
-            'nombre': DFs["componentes"]["kpi_tasa_actividad_prov"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_actividad_prov"]["resultado_sql"], DFs["componentes"]["kpi_tasa_actividad_prov"]["config"]),
-            'fuente': DFs["componentes"]["kpi_tasa_actividad_prov"]["fuente"]
-        }
-        kpi_tasa_actividad_nac = {
-            'nombre': DFs["componentes"]["kpi_tasa_actividad_nac"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_actividad_nac"]["resultado_sql"], DFs["componentes"]["kpi_tasa_actividad_nac"]["config"]),
-            'fuente': DFs["componentes"]["kpi_tasa_actividad_nac"]["fuente"]
-        }
-        kpi_tasa_desempleo_prov = {
-            'nombre': DFs["componentes"]["kpi_tasa_desempleo_prov"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_desempleo_prov"]["resultado_sql"], DFs["componentes"]["kpi_tasa_desempleo_prov"]["config"]),
-            'fuente': DFs["componentes"]["kpi_tasa_desempleo_prov"]["fuente"]
-        }
-        kpi_tasa_desempleo_nac = {
-            'nombre': DFs["componentes"]["kpi_tasa_desempleo_nac"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_desempleo_nac"]["resultado_sql"], DFs["componentes"]["kpi_tasa_desempleo_nac"]["config"]),
-            'fuente': DFs["componentes"]["kpi_tasa_desempleo_nac"]["fuente"]
-        }
+        kpi_keys = [
+            "kpi_poblacion_prov",
+            "kpi_densidad_prov",
+            "kpi_tasa_actividad_prov",
+            "kpi_tasa_actividad_nac",
+            "kpi_tasa_desempleo_prov",
+            "kpi_tasa_desempleo_nac",
+            "kpi_pfi_nacional",
+            "kpi_pfi_regional",
+            "kpi_pfi_provincial",
+            "kpi_porc_privada_nacional",
+            "kpi_porc_privada_regional",
+            "kpi_porc_privada_provincial",
+            "kpi_patentes_arg",
+            "kpi_patentes_cyt_arg",
+            "kpi_patentes_cyt_prov",
+            "kpi_unidades_id_prov",
+            "kpi_equipos_nacional",
+            "kpi_equipos_regional",
+            "kpi_equipos_provincial",
+            "kpi_tasa_pea_provincial",
+            "kpi_tasa_pea_regional",
+            "kpi_tasa_pea_nacional",
+        ]
 
-        kpi_pfi_nacional = {
-            'nombre': DFs["componentes"]["kpi_pfi_nacional"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_nacional"]["resultado_sql"], DFs["componentes"]["kpi_pfi_nacional"]["config"]),
-            'fuente': DFs["componentes"]["kpi_pfi_nacional"]["fuente"]
-        }
-        kpi_pfi_regional = {
-            'nombre': DFs["componentes"]["kpi_pfi_regional"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_regional"]["resultado_sql"], DFs["componentes"]["kpi_pfi_regional"]["config"]),
-            'fuente': DFs["componentes"]["kpi_pfi_regional"]["fuente"]
-        }
-        kpi_pfi_provincial = {
-            'nombre': DFs["componentes"]["kpi_pfi_provincial"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_provincial"]["resultado_sql"], DFs["componentes"]["kpi_pfi_provincial"]["config"]),
-            'fuente': DFs["componentes"]["kpi_pfi_provincial"]["fuente"]
-        }
-        kpi_porc_privada_nacional = {
-            'nombre': DFs["componentes"]["kpi_porc_privada_nacional"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_nacional"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_nacional"]["config"]),
-            'fuente': DFs["componentes"]["kpi_porc_privada_nacional"]["fuente"]
-        }
-        kpi_porc_privada_regional = {
-            'nombre': DFs["componentes"]["kpi_porc_privada_regional"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_regional"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_regional"]["config"]),
-            'fuente': DFs["componentes"]["kpi_porc_privada_regional"]["fuente"]
-        }
-        kpi_porc_privada_provincial = {
-            'nombre': DFs["componentes"]["kpi_porc_privada_provincial"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_provincial"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_provincial"]["config"]),
-            'fuente': DFs["componentes"]["kpi_porc_privada_provincial"]["fuente"]
-        }
-
-        kpi_patentes_arg = {
-            'nombre': DFs["componentes"]["kpi_patentes_arg"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_arg"]["resultado_sql"], DFs["componentes"]["kpi_patentes_arg"]["config"]),
-            'fuente': DFs["componentes"]["kpi_patentes_arg"]["fuente"]
-        }
-        kpi_patentes_cyt_arg = {
-            'nombre': DFs["componentes"]["kpi_patentes_cyt_arg"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_cyt_arg"]["resultado_sql"], DFs["componentes"]["kpi_patentes_cyt_arg"]["config"]),
-            'fuente': DFs["componentes"]["kpi_patentes_cyt_arg"]["fuente"]
-        }
-        kpi_patentes_cyt_prov = {
-            'nombre': DFs["componentes"]["kpi_patentes_cyt_prov"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_cyt_prov"]["resultado_sql"], DFs["componentes"]["kpi_patentes_cyt_prov"]["config"]),
-            'fuente': DFs["componentes"]["kpi_patentes_cyt_prov"]["fuente"]
-        }
-
-        kpi_unidades_id_prov = {
-            'nombre': DFs["componentes"]["kpi_unidades_id_prov"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_unidades_id_prov"]["resultado_sql"], DFs["componentes"]["kpi_unidades_id_prov"]["config"]),
-            'fuente': DFs["componentes"]["kpi_unidades_id_prov"]["fuente"]
-        }
-
-        kpi_equipos_nacional = {
-            'nombre': DFs["componentes"]["kpi_equipos_nacional"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_nacional"]["resultado_sql"], DFs["componentes"]["kpi_equipos_nacional"]["config"]),
-            'fuente': DFs["componentes"]["kpi_equipos_nacional"]["fuente"]
-        }
-        kpi_equipos_regional = {
-            'nombre': DFs["componentes"]["kpi_equipos_regional"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_regional"]["resultado_sql"], DFs["componentes"]["kpi_equipos_regional"]["config"]),
-            'fuente': DFs["componentes"]["kpi_equipos_regional"]["fuente"]
-        }
-        kpi_equipos_provincial = {
-            'nombre': DFs["componentes"]["kpi_equipos_provincial"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_provincial"]["resultado_sql"], DFs["componentes"]["kpi_equipos_provincial"]["config"]),
-            'fuente': DFs["componentes"]["kpi_equipos_provincial"]["fuente"]
-        }
-
-        kpi_tasa_pea_provincial = {
-            'nombre': DFs["componentes"]["kpi_tasa_pea_provincial"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_provincial"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_provincial"]["config"]),
-            'fuente': DFs["componentes"]["kpi_tasa_pea_provincial"]["fuente"]
-        }
-        kpi_tasa_pea_regional = {
-            'nombre': DFs["componentes"]["kpi_tasa_pea_regional"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_regional"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_regional"]["config"]),
-            'fuente': DFs["componentes"]["kpi_tasa_pea_regional"]["fuente"]
-        }
-        kpi_tasa_pea_nacional = {
-            'nombre': DFs["componentes"]["kpi_tasa_pea_nacional"]["nombre"],
-            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_nacional"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_nacional"]["config"]),
-            'fuente': DFs["componentes"]["kpi_tasa_pea_nacional"]["fuente"]
-        }
+        kpis = {key: build_kpi(DFs["componentes"], key) for key in kpi_keys}
 
         grafico_expo_top5 = DFs["componentes"]["grafico_expo_top5"]
 
@@ -229,17 +154,41 @@ def panomProvincial():
 
         with indicadoresTab:
             st.markdown("")
+
             col1, col2, col3, col4, col5 = st.columns([1, 3.75, .5, 3.75, 1])
             with col2:
-                st.metric(label=f":primary[{kpi_poblacion_prov["nombre"]}]", value=kpi_poblacion_prov["valor"], delta=None)
-                st.metric(label=f":primary[{kpi_tasa_actividad_prov["nombre"]}]", value=kpi_tasa_actividad_prov["valor"], delta=None)
-                st.metric(label=f":primary[{kpi_tasa_desempleo_prov["nombre"]}]", value=kpi_tasa_desempleo_prov["valor"], delta=None)
-
+                st.metric(
+                    label=f":primary[{kpis['kpi_poblacion_prov']['nombre']}]",
+                    value=kpis['kpi_poblacion_prov']['valor'],
+                    delta=None,
+                )
+                st.metric(
+                    label=f":primary[{kpis['kpi_tasa_actividad_prov']['nombre']}]",
+                    value=kpis['kpi_tasa_actividad_prov']['valor'],
+                    delta=None,
+                )
+                st.metric(
+                    label=f":primary[{kpis['kpi_tasa_desempleo_prov']['nombre']}]",
+                    value=kpis['kpi_tasa_desempleo_prov']['valor'],
+                    delta=None,
+                )
             with col4:
-                st.metric(label=f":primary[{kpi_densidad_prov["nombre"]}]", value=kpi_densidad_prov["valor"], delta=None)
-                st.metric(label=f":primary[{kpi_tasa_actividad_nac["nombre"]}]", value=kpi_tasa_actividad_nac["valor"], delta=None)
-                st.metric(label=f":primary[{kpi_tasa_desempleo_nac["nombre"]}]", value=kpi_tasa_desempleo_nac["valor"], delta=None)
-            st.caption(f"Fuente: {kpi_tasa_actividad_nac["fuente"]}")
+                st.metric(
+                    label=f":primary[{kpis['kpi_densidad_prov']['nombre']}]",
+                    value=kpis['kpi_densidad_prov']['valor'],
+                    delta=None,
+                )
+                st.metric(
+                    label=f":primary[{kpis['kpi_tasa_actividad_nac']['nombre']}]",
+                    value=kpis['kpi_tasa_actividad_nac']['valor'],
+                    delta=None,
+                )
+                st.metric(
+                    label=f":primary[{kpis['kpi_tasa_desempleo_nac']['nombre']}]",
+                    value=kpis['kpi_tasa_desempleo_nac']['valor'],
+                    delta=None,
+                )
+            st.caption(f"Fuente: {kpis['kpi_tasa_actividad_nac']['fuente']}")
             st.markdown("")
 
             grafico_expo_top5['resultado_sql'].iloc[:, 0] = grafico_expo_top5['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
@@ -313,16 +262,40 @@ def panomProvincial():
             st.markdown("")
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric(label=f":primary[{kpi_pfi_provincial["nombre"]}]", value=kpi_pfi_provincial["valor"], delta=None)
-                st.metric(label=f":primary[{kpi_porc_privada_provincial["nombre"]}]", value=kpi_porc_privada_provincial["valor"], delta=None)
+                st.metric(
+                    label=f":primary[{kpis['kpi_pfi_provincial']['nombre']}]",
+                    value=kpis['kpi_pfi_provincial']['valor'],
+                    delta=None,
+                )
+                st.metric(
+                    label=f":primary[{kpis['kpi_porc_privada_provincial']['nombre']}]",
+                    value=kpis['kpi_porc_privada_provincial']['valor'],
+                    delta=None,
+                )
             with col2:
-                st.metric(label=f":primary[{kpi_pfi_regional["nombre"]}]", value=kpi_pfi_regional["valor"], delta=None)
-                st.metric(label=f":primary[{kpi_porc_privada_regional["nombre"]}]", value=kpi_porc_privada_regional["valor"], delta=None)
+                st.metric(
+                    label=f":primary[{kpis['kpi_pfi_regional']['nombre']}]",
+                    value=kpis['kpi_pfi_regional']['valor'],
+                    delta=None,
+                )
+                st.metric(
+                    label=f":primary[{kpis['kpi_porc_privada_regional']['nombre']}]",
+                    value=kpis['kpi_porc_privada_regional']['valor'],
+                    delta=None,
+                )
             with col3:
-                st.metric(label=f":primary[{kpi_pfi_nacional["nombre"]}]", value=kpi_pfi_nacional["valor"], delta=None)
-                st.metric(label=f":primary[{kpi_porc_privada_nacional["nombre"]}]", value=kpi_porc_privada_nacional["valor"], delta=None)
+                st.metric(
+                    label=f":primary[{kpis['kpi_pfi_nacional']['nombre']}]",
+                    value=kpis['kpi_pfi_nacional']['valor'],
+                    delta=None,
+                )
+                st.metric(
+                    label=f":primary[{kpis['kpi_porc_privada_nacional']['nombre']}]",
+                    value=kpis['kpi_porc_privada_nacional']['valor'],
+                    delta=None,
+                )
             st.caption("*PFI: Proyectos Federales de Innovación")
-            st.caption(f"Fuente: {kpi_pfi_provincial['fuente']}")
+            st.caption(f"Fuente: {kpis['kpi_pfi_provincial']['fuente']}")
             st.markdown("")
 
             if tabla_pfi_cruce['resultado_sql'] is not None and not tabla_pfi_cruce['resultado_sql'].empty:
@@ -335,7 +308,11 @@ def panomProvincial():
             st.markdown("")
             col0, col1, col2 = st.columns([.25, 2.5, 7.25], vertical_alignment="center")
             with col1:
-                st.metric(label=f":primary[{kpi_unidades_id_prov['nombre']}]", value=kpi_unidades_id_prov['valor'], delta=None)
+                st.metric(
+                    label=f":primary[{kpis['kpi_unidades_id_prov']['nombre']}]",
+                    value=kpis['kpi_unidades_id_prov']['valor'],
+                    delta=None,
+                )
             with col2:
                 st.markdown(f"#### {grafico_unidades_por_inst['nombre']}")
 
@@ -360,12 +337,24 @@ def panomProvincial():
 
             col1, col2, col3 = st.columns(3)
             with col1:
-                st.metric(label=f":primary[{kpi_equipos_provincial['nombre']}]", value=kpi_equipos_provincial['valor'], delta=None)
+                st.metric(
+                    label=f":primary[{kpis['kpi_equipos_provincial']['nombre']}]",
+                    value=kpis['kpi_equipos_provincial']['valor'],
+                    delta=None,
+                )
             with col2:
-                st.metric(label=f":primary[{kpi_equipos_regional['nombre']}]", value=kpi_equipos_regional['valor'], delta=None)
+                st.metric(
+                    label=f":primary[{kpis['kpi_equipos_regional']['nombre']}]",
+                    value=kpis['kpi_equipos_regional']['valor'],
+                    delta=None,
+                )
             with col3:
-                st.metric(label=f":primary[{kpi_equipos_nacional['nombre']}]", value=kpi_equipos_nacional['valor'], delta=None)
-            st.caption(f"Fuente: {kpi_equipos_nacional['fuente']}")
+                st.metric(
+                    label=f":primary[{kpis['kpi_equipos_nacional']['nombre']}]",
+                    value=kpis['kpi_equipos_nacional']['valor'],
+                    delta=None,
+                )
+            st.caption(f"Fuente: {kpis['kpi_equipos_nacional']['fuente']}")
             st.markdown("")
 
             equiposIDxTipo_fig = px.bar(
@@ -410,14 +399,22 @@ def panomProvincial():
             col1, col2, col3 = st.columns(3, border=True)
             with col1:
                 st.markdown(f"#### {st.session_state.provincia}")
-                st.metric(label=":primary[Investigadores cada 1000 habs.]", value=kpi_tasa_pea_provincial['valor'], delta=None)
+                st.metric(
+                    label=":primary[Investigadores cada 1000 habs.]",
+                    value=kpis['kpi_tasa_pea_provincial']['valor'],
+                    delta=None,
+                )
             with col2:
                 st.markdown(f"#### {st.session_state.region}")
-                st.metric(label=":primary[Investigadores cada 1000 habs.]", value=kpi_tasa_pea_regional['valor'], delta=None)
+                st.metric(
+                    label=":primary[Investigadores cada 1000 habs.]",
+                    value=kpis['kpi_tasa_pea_regional']['valor'],
+                    delta=None,
+                )
             with col3:
                 st.markdown(f"#### {st.session_state.pais}")
-                st.metric(label=":primary[Investigadores cada 1000 habs.]", value=kpi_tasa_pea_nacional['valor'], delta=None)
-            st.caption(f"Fuente: {kpi_tasa_pea_nacional['fuente']}")
+                st.metric(label=":primary[Investigadores cada 1000 habs.]", value=kpis['kpi_tasa_pea_nacional']['valor'], delta=None)
+            st.caption(f"Fuente: {kpis['kpi_tasa_pea_nacional']['fuente']}")
             st.markdown("")
 
             if tabla_personas_por_funcion['resultado_sql'] is not None and not tabla_personas_por_funcion['resultado_sql'].empty:
@@ -494,14 +491,26 @@ def panomProvincial():
 
             col1, col2, col3 = st.columns([6, 1, 3], vertical_alignment="center")
             with col1:
-                st.metric(label=f":primary[{kpi_patentes_cyt_prov['nombre']}]", value=kpi_patentes_cyt_prov['valor'], delta=None)
+                st.metric(
+                    label=f":primary[{kpis['kpi_patentes_cyt_prov']['nombre']}]",
+                    value=kpis['kpi_patentes_cyt_prov']['valor'],
+                    delta=None,
+                )
             col1b, col2b, col3b = st.columns([2, 6, 2])
             with col2b:
-                st.metric(label=f":primary[{kpi_patentes_cyt_arg['nombre']}]", value=kpi_patentes_cyt_arg['valor'], delta=None)
+                st.metric(
+                    label=f":primary[{kpis['kpi_patentes_cyt_arg']['nombre']}]",
+                    value=kpis['kpi_patentes_cyt_arg']['valor'],
+                    delta=None
+                )
             col1c, col2c, col3c = st.columns([2, 2, 6])
             with col3c:
-                st.metric(label=f":primary[{kpi_patentes_arg['nombre']}]", value=kpi_patentes_arg['valor'], delta=None)
-            st.caption(f"Fuente: {kpi_patentes_arg['fuente']}")
+                st.metric(
+                    label=f":primary[{kpis['kpi_patentes_arg']['nombre']}]",
+                    value=kpis['kpi_patentes_arg']['valor'],
+                    delta=None
+                )
+            st.caption(f"Fuente: {kpis['kpi_patentes_arg']['fuente']}")
             st.markdown("---")
 
             evolucionPatentes_fig = px.line(
@@ -609,8 +618,48 @@ def panomProvincial():
             st.caption(f"Fuente: {grafico_percepcion_calidad_vida['fuente']}")
             st.markdown("")
 
-        with test:
-            st.write(DFs)
+        def exportar_a_pdf(provincia: str, data: dict):
+            componentes_exportables = {
+                "grafico_expo_top5": top5_exportaciones_fig,
+                "grafico_evolucion_regional": inversionID_fig,
+                "grafico_inv_por_investigador": inversionInvestigador_fig,
+                "grafico_inv_empresaria_sector": inversionEmpresas_fig,
+                "grafico_unidades_por_inst": unidadesIDxinstitucion_fig,
+                "grafico_equipos_por_tipo": equiposIDxTipo_fig,
+                "grafico_distribucion_investigadores": investigadoresxArea_fig,
+                "grafico_evolucion_investigadores": evolucionInvestigadores_fig,
+                "grafico_expo_intensidad": exportacionesIntensidad_fig,
+                "grafico_expo_evolucion": evolucionExportaciones_fig,
+                "grafico_expo_destino": exportacionesxPais_fig,
+                "grafico_produccion_evolucion": produccionProvincial_fig,
+                "grafico_produccion_tipo": distribucionPublicaciones_fig,
+                "grafico_publicaciones_area": publicacionesArea_fig,
+                "grafico_percepcion_calidad_vida": percepcionPublica_fig,
+                "grafico_patentes_evolucion": evolucionPatentes_fig,
+                "tabla_pfi_cruce": tabla_pfi_cruce,
+                "tabla_personas_por_funcion": tabla_personas_por_funcion,
+                "tabla_patentes_sector": tabla_patentes_sector,
+                "tabla_articulos_q1_q2": tabla_articulos_q1_q2,
+            }
+
+            for nombre, componente in componentes_exportables.items():
+                if nombre.startswith("tabla"):
+                    data["componentes"][nombre]["df"] = tabla_pivot(componente)
+                else:
+                    width, height = (1080, None)
+                    if nombre == "grafico_percepcion_calidad_vida":
+                        width, height = (None, 600)
+                    if nombre == "grafico_patentes_evolucion":
+                        resultado = data["componentes"][nombre]["resultado_sql"]
+                        if resultado is None or resultado.empty:
+                            data["componentes"][nombre]["img"] = ""
+                            continue
+                    data["componentes"][nombre]["img"] = componente.to_image(
+                        format="png", width=width, height=height, scale=2, validate=True
+                    )
+
+            print('Generación del diccionario de la ficha provincial completada.')
+            ficha_provincial_pdf(provincia, data, "output/ficha_provincial.pdf")
 
         style_metric_cards()
         st.markdown("---")
@@ -619,40 +668,7 @@ def panomProvincial():
             exportar = st.button("Exportar a PDF", use_container_width=True)
             if exportar:
                 try:
-                    DFs['componentes']['grafico_expo_top5']['img'] = top5_exportaciones_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_evolucion_regional']['img'] = inversionID_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_inv_por_investigador']['img'] = inversionInvestigador_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_inv_empresaria_sector']['img'] = inversionEmpresas_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    tabla_pfi_cruce_df = tabla_pivot(tabla_pfi_cruce)
-                    DFs['componentes']['tabla_pfi_cruce']['df'] = tabla_pfi_cruce_df
-                    DFs['componentes']['grafico_unidades_por_inst']['img'] = unidadesIDxinstitucion_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_equipos_por_tipo']['img'] = equiposIDxTipo_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_distribucion_investigadores']['img'] = investigadoresxArea_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    tabla_personas_por_funcion_df = tabla_pivot(tabla_personas_por_funcion)
-                    DFs['componentes']['tabla_personas_por_funcion']['df'] = tabla_personas_por_funcion_df
-                    DFs['componentes']['grafico_evolucion_investigadores']['img'] = evolucionInvestigadores_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_expo_intensidad']['img'] = exportacionesIntensidad_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_expo_evolucion']['img'] = evolucionExportaciones_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_expo_destino']['img'] = exportacionesxPais_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    tabla_patentes_sector_df = tabla_pivot(tabla_patentes_sector)
-                    DFs['componentes']['tabla_patentes_sector']['df'] = tabla_patentes_sector_df
-                    DFs['componentes']['grafico_produccion_evolucion']['img'] = produccionProvincial_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_produccion_tipo']['img'] = distribucionPublicaciones_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    DFs['componentes']['grafico_publicaciones_area']['img'] = publicacionesArea_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    tabla_articulos_q1_q2_df = tabla_pivot(tabla_articulos_q1_q2)
-                    DFs['componentes']['tabla_articulos_q1_q2']['df'] = tabla_articulos_q1_q2_df
-                    DFs['componentes']['grafico_percepcion_calidad_vida']['img'] = percepcionPublica_fig.to_image(format="png", width=None, height=600, scale=2, validate=True)
-                    if grafico_patentes_evolucion['resultado_sql'] is not None and not grafico_patentes_evolucion['resultado_sql'].empty:
-                        DFs['componentes']['grafico_patentes_evolucion']['img'] = evolucionPatentes_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
-                    else:
-                        DFs['componentes']['grafico_patentes_evolucion']['img'] = ''
-
-                    print('Generación del diccionario de la ficha provincial completada.')
-                except Exception as e:
-                    st.error(f"Error al generar la ficha provincial: {e}")
-
-                try:
-                    ficha_provincial_pdf(st.session_state.provincia, DFs, "output/ficha_provincial.pdf")
+                    exportar_a_pdf(st.session_state.provincia, DFs)
                     exportar = False
                 except Exception as e:
                     st.error(f"Error al generar la ficha provincial: {e}")
