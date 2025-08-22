@@ -21,6 +21,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 import textwrap
+from pathlib import Path
 
 log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
 log_level = getattr(logging, log_level_name, logging.INFO)
@@ -366,14 +367,15 @@ def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame
 
 
 def login():
-    with open('/home/hsx2/dev/proyectos/st_informes/portalInformes/.streamlit/credentials.yaml', 'r', encoding='utf-8') as file:
+    credentials_path = Path(__file__).parent / ".streamlit" / "credentials.yaml"
+    with credentials_path.open("r", encoding="utf-8") as file:
         config = yaml.load(file, Loader=SafeLoader)
 
     authenticator = stauth.Authenticate(
-        credentials='/home/hsx2/dev/proyectos/st_informes/portalInformes/.streamlit/credentials.yaml',
-        cookie_name=config['cookie']['name'],
-        cookie_key=config['cookie']['key'],
-        cookie_expiry_days=config['cookie']['expiry_days']
+        config["credentials"],
+        config["cookie"]["name"],
+        config["cookie"]["key"],
+        config["cookie"]["expiry_days"],
     )
 
     try:

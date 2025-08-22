@@ -27,13 +27,15 @@ custom_streamlit_css = """
         color: #FFFFFF;
     }
     """
-# Leer el archivo CSS de icono-arg
-css = load_css("static/iconos/dist/css/icono-arg.css")
+# Leer los archivos CSS necesarios
+icon_css = load_css("static/iconos/dist/css/icono-arg.css")
+roboto_css = load_css("static/style.css")
 
-# Combine the icono-arg.css with el custom Streamlit CSS
+# Combine los estilos de icono y tipografía con el CSS personalizado
 combined_css = f"""
 <style>
-{css}
+{icon_css}
+{roboto_css}
 {custom_streamlit_css}
 </style>
 """
@@ -148,8 +150,8 @@ def panomProvincial():
         #######################################################################################
         st.markdown(f"## {provincia}")
 
-        indicadoresTab, inversionTab, proyectosTab, infraestructuraTab, capitalHumanoTab, resultadosTab, ciencia_sociedadTab, test = st.tabs(
-            ["Indicadores de contexto", "Inversión en I+D", "Proyectos", "Infraestructura", "Capital Humano", "Resultados", "Ciencia y Sociedad", "Test"]
+        indicadoresTab, inversionTab, proyectosTab, infraestructuraTab, capitalHumanoTab, resultadosTab, ciencia_sociedadTab = st.tabs(
+            ["Indicadores de contexto", "Inversión en I+D", "Proyectos", "Infraestructura", "Capital Humano", "Resultados", "Ciencia y Sociedad"]
         )
 
         with indicadoresTab:
