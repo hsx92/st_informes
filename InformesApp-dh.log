@@ -16256,3 +16256,2008 @@ ORDER BY valor DESC;
 2025-08-22 14:35:36,194 - INFO - Consulta exitosa. Se obtuvieron 25 filas y 2 columnas.
 2025-08-22 14:35:36,194 - INFO - Consulta exitosa. Se obtuvieron 25 filas y 2 columnas.
 2025-08-22 14:35:36,194 - INFO - Consulta exitosa. Se obtuvieron 25 filas y 2 columnas.
+2025-08-22 14:37:38,045 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,045 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,045 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,045 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,045 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,062 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,062 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,062 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,062 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,062 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,070 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,070 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,070 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,070 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,070 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,076 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,076 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,076 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,076 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,076 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,081 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022 / superficie
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,081 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022 / superficie
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,081 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022 / superficie
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,081 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022 / superficie
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,081 - INFO - SQL Renderizado: 
+SELECT poblacion_censo_2022 / superficie
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,088 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,088 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,088 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,088 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,088 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,093 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,093 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,093 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,093 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,093 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,099 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,099 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,099 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,099 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,099 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,105 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,105 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,105 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,105 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,105 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,108 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,108 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,108 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,108 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,108 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,114 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,114 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,114 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,114 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,114 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 15;
+2025-08-22 14:37:38,121 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,121 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,121 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,121 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,121 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,126 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,126 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,126 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,126 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,126 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,131 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,131 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,131 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,131 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,131 - INFO - SQL Renderizado: 
+SELECT tasas_actividad_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,139 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,139 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,139 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,139 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,139 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,143 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,143 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,143 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,143 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,143 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,149 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,149 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,149 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,149 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,149 - INFO - SQL Renderizado: 
+SELECT tasa_desocupacion_eph_3trim_2024
+FROM indicadores_contexto_y_sicytar
+WHERE id = 99;
+2025-08-22 14:37:38,156 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,156 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,156 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,156 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,156 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,161 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,161 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,161 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,161 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,161 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,166 - INFO - SQL Renderizado: 
+SELECT "2023", gran_rubro
+FROM expo_por_provincia_top5
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+ORDER BY "2023" DESC LIMIT 5;
+2025-08-22 14:37:38,166 - INFO - SQL Renderizado: 
+SELECT "2023", gran_rubro
+FROM expo_por_provincia_top5
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+ORDER BY "2023" DESC LIMIT 5;
+2025-08-22 14:37:38,166 - INFO - SQL Renderizado: 
+SELECT "2023", gran_rubro
+FROM expo_por_provincia_top5
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+ORDER BY "2023" DESC LIMIT 5;
+2025-08-22 14:37:38,166 - INFO - SQL Renderizado: 
+SELECT "2023", gran_rubro
+FROM expo_por_provincia_top5
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+ORDER BY "2023" DESC LIMIT 5;
+2025-08-22 14:37:38,166 - INFO - SQL Renderizado: 
+SELECT "2023", gran_rubro
+FROM expo_por_provincia_top5
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+ORDER BY "2023" DESC LIMIT 5;
+2025-08-22 14:37:38,173 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,173 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,173 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,173 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,173 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,178 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,178 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,178 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,178 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,178 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,184 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(monto_inversion_constante_2004) as inversion_constante
+FROM inversion_id_ract_esid_provincia_region_pais
+WHERE unidad_territorial IN (
+    (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+    (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15)
+)
+GROUP BY anio, unidad_territorial ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,184 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(monto_inversion_constante_2004) as inversion_constante
+FROM inversion_id_ract_esid_provincia_region_pais
+WHERE unidad_territorial IN (
+    (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+    (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15)
+)
+GROUP BY anio, unidad_territorial ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,184 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(monto_inversion_constante_2004) as inversion_constante
+FROM inversion_id_ract_esid_provincia_region_pais
+WHERE unidad_territorial IN (
+    (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+    (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15)
+)
+GROUP BY anio, unidad_territorial ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,184 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(monto_inversion_constante_2004) as inversion_constante
+FROM inversion_id_ract_esid_provincia_region_pais
+WHERE unidad_territorial IN (
+    (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+    (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15)
+)
+GROUP BY anio, unidad_territorial ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,184 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(monto_inversion_constante_2004) as inversion_constante
+FROM inversion_id_ract_esid_provincia_region_pais
+WHERE unidad_territorial IN (
+    (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+    (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15)
+)
+GROUP BY anio, unidad_territorial ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,192 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 3 columnas.
+2025-08-22 14:37:38,192 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 3 columnas.
+2025-08-22 14:37:38,192 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 3 columnas.
+2025-08-22 14:37:38,192 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 3 columnas.
+2025-08-22 14:37:38,192 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 3 columnas.
+2025-08-22 14:37:38,197 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,197 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,197 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,197 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,197 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,203 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, inversion_investigador
+FROM inversion_y_articulos_por_investigador_provincia_region_pais
+WHERE anio = 2023 AND nivel_agregacion = 'Provincia' AND unidad_territorial IN (
+    SELECT provincia FROM ref_provincia
+    WHERE region_cofecyt = (
+        SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+    )
+)
+ORDER BY inversion_investigador DESC;
+2025-08-22 14:37:38,203 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, inversion_investigador
+FROM inversion_y_articulos_por_investigador_provincia_region_pais
+WHERE anio = 2023 AND nivel_agregacion = 'Provincia' AND unidad_territorial IN (
+    SELECT provincia FROM ref_provincia
+    WHERE region_cofecyt = (
+        SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+    )
+)
+ORDER BY inversion_investigador DESC;
+2025-08-22 14:37:38,203 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, inversion_investigador
+FROM inversion_y_articulos_por_investigador_provincia_region_pais
+WHERE anio = 2023 AND nivel_agregacion = 'Provincia' AND unidad_territorial IN (
+    SELECT provincia FROM ref_provincia
+    WHERE region_cofecyt = (
+        SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+    )
+)
+ORDER BY inversion_investigador DESC;
+2025-08-22 14:37:38,203 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, inversion_investigador
+FROM inversion_y_articulos_por_investigador_provincia_region_pais
+WHERE anio = 2023 AND nivel_agregacion = 'Provincia' AND unidad_territorial IN (
+    SELECT provincia FROM ref_provincia
+    WHERE region_cofecyt = (
+        SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+    )
+)
+ORDER BY inversion_investigador DESC;
+2025-08-22 14:37:38,203 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, inversion_investigador
+FROM inversion_y_articulos_por_investigador_provincia_region_pais
+WHERE anio = 2023 AND nivel_agregacion = 'Provincia' AND unidad_territorial IN (
+    SELECT provincia FROM ref_provincia
+    WHERE region_cofecyt = (
+        SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+    )
+)
+ORDER BY inversion_investigador DESC;
+2025-08-22 14:37:38,212 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:38,212 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:38,212 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:38,212 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:38,212 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:38,217 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,217 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,217 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,217 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,217 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,222 - INFO - SQL Renderizado: 
+SELECT
+    SUBSTRING(sector_clae, 5) AS sector_clae,
+    SUM(monto_inversion_constante_2004) AS monto_inversion
+FROM esid_inversion_sectores_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND anio = 2023
+GROUP BY sector_clae
+ORDER BY monto_inversion DESC LIMIT 5;
+2025-08-22 14:37:38,222 - INFO - SQL Renderizado: 
+SELECT
+    SUBSTRING(sector_clae, 5) AS sector_clae,
+    SUM(monto_inversion_constante_2004) AS monto_inversion
+FROM esid_inversion_sectores_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND anio = 2023
+GROUP BY sector_clae
+ORDER BY monto_inversion DESC LIMIT 5;
+2025-08-22 14:37:38,222 - INFO - SQL Renderizado: 
+SELECT
+    SUBSTRING(sector_clae, 5) AS sector_clae,
+    SUM(monto_inversion_constante_2004) AS monto_inversion
+FROM esid_inversion_sectores_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND anio = 2023
+GROUP BY sector_clae
+ORDER BY monto_inversion DESC LIMIT 5;
+2025-08-22 14:37:38,222 - INFO - SQL Renderizado: 
+SELECT
+    SUBSTRING(sector_clae, 5) AS sector_clae,
+    SUM(monto_inversion_constante_2004) AS monto_inversion
+FROM esid_inversion_sectores_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND anio = 2023
+GROUP BY sector_clae
+ORDER BY monto_inversion DESC LIMIT 5;
+2025-08-22 14:37:38,222 - INFO - SQL Renderizado: 
+SELECT
+    SUBSTRING(sector_clae, 5) AS sector_clae,
+    SUM(monto_inversion_constante_2004) AS monto_inversion
+FROM esid_inversion_sectores_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND anio = 2023
+GROUP BY sector_clae
+ORDER BY monto_inversion DESC LIMIT 5;
+2025-08-22 14:37:38,231 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,231 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,231 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,231 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,231 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,235 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,235 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,235 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,235 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,235 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,240 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi;
+2025-08-22 14:37:38,240 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi;
+2025-08-22 14:37:38,240 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi;
+2025-08-22 14:37:38,240 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi;
+2025-08-22 14:37:38,240 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi;
+2025-08-22 14:37:38,247 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,247 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,247 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,247 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,247 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,251 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,251 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,251 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,251 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,251 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,256 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,256 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,256 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,256 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,256 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,262 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,262 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,262 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,262 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,262 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,267 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,267 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,267 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,267 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,267 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,273 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,273 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,273 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,273 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,273 - INFO - SQL Renderizado: 
+SELECT COUNT(id_pfi) FROM proyectos_pfi
+WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,282 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,282 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,282 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,282 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,282 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,286 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,286 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,286 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,286 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,286 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,292 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi;
+2025-08-22 14:37:38,292 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi;
+2025-08-22 14:37:38,292 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi;
+2025-08-22 14:37:38,292 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi;
+2025-08-22 14:37:38,292 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi;
+2025-08-22 14:37:38,299 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,299 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,299 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,299 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,299 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,304 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,304 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,304 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,304 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,304 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,310 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,310 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,310 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,310 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,310 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE region_cofecyt ILIKE (
+    SELECT region_cofecyt FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,317 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,317 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,317 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,317 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,317 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,323 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,323 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,323 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,323 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,323 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,329 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,329 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,329 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,329 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,329 - INFO - SQL Renderizado: 
+SELECT (COUNT(*) FILTER (WHERE sector = 'PRIVADO') * 100.0 / COUNT(*))
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+);
+2025-08-22 14:37:38,336 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,336 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,336 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,336 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,336 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,341 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,341 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,341 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,341 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,341 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,347 - INFO - SQL Renderizado: 
+SELECT tecnologias, vertical, COUNT(id_pfi) as cantidad
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+GROUP BY tecnologias, vertical;
+2025-08-22 14:37:38,347 - INFO - SQL Renderizado: 
+SELECT tecnologias, vertical, COUNT(id_pfi) as cantidad
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+GROUP BY tecnologias, vertical;
+2025-08-22 14:37:38,347 - INFO - SQL Renderizado: 
+SELECT tecnologias, vertical, COUNT(id_pfi) as cantidad
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+GROUP BY tecnologias, vertical;
+2025-08-22 14:37:38,347 - INFO - SQL Renderizado: 
+SELECT tecnologias, vertical, COUNT(id_pfi) as cantidad
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+GROUP BY tecnologias, vertical;
+2025-08-22 14:37:38,347 - INFO - SQL Renderizado: 
+SELECT tecnologias, vertical, COUNT(id_pfi) as cantidad
+FROM proyectos_pfi WHERE provincia ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+GROUP BY tecnologias, vertical;
+2025-08-22 14:37:38,354 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 3 columnas.
+2025-08-22 14:37:38,354 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 3 columnas.
+2025-08-22 14:37:38,354 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 3 columnas.
+2025-08-22 14:37:38,354 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 3 columnas.
+2025-08-22 14:37:38,354 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 3 columnas.
+2025-08-22 14:37:38,358 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,358 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,358 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,358 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,358 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,363 - INFO - SQL Renderizado: 
+SELECT INITCAP(LOWER("ITEnfoqueindustria")) as "ITEnfoqueindustria", SUM(fob_millones_uss) as fob_millones_uss
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio = 2023
+GROUP BY "ITEnfoqueindustria";
+2025-08-22 14:37:38,363 - INFO - SQL Renderizado: 
+SELECT INITCAP(LOWER("ITEnfoqueindustria")) as "ITEnfoqueindustria", SUM(fob_millones_uss) as fob_millones_uss
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio = 2023
+GROUP BY "ITEnfoqueindustria";
+2025-08-22 14:37:38,363 - INFO - SQL Renderizado: 
+SELECT INITCAP(LOWER("ITEnfoqueindustria")) as "ITEnfoqueindustria", SUM(fob_millones_uss) as fob_millones_uss
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio = 2023
+GROUP BY "ITEnfoqueindustria";
+2025-08-22 14:37:38,363 - INFO - SQL Renderizado: 
+SELECT INITCAP(LOWER("ITEnfoqueindustria")) as "ITEnfoqueindustria", SUM(fob_millones_uss) as fob_millones_uss
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio = 2023
+GROUP BY "ITEnfoqueindustria";
+2025-08-22 14:37:38,363 - INFO - SQL Renderizado: 
+SELECT INITCAP(LOWER("ITEnfoqueindustria")) as "ITEnfoqueindustria", SUM(fob_millones_uss) as fob_millones_uss
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio = 2023
+GROUP BY "ITEnfoqueindustria";
+2025-08-22 14:37:38,370 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,370 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,370 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,370 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,370 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:38,374 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,374 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,374 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,374 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,374 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,380 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(fob_millones_uss) as total_fob
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE anio BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia
+       WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia
+       WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio, unidad_territorial
+ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,380 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(fob_millones_uss) as total_fob
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE anio BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia
+       WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia
+       WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio, unidad_territorial
+ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,380 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(fob_millones_uss) as total_fob
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE anio BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia
+       WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia
+       WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio, unidad_territorial
+ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,380 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(fob_millones_uss) as total_fob
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE anio BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia
+       WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia
+       WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio, unidad_territorial
+ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,380 - INFO - SQL Renderizado: 
+SELECT anio, unidad_territorial, SUM(fob_millones_uss) as total_fob
+FROM expo_nivel_tecnologico_provincia_region_pais
+WHERE anio BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia
+       WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia
+       WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio, unidad_territorial
+ORDER BY anio, unidad_territorial;
+2025-08-22 14:37:38,388 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:38,388 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:38,388 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:38,388 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:38,388 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:38,393 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,393 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,393 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,393 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,393 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,399 - INFO - SQL Renderizado: 
+SELECT pais_destino, SUM(fob_millones_sum) as fob_total
+FROM expo_tecno_destino
+WHERE cod_prov ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio = 2023 AND intensidad_tecnologica = TRUE
+GROUP BY pais_destino
+ORDER BY fob_total DESC LIMIT 10;
+2025-08-22 14:37:38,399 - INFO - SQL Renderizado: 
+SELECT pais_destino, SUM(fob_millones_sum) as fob_total
+FROM expo_tecno_destino
+WHERE cod_prov ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio = 2023 AND intensidad_tecnologica = TRUE
+GROUP BY pais_destino
+ORDER BY fob_total DESC LIMIT 10;
+2025-08-22 14:37:38,399 - INFO - SQL Renderizado: 
+SELECT pais_destino, SUM(fob_millones_sum) as fob_total
+FROM expo_tecno_destino
+WHERE cod_prov ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio = 2023 AND intensidad_tecnologica = TRUE
+GROUP BY pais_destino
+ORDER BY fob_total DESC LIMIT 10;
+2025-08-22 14:37:38,399 - INFO - SQL Renderizado: 
+SELECT pais_destino, SUM(fob_millones_sum) as fob_total
+FROM expo_tecno_destino
+WHERE cod_prov ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio = 2023 AND intensidad_tecnologica = TRUE
+GROUP BY pais_destino
+ORDER BY fob_total DESC LIMIT 10;
+2025-08-22 14:37:38,399 - INFO - SQL Renderizado: 
+SELECT pais_destino, SUM(fob_millones_sum) as fob_total
+FROM expo_tecno_destino
+WHERE cod_prov ILIKE (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio = 2023 AND intensidad_tecnologica = TRUE
+GROUP BY pais_destino
+ORDER BY fob_total DESC LIMIT 10;
+2025-08-22 14:37:38,440 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 2 columnas.
+2025-08-22 14:37:38,440 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 2 columnas.
+2025-08-22 14:37:38,440 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 2 columnas.
+2025-08-22 14:37:38,440 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 2 columnas.
+2025-08-22 14:37:38,440 - INFO - Consulta exitosa. Se obtuvieron 10 filas y 2 columnas.
+2025-08-22 14:37:38,444 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,444 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,444 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,444 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,444 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,451 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023;
+2025-08-22 14:37:38,451 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023;
+2025-08-22 14:37:38,451 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023;
+2025-08-22 14:37:38,451 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023;
+2025-08-22 14:37:38,451 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023;
+2025-08-22 14:37:38,500 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,500 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,500 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,500 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,500 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,505 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,505 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,505 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,505 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,505 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,511 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023
+  AND provincia != 'NA';
+2025-08-22 14:37:38,511 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023
+  AND provincia != 'NA';
+2025-08-22 14:37:38,511 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023
+  AND provincia != 'NA';
+2025-08-22 14:37:38,511 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023
+  AND provincia != 'NA';
+2025-08-22 14:37:38,511 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE anio BETWEEN 2014 AND 2023
+  AND provincia != 'NA';
+2025-08-22 14:37:38,529 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,529 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,529 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,529 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,529 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,535 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,535 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,535 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,535 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,535 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,542 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE;
+2025-08-22 14:37:38,542 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE;
+2025-08-22 14:37:38,542 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE;
+2025-08-22 14:37:38,542 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE;
+2025-08-22 14:37:38,542 - INFO - SQL Renderizado: 
+SELECT COUNT(DISTINCT lens_id) FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE;
+2025-08-22 14:37:38,554 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,554 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,554 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,554 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,554 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:38,558 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,558 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,558 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,558 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,558 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,565 - INFO - SQL Renderizado: 
+SELECT anio, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:38,565 - INFO - SQL Renderizado: 
+SELECT anio, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:38,565 - INFO - SQL Renderizado: 
+SELECT anio, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:38,565 - INFO - SQL Renderizado: 
+SELECT anio, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:38,565 - INFO - SQL Renderizado: 
+SELECT anio, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia
+    FROM ref_provincia
+    WHERE provincia_id = 15
+)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:38,577 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 2 columnas.
+2025-08-22 14:37:38,577 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 2 columnas.
+2025-08-22 14:37:38,577 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 2 columnas.
+2025-08-22 14:37:38,577 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 2 columnas.
+2025-08-22 14:37:38,577 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 2 columnas.
+2025-08-22 14:37:38,580 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,580 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,580 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,580 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,580 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,585 - INFO - SQL Renderizado: 
+SELECT institucion, letra_ipc_descripcion, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+  AND institucion != 'NA'
+GROUP BY institucion, letra_ipc_descripcion;
+2025-08-22 14:37:38,585 - INFO - SQL Renderizado: 
+SELECT institucion, letra_ipc_descripcion, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+  AND institucion != 'NA'
+GROUP BY institucion, letra_ipc_descripcion;
+2025-08-22 14:37:38,585 - INFO - SQL Renderizado: 
+SELECT institucion, letra_ipc_descripcion, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+  AND institucion != 'NA'
+GROUP BY institucion, letra_ipc_descripcion;
+2025-08-22 14:37:38,585 - INFO - SQL Renderizado: 
+SELECT institucion, letra_ipc_descripcion, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+  AND institucion != 'NA'
+GROUP BY institucion, letra_ipc_descripcion;
+2025-08-22 14:37:38,585 - INFO - SQL Renderizado: 
+SELECT institucion, letra_ipc_descripcion, COUNT(DISTINCT lens_id) as cantidad
+FROM patentes_desagregadas_ipc_provincia_region_pais
+WHERE provincia = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15)
+  AND anio BETWEEN 2014 AND 2023
+  AND es_institucion_nacional = FALSE
+  AND institucion != 'NA'
+GROUP BY institucion, letra_ipc_descripcion;
+2025-08-22 14:37:38,598 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 3 columnas.
+2025-08-22 14:37:38,598 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 3 columnas.
+2025-08-22 14:37:38,598 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 3 columnas.
+2025-08-22 14:37:38,598 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 3 columnas.
+2025-08-22 14:37:38,598 - INFO - Consulta exitosa. Se obtuvieron 0 filas y 3 columnas.
+2025-08-22 14:37:38,603 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,603 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,603 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,603 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,603 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:38,610 - INFO - SQL Renderizado: 
+SELECT anio_publica, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio_publica, unidad_territorial;
+2025-08-22 14:37:38,610 - INFO - SQL Renderizado: 
+SELECT anio_publica, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio_publica, unidad_territorial;
+2025-08-22 14:37:38,610 - INFO - SQL Renderizado: 
+SELECT anio_publica, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio_publica, unidad_territorial;
+2025-08-22 14:37:38,610 - INFO - SQL Renderizado: 
+SELECT anio_publica, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio_publica, unidad_territorial;
+2025-08-22 14:37:38,610 - INFO - SQL Renderizado: 
+SELECT anio_publica, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY anio_publica, unidad_territorial;
+2025-08-22 14:37:39,203 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:39,203 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:39,203 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:39,203 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:39,203 - INFO - Consulta exitosa. Se obtuvieron 15 filas y 3 columnas.
+2025-08-22 14:37:39,208 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,208 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,208 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,208 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,208 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,215 - INFO - SQL Renderizado: 
+SELECT tipo_producto_cientifico, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023
+GROUP BY tipo_producto_cientifico;
+2025-08-22 14:37:39,215 - INFO - SQL Renderizado: 
+SELECT tipo_producto_cientifico, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023
+GROUP BY tipo_producto_cientifico;
+2025-08-22 14:37:39,215 - INFO - SQL Renderizado: 
+SELECT tipo_producto_cientifico, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023
+GROUP BY tipo_producto_cientifico;
+2025-08-22 14:37:39,215 - INFO - SQL Renderizado: 
+SELECT tipo_producto_cientifico, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023
+GROUP BY tipo_producto_cientifico;
+2025-08-22 14:37:39,215 - INFO - SQL Renderizado: 
+SELECT tipo_producto_cientifico, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023
+GROUP BY tipo_producto_cientifico;
+2025-08-22 14:37:39,285 - INFO - Consulta exitosa. Se obtuvieron 3 filas y 2 columnas.
+2025-08-22 14:37:39,285 - INFO - Consulta exitosa. Se obtuvieron 3 filas y 2 columnas.
+2025-08-22 14:37:39,285 - INFO - Consulta exitosa. Se obtuvieron 3 filas y 2 columnas.
+2025-08-22 14:37:39,285 - INFO - Consulta exitosa. Se obtuvieron 3 filas y 2 columnas.
+2025-08-22 14:37:39,285 - INFO - Consulta exitosa. Se obtuvieron 3 filas y 2 columnas.
+2025-08-22 14:37:39,290 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,290 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,290 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,290 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,290 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,296 - INFO - SQL Renderizado: 
+SELECT revista_sjr, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND revista_sjr IN ('Q1', 'Q2')
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY revista_sjr, unidad_territorial;
+2025-08-22 14:37:39,296 - INFO - SQL Renderizado: 
+SELECT revista_sjr, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND revista_sjr IN ('Q1', 'Q2')
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY revista_sjr, unidad_territorial;
+2025-08-22 14:37:39,296 - INFO - SQL Renderizado: 
+SELECT revista_sjr, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND revista_sjr IN ('Q1', 'Q2')
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY revista_sjr, unidad_territorial;
+2025-08-22 14:37:39,296 - INFO - SQL Renderizado: 
+SELECT revista_sjr, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND revista_sjr IN ('Q1', 'Q2')
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY revista_sjr, unidad_territorial;
+2025-08-22 14:37:39,296 - INFO - SQL Renderizado: 
+SELECT revista_sjr, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
+FROM productos_provincia_region_pais_renaprod
+WHERE anio_publica BETWEEN (2023 - 4) AND 2023
+  AND revista_sjr IN ('Q1', 'Q2')
+  AND unidad_territorial IN (
+      (SELECT provincia FROM ref_provincia WHERE provincia_id = 15),
+      (SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15),
+      'Total País'
+  )
+GROUP BY revista_sjr, unidad_territorial;
+2025-08-22 14:37:39,432 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 3 columnas.
+2025-08-22 14:37:39,432 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 3 columnas.
+2025-08-22 14:37:39,432 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 3 columnas.
+2025-08-22 14:37:39,432 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 3 columnas.
+2025-08-22 14:37:39,432 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 3 columnas.
+2025-08-22 14:37:39,438 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,438 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,438 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,438 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,438 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,444 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT COUNT(producto_id) as total FROM productos_provincia_region_pais_renaprod
+    WHERE unidad_territorial = (
+        SELECT provincia FROM ref_provincia
+        WHERE provincia_id = 15
+    ) AND anio_publica = 2023
+)
+SELECT gran_area, (COUNT(DISTINCT producto_id) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023 AND gran_area IS NOT NULL
+GROUP BY gran_area
+ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,444 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT COUNT(producto_id) as total FROM productos_provincia_region_pais_renaprod
+    WHERE unidad_territorial = (
+        SELECT provincia FROM ref_provincia
+        WHERE provincia_id = 15
+    ) AND anio_publica = 2023
+)
+SELECT gran_area, (COUNT(DISTINCT producto_id) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023 AND gran_area IS NOT NULL
+GROUP BY gran_area
+ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,444 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT COUNT(producto_id) as total FROM productos_provincia_region_pais_renaprod
+    WHERE unidad_territorial = (
+        SELECT provincia FROM ref_provincia
+        WHERE provincia_id = 15
+    ) AND anio_publica = 2023
+)
+SELECT gran_area, (COUNT(DISTINCT producto_id) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023 AND gran_area IS NOT NULL
+GROUP BY gran_area
+ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,444 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT COUNT(producto_id) as total FROM productos_provincia_region_pais_renaprod
+    WHERE unidad_territorial = (
+        SELECT provincia FROM ref_provincia
+        WHERE provincia_id = 15
+    ) AND anio_publica = 2023
+)
+SELECT gran_area, (COUNT(DISTINCT producto_id) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023 AND gran_area IS NOT NULL
+GROUP BY gran_area
+ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,444 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT COUNT(producto_id) as total FROM productos_provincia_region_pais_renaprod
+    WHERE unidad_territorial = (
+        SELECT provincia FROM ref_provincia
+        WHERE provincia_id = 15
+    ) AND anio_publica = 2023
+)
+SELECT gran_area, (COUNT(DISTINCT producto_id) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM productos_provincia_region_pais_renaprod
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+) AND anio_publica = 2023 AND gran_area IS NOT NULL
+GROUP BY gran_area
+ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,569 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,569 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,569 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,569 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,569 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,574 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,574 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,574 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,574 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,574 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,579 - INFO - SQL Renderizado: 
+SELECT COUNT(organizacion_id) FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15);
+2025-08-22 14:37:39,579 - INFO - SQL Renderizado: 
+SELECT COUNT(organizacion_id) FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15);
+2025-08-22 14:37:39,579 - INFO - SQL Renderizado: 
+SELECT COUNT(organizacion_id) FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15);
+2025-08-22 14:37:39,579 - INFO - SQL Renderizado: 
+SELECT COUNT(organizacion_id) FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15);
+2025-08-22 14:37:39,579 - INFO - SQL Renderizado: 
+SELECT COUNT(organizacion_id) FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15);
+2025-08-22 14:37:39,587 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,587 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,587 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,587 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,587 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,592 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,592 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,592 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,592 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,592 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,597 - INFO - SQL Renderizado: 
+SELECT nivel_1, COUNT(organizacion_id) as cantidad
+FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+GROUP BY nivel_1 ORDER BY cantidad ASC;
+2025-08-22 14:37:39,597 - INFO - SQL Renderizado: 
+SELECT nivel_1, COUNT(organizacion_id) as cantidad
+FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+GROUP BY nivel_1 ORDER BY cantidad ASC;
+2025-08-22 14:37:39,597 - INFO - SQL Renderizado: 
+SELECT nivel_1, COUNT(organizacion_id) as cantidad
+FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+GROUP BY nivel_1 ORDER BY cantidad ASC;
+2025-08-22 14:37:39,597 - INFO - SQL Renderizado: 
+SELECT nivel_1, COUNT(organizacion_id) as cantidad
+FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+GROUP BY nivel_1 ORDER BY cantidad ASC;
+2025-08-22 14:37:39,597 - INFO - SQL Renderizado: 
+SELECT nivel_1, COUNT(organizacion_id) as cantidad
+FROM listado_unidades_de_id
+WHERE provincia = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+GROUP BY nivel_1 ORDER BY cantidad ASC;
+2025-08-22 14:37:39,605 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 2 columnas.
+2025-08-22 14:37:39,605 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 2 columnas.
+2025-08-22 14:37:39,605 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 2 columnas.
+2025-08-22 14:37:39,605 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 2 columnas.
+2025-08-22 14:37:39,605 - INFO - Consulta exitosa. Se obtuvieron 7 filas y 2 columnas.
+2025-08-22 14:37:39,610 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,610 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,610 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,610 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,610 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,616 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais WHERE nivel_agregacion = 'País';
+2025-08-22 14:37:39,616 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais WHERE nivel_agregacion = 'País';
+2025-08-22 14:37:39,616 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais WHERE nivel_agregacion = 'País';
+2025-08-22 14:37:39,616 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais WHERE nivel_agregacion = 'País';
+2025-08-22 14:37:39,616 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais WHERE nivel_agregacion = 'País';
+2025-08-22 14:37:39,623 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,623 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,623 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,623 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,623 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,628 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,628 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,628 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,628 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,628 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,633 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Región' AND unidad_territorial = (
+    SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,633 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Región' AND unidad_territorial = (
+    SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,633 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Región' AND unidad_territorial = (
+    SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,633 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Región' AND unidad_territorial = (
+    SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,633 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Región' AND unidad_territorial = (
+    SELECT region_cofecyt FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,640 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,640 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,640 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,640 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,640 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,644 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,644 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,644 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,644 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,644 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,650 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,650 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,650 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,650 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,650 - INFO - SQL Renderizado: 
+SELECT SUM(cant_equipos) FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+);
+2025-08-22 14:37:39,657 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,657 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,657 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,657 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,657 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,661 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,661 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,661 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,661 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,661 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,668 - INFO - SQL Renderizado: 
+SELECT sistema_nacional, SUM(cant_equipos) as total_equipos
+FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+)
+GROUP BY sistema_nacional ORDER BY total_equipos DESC;
+2025-08-22 14:37:39,668 - INFO - SQL Renderizado: 
+SELECT sistema_nacional, SUM(cant_equipos) as total_equipos
+FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+)
+GROUP BY sistema_nacional ORDER BY total_equipos DESC;
+2025-08-22 14:37:39,668 - INFO - SQL Renderizado: 
+SELECT sistema_nacional, SUM(cant_equipos) as total_equipos
+FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+)
+GROUP BY sistema_nacional ORDER BY total_equipos DESC;
+2025-08-22 14:37:39,668 - INFO - SQL Renderizado: 
+SELECT sistema_nacional, SUM(cant_equipos) as total_equipos
+FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+)
+GROUP BY sistema_nacional ORDER BY total_equipos DESC;
+2025-08-22 14:37:39,668 - INFO - SQL Renderizado: 
+SELECT sistema_nacional, SUM(cant_equipos) as total_equipos
+FROM equipos_ssnn_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia' AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+)
+GROUP BY sistema_nacional ORDER BY total_equipos DESC;
+2025-08-22 14:37:39,676 - INFO - Consulta exitosa. Se obtuvieron 2 filas y 2 columnas.
+2025-08-22 14:37:39,676 - INFO - Consulta exitosa. Se obtuvieron 2 filas y 2 columnas.
+2025-08-22 14:37:39,676 - INFO - Consulta exitosa. Se obtuvieron 2 filas y 2 columnas.
+2025-08-22 14:37:39,676 - INFO - Consulta exitosa. Se obtuvieron 2 filas y 2 columnas.
+2025-08-22 14:37:39,676 - INFO - Consulta exitosa. Se obtuvieron 2 filas y 2 columnas.
+2025-08-22 14:37:39,680 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,680 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,680 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,680 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,680 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,686 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT SUM(cant_personas) as total FROM rrhh_sicytar_agregado_provincia_region_pais
+    WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+      AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+      AND anio = 2023
+)
+SELECT gran_area_experticia, (SUM(cant_personas) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+  AND anio = 2023 AND gran_area_experticia IS NOT NULL
+GROUP BY gran_area_experticia ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,686 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT SUM(cant_personas) as total FROM rrhh_sicytar_agregado_provincia_region_pais
+    WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+      AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+      AND anio = 2023
+)
+SELECT gran_area_experticia, (SUM(cant_personas) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+  AND anio = 2023 AND gran_area_experticia IS NOT NULL
+GROUP BY gran_area_experticia ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,686 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT SUM(cant_personas) as total FROM rrhh_sicytar_agregado_provincia_region_pais
+    WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+      AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+      AND anio = 2023
+)
+SELECT gran_area_experticia, (SUM(cant_personas) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+  AND anio = 2023 AND gran_area_experticia IS NOT NULL
+GROUP BY gran_area_experticia ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,686 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT SUM(cant_personas) as total FROM rrhh_sicytar_agregado_provincia_region_pais
+    WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+      AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+      AND anio = 2023
+)
+SELECT gran_area_experticia, (SUM(cant_personas) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+  AND anio = 2023 AND gran_area_experticia IS NOT NULL
+GROUP BY gran_area_experticia ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,686 - INFO - SQL Renderizado: 
+WITH total_general AS (
+    SELECT SUM(cant_personas) as total FROM rrhh_sicytar_agregado_provincia_region_pais
+    WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+      AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+      AND anio = 2023
+)
+SELECT gran_area_experticia, (SUM(cant_personas) * 100.0 / (SELECT total FROM total_general)) as porcentaje
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (SELECT provincia FROM ref_provincia WHERE provincia_id = 15)
+  AND anio = 2023 AND gran_area_experticia IS NOT NULL
+GROUP BY gran_area_experticia ORDER BY porcentaje DESC;
+2025-08-22 14:37:39,698 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,698 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,698 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,698 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,698 - INFO - Consulta exitosa. Se obtuvieron 6 filas y 2 columnas.
+2025-08-22 14:37:39,703 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,703 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,703 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,703 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,703 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,710 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Provincia'
+          AND unidad_territorial = (
+            SELECT provincia FROM ref_provincia
+            WHERE provincia_id = 15
+          )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 15
+    );
+2025-08-22 14:37:39,710 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Provincia'
+          AND unidad_territorial = (
+            SELECT provincia FROM ref_provincia
+            WHERE provincia_id = 15
+          )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 15
+    );
+2025-08-22 14:37:39,710 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Provincia'
+          AND unidad_territorial = (
+            SELECT provincia FROM ref_provincia
+            WHERE provincia_id = 15
+          )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 15
+    );
+2025-08-22 14:37:39,710 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Provincia'
+          AND unidad_territorial = (
+            SELECT provincia FROM ref_provincia
+            WHERE provincia_id = 15
+          )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 15
+    );
+2025-08-22 14:37:39,710 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Provincia'
+          AND unidad_territorial = (
+            SELECT provincia FROM ref_provincia
+            WHERE provincia_id = 15
+          )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 15
+    );
+2025-08-22 14:37:39,720 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,720 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,720 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,720 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,720 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,725 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,725 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,725 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,725 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,725 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,731 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Región'
+          AND unidad_territorial = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE provincia = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    );
+2025-08-22 14:37:39,731 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Región'
+          AND unidad_territorial = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE provincia = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    );
+2025-08-22 14:37:39,731 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Región'
+          AND unidad_territorial = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE provincia = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    );
+2025-08-22 14:37:39,731 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Región'
+          AND unidad_territorial = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE provincia = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    );
+2025-08-22 14:37:39,731 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023
+          AND nivel_agregacion = 'Región'
+          AND unidad_territorial = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE provincia = (
+            SELECT region_cofecyt
+            FROM ref_provincia
+            WHERE provincia_id = 15
+        )
+    );
+2025-08-22 14:37:39,740 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,740 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,740 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,740 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,740 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,743 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,743 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,743 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,743 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,743 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,749 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023 AND nivel_agregacion = 'País'
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 99
+    );
+2025-08-22 14:37:39,749 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023 AND nivel_agregacion = 'País'
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 99
+    );
+2025-08-22 14:37:39,749 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023 AND nivel_agregacion = 'País'
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 99
+    );
+2025-08-22 14:37:39,749 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023 AND nivel_agregacion = 'País'
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 99
+    );
+2025-08-22 14:37:39,749 - INFO - SQL Renderizado: 
+SELECT
+    (
+        SELECT SUM(cant_personas) FROM rrhh_sicytar_agregado_provincia_region_pais
+        WHERE tipo_personal_sicytar = 'INVESTIGADOR' AND anio = 2023 AND nivel_agregacion = 'País'
+    ) / (
+        SELECT pea_miles_censo_2022 FROM indicadores_contexto_y_sicytar
+        WHERE id = 99
+    );
+2025-08-22 14:37:39,759 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,759 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,759 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,759 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,759 - INFO - Consulta exitosa. Se obtuvieron 1 filas y 1 columnas.
+2025-08-22 14:37:39,762 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,762 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,762 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,762 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,762 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,769 - INFO - SQL Renderizado: 
+SELECT tipo_personal_sicytar, SUM(cant_personas) as cantidad
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+  )
+  AND anio = 2023
+GROUP BY tipo_personal_sicytar;
+2025-08-22 14:37:39,769 - INFO - SQL Renderizado: 
+SELECT tipo_personal_sicytar, SUM(cant_personas) as cantidad
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+  )
+  AND anio = 2023
+GROUP BY tipo_personal_sicytar;
+2025-08-22 14:37:39,769 - INFO - SQL Renderizado: 
+SELECT tipo_personal_sicytar, SUM(cant_personas) as cantidad
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+  )
+  AND anio = 2023
+GROUP BY tipo_personal_sicytar;
+2025-08-22 14:37:39,769 - INFO - SQL Renderizado: 
+SELECT tipo_personal_sicytar, SUM(cant_personas) as cantidad
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+  )
+  AND anio = 2023
+GROUP BY tipo_personal_sicytar;
+2025-08-22 14:37:39,769 - INFO - SQL Renderizado: 
+SELECT tipo_personal_sicytar, SUM(cant_personas) as cantidad
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE nivel_agregacion = 'Provincia'
+  AND unidad_territorial = (
+    SELECT provincia FROM ref_provincia
+    WHERE provincia_id = 15
+  )
+  AND anio = 2023
+GROUP BY tipo_personal_sicytar;
+2025-08-22 14:37:39,778 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:39,778 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:39,778 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:39,778 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:39,778 - INFO - Consulta exitosa. Se obtuvieron 4 filas y 2 columnas.
+2025-08-22 14:37:39,783 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,783 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,783 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,783 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,783 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,789 - INFO - SQL Renderizado: 
+SELECT anio, SUM(cant_personas) as cantidad_investigadores
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND tipo_personal_sicytar = 'INVESTIGADOR'
+  AND anio BETWEEN 2019 AND 2023
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:39,789 - INFO - SQL Renderizado: 
+SELECT anio, SUM(cant_personas) as cantidad_investigadores
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND tipo_personal_sicytar = 'INVESTIGADOR'
+  AND anio BETWEEN 2019 AND 2023
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:39,789 - INFO - SQL Renderizado: 
+SELECT anio, SUM(cant_personas) as cantidad_investigadores
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND tipo_personal_sicytar = 'INVESTIGADOR'
+  AND anio BETWEEN 2019 AND 2023
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:39,789 - INFO - SQL Renderizado: 
+SELECT anio, SUM(cant_personas) as cantidad_investigadores
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND tipo_personal_sicytar = 'INVESTIGADOR'
+  AND anio BETWEEN 2019 AND 2023
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:39,789 - INFO - SQL Renderizado: 
+SELECT anio, SUM(cant_personas) as cantidad_investigadores
+FROM rrhh_sicytar_agregado_provincia_region_pais
+WHERE unidad_territorial = (
+    SELECT provincia FROM ref_provincia WHERE provincia_id = 15
+) AND tipo_personal_sicytar = 'INVESTIGADOR'
+  AND anio BETWEEN 2019 AND 2023
+GROUP BY anio ORDER BY anio;
+2025-08-22 14:37:39,799 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:39,799 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:39,799 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:39,799 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:39,799 - INFO - Consulta exitosa. Se obtuvieron 5 filas y 2 columnas.
+2025-08-22 14:37:39,802 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,802 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,802 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,802 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,802 - INFO - Iniciando ejecución de consulta parametrizada...
+2025-08-22 14:37:39,809 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, valor * 100.0 AS valor
+FROM percepcion_final
+WHERE anio = 2023
+  AND nivel_agregacion = 'Provincia'
+  AND indicador ILIKE '%contribuyen a mejorar la calidad de vida%'
+  AND variable = '10- Contribuyen totalmente'
+ORDER BY valor DESC;
+2025-08-22 14:37:39,809 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, valor * 100.0 AS valor
+FROM percepcion_final
+WHERE anio = 2023
+  AND nivel_agregacion = 'Provincia'
+  AND indicador ILIKE '%contribuyen a mejorar la calidad de vida%'
+  AND variable = '10- Contribuyen totalmente'
+ORDER BY valor DESC;
+2025-08-22 14:37:39,809 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, valor * 100.0 AS valor
+FROM percepcion_final
+WHERE anio = 2023
+  AND nivel_agregacion = 'Provincia'
+  AND indicador ILIKE '%contribuyen a mejorar la calidad de vida%'
+  AND variable = '10- Contribuyen totalmente'
+ORDER BY valor DESC;
+2025-08-22 14:37:39,809 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, valor * 100.0 AS valor
+FROM percepcion_final
+WHERE anio = 2023
+  AND nivel_agregacion = 'Provincia'
+  AND indicador ILIKE '%contribuyen a mejorar la calidad de vida%'
+  AND variable = '10- Contribuyen totalmente'
+ORDER BY valor DESC;
+2025-08-22 14:37:39,809 - INFO - SQL Renderizado: 
+SELECT unidad_territorial, valor * 100.0 AS valor
+FROM percepcion_final
+WHERE anio = 2023
+  AND nivel_agregacion = 'Provincia'
+  AND indicador ILIKE '%contribuyen a mejorar la calidad de vida%'
+  AND variable = '10- Contribuyen totalmente'
+ORDER BY valor DESC;
+2025-08-22 14:37:39,817 - INFO - Consulta exitosa. Se obtuvieron 25 filas y 2 columnas.
+2025-08-22 14:37:39,817 - INFO - Consulta exitosa. Se obtuvieron 25 filas y 2 columnas.
+2025-08-22 14:37:39,817 - INFO - Consulta exitosa. Se obtuvieron 25 filas y 2 columnas.
+2025-08-22 14:37:39,817 - INFO - Consulta exitosa. Se obtuvieron 25 filas y 2 columnas.
+2025-08-22 14:37:39,817 - INFO - Consulta exitosa. Se obtuvieron 25 filas y 2 columnas.
