@@ -5,6 +5,7 @@ Created on Sun Jun 25 22:11:18 2023
 @author: facun
 """
 import pandas as pd
+from typing import Union
 from jinja2 import Template
 import psycopg2
 from psycopg2 import pool
@@ -231,7 +232,7 @@ def procesar_kpi(df: pd.DataFrame, config: dict) -> str:
     return f"{valor}{sufijo}"
 
 
-def tabla_pivot(componente: dict) -> GT:
+def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame, GT, None]:
     """
     Crea una tabla dinámica (pivot table) y la formatea con great_tables.
 
@@ -271,72 +272,75 @@ def tabla_pivot(componente: dict) -> GT:
         col_str = tabla.columns.tolist()
 
     # 3. Construcción del objeto GT con el formato deseado
-    try:
-        gt = (
-            GT(tabla)
-            .tab_header(title=componente['nombre'])
-            .tab_stubhead(label='')
-            .opt_table_font(
-                stack="geometric-humanist"
+    if render_gt:
+        try:
+            gt = (
+                GT(tabla)
+                .tab_header(title=componente['nombre'])
+                .tab_stubhead(label='')
+                .opt_table_font(
+                    stack="geometric-humanist"
+                )
+                # 1. Formato para el cuerpo de la primera columna (el índice)
+                .tab_style(
+                    style.css("padding-top: 25px; padding-bottom: 25px;"),  # El primer valor es el padding vertical (top/bottom)
+                    locations=loc.body()
+                )
+                .tab_style(
+                    style.css("padding-top: 15px; padding-bottom: 15px;"),  # El primer valor es el padding vertical (top/bottom)
+                    locations=loc.column_header()
+                )
+                .tab_style(
+                    style.css("padding-top: 15px; padding-bottom: 15px;"),  # El primer valor es el padding vertical (top/bottom)
+                    locations=loc.header()
+                )
+                .tab_style(
+                    style.fill(color="#4D7AAE"),
+                    locations=loc.body(columns='')
+                )
+                # 2. Formato para el encabezado de la primera columna
+                .tab_style(
+                    style.text(weight="bold", color="white", align="center"),
+                    locations=loc.body(columns='')
+                )
+                # 3. Formato para el encabezado de las otras columnas
+                .tab_style(
+                    style.text(weight="bold", color="white", align="center"),
+                    locations=loc.column_labels()
+                )
+                .tab_style(
+                    style=style.text(align="center", color="gray", weight="lighter"),
+                    locations=loc.body(columns=col_str)
+                )
+                .data_color(
+                    na_color="white",
+                    palette=[
+                        "#FDF8E7", "#FBF5E0", "#F9F2DA", "#F7EFD4", "#F5EDCE", "#F3EAC8",
+                        "#F1E7C2", "#EFE4BC", "#EFE1B6", "#ECE4B1", "#EAE2AC", "#E8DFAB",
+                        "#E6DC9F", "#E4D999", "#E2D693", "#E0D38D", "#DED087", "#DCCDA1"
+                    ],
+                    domain=[df[pivot_config['values']].min(), df[pivot_config['values']].max()],
+                )
+                .fmt_integer(
+                    columns=col_str,
+                    use_seps=True,
+                    sep_mark="."
+                )
+                .tab_options(
+                    heading_background_color="#54698B",
+                    column_labels_background_color="#54698B",  # Nuevo: Color de fondo para encabezados
+                    table_border_top_color="#54698B",
+                    table_border_bottom_color="#54698B",
+                    row_striping_include_stub=True,
+                    table_font_names="Poppins"
+                )
             )
-            # 1. Formato para el cuerpo de la primera columna (el índice)
-            .tab_style(
-                style.css("padding-top: 25px; padding-bottom: 25px;"),  # El primer valor es el padding vertical (top/bottom)
-                locations=loc.body()
-            )
-            .tab_style(
-                style.css("padding-top: 15px; padding-bottom: 15px;"),  # El primer valor es el padding vertical (top/bottom)
-                locations=loc.column_header()
-            )
-            .tab_style(
-                style.css("padding-top: 15px; padding-bottom: 15px;"),  # El primer valor es el padding vertical (top/bottom)
-                locations=loc.header()
-            )
-            .tab_style(
-                style.fill(color="#4D7AAE"),
-                locations=loc.body(columns='')
-            )
-            # 2. Formato para el encabezado de la primera columna
-            .tab_style(
-                style.text(weight="bold", color="white", align="center"),
-                locations=loc.body(columns='')
-            )
-            # 3. Formato para el encabezado de las otras columnas
-            .tab_style(
-                style.text(weight="bold", color="white", align="center"),
-                locations=loc.column_labels()
-            )
-            .tab_style(
-                style=style.text(align="center", color="gray", weight="lighter"),
-                locations=loc.body(columns=col_str)
-            )
-            .data_color(
-                na_color="white",
-                palette=[
-                    "#FDF8E7", "#FBF5E0", "#F9F2DA", "#F7EFD4", "#F5EDCE", "#F3EAC8",
-                    "#F1E7C2", "#EFE4BC", "#EFE1B6", "#ECE4B1", "#EAE2AC", "#E8DFAB",
-                    "#E6DC9F", "#E4D999", "#E2D693", "#E0D38D", "#DED087", "#DCCDA1"
-                ],
-                domain=[df[pivot_config['values']].min(), df[pivot_config['values']].max()],
-            )
-            .fmt_integer(
-                columns=col_str,
-                use_seps=True,
-                sep_mark="."
-            )
-            .tab_options(
-                heading_background_color="#54698B",
-                column_labels_background_color="#54698B",  # Nuevo: Color de fondo para encabezados
-                table_border_top_color="#54698B",
-                table_border_bottom_color="#54698B",
-                row_striping_include_stub=True,
-                table_font_names="Poppins"
-            )
-        )
-        return gt, tabla
-    except Exception as e:
-        st.error(f"Error al crear la tabla: {e}")
-        return None
+            return gt
+        except Exception as e:
+            st.error(f"Error al crear la tabla: {e}")
+            return None
+    else:
+        return tabla
 
 
 def login():

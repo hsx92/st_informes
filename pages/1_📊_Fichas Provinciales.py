@@ -4,6 +4,7 @@ import plotly.express as px
 from streamlit_extras.great_tables import great_tables
 from streamlit_extras.metric_cards import style_metric_cards
 from data_handler import get_provincias, get_informe, procesar_kpi, insertar_saltos, tabla_pivot
+from pdf_generator import ficha_provincial_pdf
 
 
 st.set_page_config(page_title="Portal - SICyT", page_icon=st.secrets["LOGO_CORTO"], layout="wide")
@@ -75,33 +76,121 @@ def panomProvincial():
         })
 
         # ################################## COMPONENTES #######################################
-        kpi_poblacion_prov = {'nombre': DFs["componentes"]["kpi_poblacion_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_poblacion_prov"]["resultado_sql"], DFs["componentes"]["kpi_poblacion_prov"]["config"])}
-        kpi_densidad_prov = {'nombre': DFs["componentes"]["kpi_densidad_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_densidad_prov"]["resultado_sql"], DFs["componentes"]["kpi_densidad_prov"]["config"])}
-        kpi_tasa_actividad_prov = {'nombre': DFs["componentes"]["kpi_tasa_actividad_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_actividad_prov"]["resultado_sql"], DFs["componentes"]["kpi_tasa_actividad_prov"]["config"])}
-        kpi_tasa_actividad_nac = {'nombre': DFs["componentes"]["kpi_tasa_actividad_nac"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_actividad_nac"]["resultado_sql"], DFs["componentes"]["kpi_tasa_actividad_nac"]["config"])}
-        kpi_tasa_desempleo_prov = {'nombre': DFs["componentes"]["kpi_tasa_desempleo_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_desempleo_prov"]["resultado_sql"], DFs["componentes"]["kpi_tasa_desempleo_prov"]["config"])}
-        kpi_tasa_desempleo_nac = {'nombre': DFs["componentes"]["kpi_tasa_desempleo_nac"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_desempleo_nac"]["resultado_sql"], DFs["componentes"]["kpi_tasa_desempleo_nac"]["config"])}
+        kpi_poblacion_prov = {
+            'nombre': DFs["componentes"]["kpi_poblacion_prov"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_poblacion_prov"]["resultado_sql"], DFs["componentes"]["kpi_poblacion_prov"]["config"]),
+            'fuente': DFs["componentes"]["kpi_poblacion_prov"]["fuente"]
+        }
+        kpi_densidad_prov = {
+            'nombre': DFs["componentes"]["kpi_densidad_prov"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_densidad_prov"]["resultado_sql"], DFs["componentes"]["kpi_densidad_prov"]["config"]),
+            'fuente': DFs["componentes"]["kpi_densidad_prov"]["fuente"]
+        }
+        kpi_tasa_actividad_prov = {
+            'nombre': DFs["componentes"]["kpi_tasa_actividad_prov"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_actividad_prov"]["resultado_sql"], DFs["componentes"]["kpi_tasa_actividad_prov"]["config"]),
+            'fuente': DFs["componentes"]["kpi_tasa_actividad_prov"]["fuente"]
+        }
+        kpi_tasa_actividad_nac = {
+            'nombre': DFs["componentes"]["kpi_tasa_actividad_nac"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_actividad_nac"]["resultado_sql"], DFs["componentes"]["kpi_tasa_actividad_nac"]["config"]),
+            'fuente': DFs["componentes"]["kpi_tasa_actividad_nac"]["fuente"]
+        }
+        kpi_tasa_desempleo_prov = {
+            'nombre': DFs["componentes"]["kpi_tasa_desempleo_prov"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_desempleo_prov"]["resultado_sql"], DFs["componentes"]["kpi_tasa_desempleo_prov"]["config"]),
+            'fuente': DFs["componentes"]["kpi_tasa_desempleo_prov"]["fuente"]
+        }
+        kpi_tasa_desempleo_nac = {
+            'nombre': DFs["componentes"]["kpi_tasa_desempleo_nac"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_desempleo_nac"]["resultado_sql"], DFs["componentes"]["kpi_tasa_desempleo_nac"]["config"]),
+            'fuente': DFs["componentes"]["kpi_tasa_desempleo_nac"]["fuente"]
+        }
 
-        kpi_pfi_nacional = {'nombre': DFs["componentes"]["kpi_pfi_nacional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_nacional"]["resultado_sql"], DFs["componentes"]["kpi_pfi_nacional"]["config"])}
-        kpi_pfi_regional = {'nombre': DFs["componentes"]["kpi_pfi_regional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_regional"]["resultado_sql"], DFs["componentes"]["kpi_pfi_regional"]["config"])}
-        kpi_pfi_provincial = {'nombre': DFs["componentes"]["kpi_pfi_provincial"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_provincial"]["resultado_sql"], DFs["componentes"]["kpi_pfi_provincial"]["config"])}
-        kpi_porc_privada_nacional = {'nombre': DFs["componentes"]["kpi_porc_privada_nacional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_nacional"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_nacional"]["config"])}
-        kpi_porc_privada_regional = {'nombre': DFs["componentes"]["kpi_porc_privada_regional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_regional"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_regional"]["config"])}
-        kpi_porc_privada_provincial = {'nombre': DFs["componentes"]["kpi_porc_privada_provincial"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_provincial"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_provincial"]["config"])}
+        kpi_pfi_nacional = {
+            'nombre': DFs["componentes"]["kpi_pfi_nacional"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_nacional"]["resultado_sql"], DFs["componentes"]["kpi_pfi_nacional"]["config"]),
+            'fuente': DFs["componentes"]["kpi_pfi_nacional"]["fuente"]
+        }
+        kpi_pfi_regional = {
+            'nombre': DFs["componentes"]["kpi_pfi_regional"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_regional"]["resultado_sql"], DFs["componentes"]["kpi_pfi_regional"]["config"]),
+            'fuente': DFs["componentes"]["kpi_pfi_regional"]["fuente"]
+        }
+        kpi_pfi_provincial = {
+            'nombre': DFs["componentes"]["kpi_pfi_provincial"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_pfi_provincial"]["resultado_sql"], DFs["componentes"]["kpi_pfi_provincial"]["config"]),
+            'fuente': DFs["componentes"]["kpi_pfi_provincial"]["fuente"]
+        }
+        kpi_porc_privada_nacional = {
+            'nombre': DFs["componentes"]["kpi_porc_privada_nacional"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_nacional"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_nacional"]["config"]),
+            'fuente': DFs["componentes"]["kpi_porc_privada_nacional"]["fuente"]
+        }
+        kpi_porc_privada_regional = {
+            'nombre': DFs["componentes"]["kpi_porc_privada_regional"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_regional"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_regional"]["config"]),
+            'fuente': DFs["componentes"]["kpi_porc_privada_regional"]["fuente"]
+        }
+        kpi_porc_privada_provincial = {
+            'nombre': DFs["componentes"]["kpi_porc_privada_provincial"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_porc_privada_provincial"]["resultado_sql"], DFs["componentes"]["kpi_porc_privada_provincial"]["config"]),
+            'fuente': DFs["componentes"]["kpi_porc_privada_provincial"]["fuente"]
+        }
 
-        kpi_patentes_arg = {'nombre': DFs["componentes"]["kpi_patentes_arg"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_arg"]["resultado_sql"], DFs["componentes"]["kpi_patentes_arg"]["config"])}
-        kpi_patentes_cyt_arg = {'nombre': DFs["componentes"]["kpi_patentes_cyt_arg"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_cyt_arg"]["resultado_sql"], DFs["componentes"]["kpi_patentes_cyt_arg"]["config"])}
-        kpi_patentes_cyt_prov = {'nombre': DFs["componentes"]["kpi_patentes_cyt_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_cyt_prov"]["resultado_sql"], DFs["componentes"]["kpi_patentes_cyt_prov"]["config"])}
+        kpi_patentes_arg = {
+            'nombre': DFs["componentes"]["kpi_patentes_arg"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_arg"]["resultado_sql"], DFs["componentes"]["kpi_patentes_arg"]["config"]),
+            'fuente': DFs["componentes"]["kpi_patentes_arg"]["fuente"]
+        }
+        kpi_patentes_cyt_arg = {
+            'nombre': DFs["componentes"]["kpi_patentes_cyt_arg"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_cyt_arg"]["resultado_sql"], DFs["componentes"]["kpi_patentes_cyt_arg"]["config"]),
+            'fuente': DFs["componentes"]["kpi_patentes_cyt_arg"]["fuente"]
+        }
+        kpi_patentes_cyt_prov = {
+            'nombre': DFs["componentes"]["kpi_patentes_cyt_prov"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_patentes_cyt_prov"]["resultado_sql"], DFs["componentes"]["kpi_patentes_cyt_prov"]["config"]),
+            'fuente': DFs["componentes"]["kpi_patentes_cyt_prov"]["fuente"]
+        }
 
-        kpi_unidades_id_prov = {'nombre': DFs["componentes"]["kpi_unidades_id_prov"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_unidades_id_prov"]["resultado_sql"], DFs["componentes"]["kpi_unidades_id_prov"]["config"])}
+        kpi_unidades_id_prov = {
+            'nombre': DFs["componentes"]["kpi_unidades_id_prov"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_unidades_id_prov"]["resultado_sql"], DFs["componentes"]["kpi_unidades_id_prov"]["config"]),
+            'fuente': DFs["componentes"]["kpi_unidades_id_prov"]["fuente"]
+        }
 
-        kpi_equipos_nacional = {'nombre': DFs["componentes"]["kpi_equipos_nacional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_nacional"]["resultado_sql"], DFs["componentes"]["kpi_equipos_nacional"]["config"])}
-        kpi_equipos_regional = {'nombre': DFs["componentes"]["kpi_equipos_regional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_regional"]["resultado_sql"], DFs["componentes"]["kpi_equipos_regional"]["config"])}
-        kpi_equipos_provincial = {'nombre': DFs["componentes"]["kpi_equipos_provincial"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_provincial"]["resultado_sql"], DFs["componentes"]["kpi_equipos_provincial"]["config"])}
+        kpi_equipos_nacional = {
+            'nombre': DFs["componentes"]["kpi_equipos_nacional"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_nacional"]["resultado_sql"], DFs["componentes"]["kpi_equipos_nacional"]["config"]),
+            'fuente': DFs["componentes"]["kpi_equipos_nacional"]["fuente"]
+        }
+        kpi_equipos_regional = {
+            'nombre': DFs["componentes"]["kpi_equipos_regional"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_regional"]["resultado_sql"], DFs["componentes"]["kpi_equipos_regional"]["config"]),
+            'fuente': DFs["componentes"]["kpi_equipos_regional"]["fuente"]
+        }
+        kpi_equipos_provincial = {
+            'nombre': DFs["componentes"]["kpi_equipos_provincial"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_equipos_provincial"]["resultado_sql"], DFs["componentes"]["kpi_equipos_provincial"]["config"]),
+            'fuente': DFs["componentes"]["kpi_equipos_provincial"]["fuente"]
+        }
 
-        kpi_tasa_pea_provincial = {'nombre': DFs["componentes"]["kpi_tasa_pea_provincial"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_provincial"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_provincial"]["config"])}
-        kpi_tasa_pea_regional = {'nombre': DFs["componentes"]["kpi_tasa_pea_regional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_regional"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_regional"]["config"])}
-        kpi_tasa_pea_nacional = {'nombre': DFs["componentes"]["kpi_tasa_pea_nacional"]["nombre"], 'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_nacional"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_nacional"]["config"])}
+        kpi_tasa_pea_provincial = {
+            'nombre': DFs["componentes"]["kpi_tasa_pea_provincial"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_provincial"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_provincial"]["config"]),
+            'fuente': DFs["componentes"]["kpi_tasa_pea_provincial"]["fuente"]
+        }
+        kpi_tasa_pea_regional = {
+            'nombre': DFs["componentes"]["kpi_tasa_pea_regional"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_regional"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_regional"]["config"]),
+            'fuente': DFs["componentes"]["kpi_tasa_pea_regional"]["fuente"]
+        }
+        kpi_tasa_pea_nacional = {
+            'nombre': DFs["componentes"]["kpi_tasa_pea_nacional"]["nombre"],
+            'valor': procesar_kpi(DFs["componentes"]["kpi_tasa_pea_nacional"]["resultado_sql"], DFs["componentes"]["kpi_tasa_pea_nacional"]["config"]),
+            'fuente': DFs["componentes"]["kpi_tasa_pea_nacional"]["fuente"]
+        }
 
         grafico_expo_top5 = DFs["componentes"]["grafico_expo_top5"]
 
@@ -132,7 +221,6 @@ def panomProvincial():
         grafico_percepcion_calidad_vida = DFs["componentes"]["grafico_percepcion_calidad_vida"]
 
         #######################################################################################
-
         st.markdown(f"## {provincia}")
 
         indicadoresTab, inversionTab, proyectosTab, infraestructuraTab, capitalHumanoTab, resultadosTab, ciencia_sociedadTab, test = st.tabs(
@@ -151,7 +239,7 @@ def panomProvincial():
                 st.metric(label=f":primary[{kpi_densidad_prov["nombre"]}]", value=kpi_densidad_prov["valor"], delta=None)
                 st.metric(label=f":primary[{kpi_tasa_actividad_nac["nombre"]}]", value=kpi_tasa_actividad_nac["valor"], delta=None)
                 st.metric(label=f":primary[{kpi_tasa_desempleo_nac["nombre"]}]", value=kpi_tasa_desempleo_nac["valor"], delta=None)
-            st.caption("Fuente: INDEC")
+            st.caption(f"Fuente: {kpi_tasa_actividad_nac["fuente"]}")
             st.markdown("")
 
             grafico_expo_top5['resultado_sql'].iloc[:, 0] = grafico_expo_top5['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
@@ -171,8 +259,7 @@ def panomProvincial():
             top5_exportaciones_fig.update_layout(showlegend=False)
 
             st.plotly_chart(top5_exportaciones_fig, use_container_width=True)
-            st.caption("Fuente: OPEX - INDEC")
-            DFs['componentes']['grafico_expo_top5']['img'] = top5_exportaciones_fig.to_image(format="png", width=1200, height=600)
+            st.caption(f"Fuente: {grafico_expo_top5['fuente']}")
 
         with inversionTab:
             inversionID_fig = px.line(
@@ -186,7 +273,7 @@ def panomProvincial():
             )
             inversionID_fig.update_layout(grafico_evolucion_regional['config']['layout'])
             st.plotly_chart(inversionID_fig, use_container_width=True)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_evolucion_regional['fuente']}")
             st.markdown("")
 
             inversionInvestigador_fig = px.bar(
@@ -200,7 +287,7 @@ def panomProvincial():
             )
             inversionInvestigador_fig.update_layout(grafico_inv_por_investigador['config']['layout'])
             st.plotly_chart(inversionInvestigador_fig, use_container_width=True)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_inv_por_investigador['fuente']}")
             st.markdown("")
 
             grafico_inv_empresaria_sector['resultado_sql'].iloc[:, 0] = grafico_inv_empresaria_sector['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
@@ -220,11 +307,7 @@ def panomProvincial():
             inversionEmpresas_fig.update_layout(grafico_inv_empresaria_sector['config']['layout'])
             inversionEmpresas_fig.update_layout(showlegend=False)
             st.plotly_chart(inversionEmpresas_fig, use_container_width=True)
-            st.caption("Fuente: DNIYES")
-
-            DFs['componentes']['grafico_evolucion_regional']['img'] = inversionID_fig.to_image(format="png", width=1200, height=600)
-            DFs['componentes']['grafico_inv_por_investigador']['img'] = inversionInvestigador_fig.to_image(format="png", width=1200, height=600)
-            DFs['componentes']['grafico_inv_empresaria_sector']['img'] = inversionEmpresas_fig.to_image(format="png", width=1200, height=600)
+            st.caption(f"Fuente: {grafico_inv_empresaria_sector['fuente']}")
 
         with proyectosTab:
             st.markdown("")
@@ -239,15 +322,14 @@ def panomProvincial():
                 st.metric(label=f":primary[{kpi_pfi_nacional["nombre"]}]", value=kpi_pfi_nacional["valor"], delta=None)
                 st.metric(label=f":primary[{kpi_porc_privada_nacional["nombre"]}]", value=kpi_porc_privada_nacional["valor"], delta=None)
             st.caption("*PFI: Proyectos Federales de Innovación")
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {kpi_pfi_provincial['fuente']}")
             st.markdown("")
 
-            tabla_pfi_cruce_fig, tabla_pfi_cruce_DF = tabla_pivot(tabla_pfi_cruce)
-            great_tables(tabla_pfi_cruce_fig)
-            st.caption("Fuente: DNIYES")
-
-            DFs['componentes']['tabla_pfi_cruce']['df'] = tabla_pfi_cruce_DF
-            st.markdown("")
+            if tabla_pfi_cruce['resultado_sql'] is not None and not tabla_pfi_cruce['resultado_sql'].empty:
+                tabla_pfi_cruce_fig = tabla_pivot(tabla_pfi_cruce, render_gt=True)
+                great_tables(tabla_pfi_cruce_fig)
+                st.caption(f"Fuente: {tabla_pfi_cruce['fuente']}")
+                st.markdown("")
 
         with infraestructuraTab:
             st.markdown("")
@@ -273,9 +355,8 @@ def panomProvincial():
             unidadesIDxinstitucion_fig.update_layout(grafico_unidades_por_inst['config']['layout'])
             unidadesIDxinstitucion_fig.update_layout(margin=dict(l=0, r=20, t=0, b=20), showlegend=False)
             st.plotly_chart(unidadesIDxinstitucion_fig, use_container_width=True)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_unidades_por_inst['fuente']}")
             st.markdown("---")
-            DFs['componentes']['grafico_unidades_por_inst']['img'] = unidadesIDxinstitucion_fig.to_image(format="png", width=1200, height=600)
 
             col1, col2, col3 = st.columns(3)
             with col1:
@@ -284,7 +365,7 @@ def panomProvincial():
                 st.metric(label=f":primary[{kpi_equipos_regional['nombre']}]", value=kpi_equipos_regional['valor'], delta=None)
             with col3:
                 st.metric(label=f":primary[{kpi_equipos_nacional['nombre']}]", value=kpi_equipos_nacional['valor'], delta=None)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {kpi_equipos_nacional['fuente']}")
             st.markdown("")
 
             equiposIDxTipo_fig = px.bar(
@@ -300,8 +381,7 @@ def panomProvincial():
             equiposIDxTipo_fig.update_layout(grafico_equipos_por_tipo['config']['layout'])
             equiposIDxTipo_fig.update_layout(showlegend=False)
             st.plotly_chart(equiposIDxTipo_fig, use_container_width=True)
-            st.caption("Fuente: DNIYES")
-            DFs['componentes']['grafico_equipos_por_tipo']['img'] = equiposIDxTipo_fig.to_image(format="png", width=1200, height=600)
+            st.caption(f"Fuente: {grafico_equipos_por_tipo['fuente']}")
 
         with capitalHumanoTab:
             st.markdown("")
@@ -319,14 +399,13 @@ def panomProvincial():
                 textposition=grafico_distribucion_investigadores['config']['traces']['textposition'],
                 marker=dict(cornerradius=5))
 
+            investigadoresxArea_fig.update_layout(grafico_distribucion_investigadores['config']['layout'])
             investigadoresxArea_fig.update_layout(
-                title_font=dict(size=20),
                 margin=dict(l=20, r=20, t=50, b=20)
             )
             st.plotly_chart(investigadoresxArea_fig, use_container_width=True)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_distribucion_investigadores['fuente']}")
             st.markdown("")
-            DFs['componentes']['grafico_distribucion_investigadores']['img'] = investigadoresxArea_fig.to_image(format="png", width=1200, height=600)
 
             col1, col2, col3 = st.columns(3, border=True)
             with col1:
@@ -338,15 +417,15 @@ def panomProvincial():
             with col3:
                 st.markdown(f"#### {st.session_state.pais}")
                 st.metric(label=":primary[Investigadores cada 1000 habs.]", value=kpi_tasa_pea_nacional['valor'], delta=None)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {kpi_tasa_pea_nacional['fuente']}")
             st.markdown("")
 
-            tabla_personas_por_funcion_fig, tabla_personas_por_funcion_DF = tabla_pivot(tabla_personas_por_funcion)
-            great_tables(tabla_personas_por_funcion_fig)
-            st.caption("Fuente: DNIYES")
+            if tabla_personas_por_funcion['resultado_sql'] is not None and not tabla_personas_por_funcion['resultado_sql'].empty:
+                tabla_personas_por_funcion_fig = tabla_pivot(tabla_personas_por_funcion, render_gt=True)
+                great_tables(tabla_personas_por_funcion_fig)
+                st.caption(f"Fuente: {tabla_personas_por_funcion['fuente']}")
 
-            DFs['componentes']['tabla_personas_por_funcion']['df'] = tabla_personas_por_funcion_DF
-            st.markdown("---")
+                st.markdown("---")
 
             evolucionInvestigadores_fig = px.line(
                 data_frame=grafico_evolucion_investigadores['resultado_sql'],
@@ -357,13 +436,9 @@ def panomProvincial():
                 template="seaborn"
             )
             evolucionInvestigadores_fig.update_layout(grafico_evolucion_investigadores['config']['layout'])
-            evolucionInvestigadores_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            evolucionInvestigadores_fig.update_layout(margin=dict(l=20, r=20, t=50, b=20))
             st.plotly_chart(evolucionInvestigadores_fig)
-            st.caption("Fuente: DNIYES")
-            DFs['componentes']['grafico_evolucion_investigadores']['img'] = evolucionInvestigadores_fig.to_image(format="png", width=1200, height=600)
+            st.caption(f"Fuente: {grafico_evolucion_investigadores['fuente']}")
 
         with resultadosTab:
             st.markdown("")
@@ -373,18 +448,16 @@ def panomProvincial():
                 values=grafico_expo_intensidad['config']['plot_mapping']['values'],
                 labels=grafico_expo_intensidad['config']['plot_mapping']['labels'],
                 title=grafico_expo_intensidad['nombre'],
+                hole=grafico_expo_intensidad['config']['plot_mapping']['hole'],
                 template="seaborn",
-                hole=0.4
             )
             exportacionesIntensidad_fig.update_layout(grafico_expo_intensidad['config']['layout'])
-            exportacionesIntensidad_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            exportacionesIntensidad_fig.update_traces(grafico_expo_intensidad['config']['traces'])
+            exportacionesIntensidad_fig.update_layout(margin=dict(l=20, r=20, t=50, b=20))
+
             st.plotly_chart(exportacionesIntensidad_fig)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_expo_intensidad['fuente']}")
             st.markdown("")
-            DFs['componentes']['grafico_expo_intensidad']['img'] = exportacionesIntensidad_fig.to_image(format="png", width=1200, height=600)
 
             evolucionExportaciones_fig = px.line(
                 data_frame=grafico_expo_evolucion['resultado_sql'],
@@ -396,14 +469,11 @@ def panomProvincial():
                 template="seaborn"
             )
             evolucionExportaciones_fig.update_layout(grafico_expo_evolucion['config']['layout'])
-            evolucionExportaciones_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            evolucionExportaciones_fig.update_layout(margin=dict(l=20, r=20, t=50, b=20))
+
             st.plotly_chart(evolucionExportaciones_fig)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_expo_evolucion['fuente']}")
             st.markdown("")
-            DFs['componentes']['grafico_expo_evolucion']['img'] = evolucionExportaciones_fig.to_image(format="png", width=1200, height=600)
 
             exportacionesxPais_fig = px.treemap(
                 data_frame=grafico_expo_destino['resultado_sql'],
@@ -412,17 +482,15 @@ def panomProvincial():
                 color=grafico_expo_destino['config']['plot_mapping']['color'],
                 title=grafico_expo_destino['nombre'],
                 template="seaborn",
-                color_discrete_sequence=["#4D7AAE", "#B9422D", "#B2713F", "#198769", "#5C3C7D", "#F2C94C", "#E26D5C", "#D4BCEA", "#93D8EF", "#27AE60"]
+                color_discrete_sequence=["#4D7AAE", "#BC321A", "#EBDBCF", "#198769", "#5C3C7D", "#F2C94C", "#E26D5C", "#9B51E0", "#56CCF2", "#27AE60"]
             )
             exportacionesxPais_fig.update_traces(grafico_expo_destino['config']['traces'])
-            exportacionesxPais_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=0)
-            )
+            exportacionesxPais_fig.update_layout(grafico_expo_destino['config']['layout'])
+            exportacionesxPais_fig.update_layout(margin=dict(l=20, r=20, t=50, b=0))
+
             st.plotly_chart(exportacionesxPais_fig)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_expo_destino['fuente']}")
             st.markdown("---")
-            DFs['componentes']['grafico_expo_destino']['img'] = exportacionesxPais_fig.to_image(format="png", width=1200, height=600)
 
             col1, col2, col3 = st.columns([6, 1, 3], vertical_alignment="center")
             with col1:
@@ -433,7 +501,7 @@ def panomProvincial():
             col1c, col2c, col3c = st.columns([2, 2, 6])
             with col3c:
                 st.metric(label=f":primary[{kpi_patentes_arg['nombre']}]", value=kpi_patentes_arg['valor'], delta=None)
-            st.caption("Fuente: Elaboración propia en base a datos de THE LENS")
+            st.caption(f"Fuente: {kpi_patentes_arg['fuente']}")
             st.markdown("---")
 
             evolucionPatentes_fig = px.line(
@@ -445,23 +513,19 @@ def panomProvincial():
                 template="seaborn"
             )
             evolucionPatentes_fig.update_layout(grafico_patentes_evolucion['config']['layout'])
-            evolucionPatentes_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            evolucionPatentes_fig.update_layout(margin=dict(l=20, r=20, t=50, b=20))
             # Si el dataframe no tiene info, no mostrar
             if grafico_patentes_evolucion['resultado_sql'] is not None and not grafico_patentes_evolucion['resultado_sql'].empty:
                 st.plotly_chart(evolucionPatentes_fig)
-                st.caption("Fuente: Elaboración propia en base a datos de THE LENS")
+                st.caption(f"Fuente: {grafico_patentes_evolucion['fuente']}")
                 st.markdown("---")
-                DFs['componentes']['grafico_patentes_evolucion']['img'] = evolucionPatentes_fig.to_image(format="png", width=1200, height=600)
 
-            tabla_patentes_sector_fig, tabla_patentes_sector_DF = tabla_pivot(tabla_patentes_sector)
-            great_tables(tabla_patentes_sector_fig)
-            st.caption("Fuente: Elaboración propia en base a datos de THE LENS")
+            if tabla_patentes_sector['resultado_sql'] is not None and not tabla_patentes_sector['resultado_sql'].empty:
+                tabla_patentes_sector_fig = tabla_pivot(tabla_patentes_sector, render_gt=True)
+                great_tables(tabla_patentes_sector_fig)
+                st.caption(f"Fuente: {tabla_patentes_sector['fuente']}")
 
-            DFs['componentes']['tabla_patentes_sector']['df'] = tabla_patentes_sector_DF
-            st.markdown("---")
+                st.markdown("---")
 
             produccionProvincial_fig = px.line(
                 data_frame=grafico_produccion_evolucion['resultado_sql'],
@@ -473,14 +537,11 @@ def panomProvincial():
                 template="seaborn"
             )
             produccionProvincial_fig.update_layout(grafico_produccion_evolucion['config']['layout'])
-            produccionProvincial_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            produccionProvincial_fig.update_layout(margin=dict(l=20, r=20, t=50, b=20))
+
             st.plotly_chart(produccionProvincial_fig)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_produccion_evolucion['fuente']}")
             st.markdown("---")
-            DFs['componentes']['grafico_produccion_evolucion']['img'] = produccionProvincial_fig.to_image(format="png", width=1200, height=600)
 
             distribucionPublicaciones_fig = px.treemap(
                 data_frame=grafico_produccion_tipo['resultado_sql'],
@@ -496,15 +557,12 @@ def panomProvincial():
                 textposition=grafico_produccion_tipo['config']['traces']['textposition'],
                 marker=dict(cornerradius=5)
             )
-            distribucionPublicaciones_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=20, t=50, b=20)
-            )
+            distribucionPublicaciones_fig.update_layout(grafico_produccion_tipo['config']['layout'])
+            distribucionPublicaciones_fig.update_layout(margin=dict(l=20, r=20, t=50, b=20))
 
             st.plotly_chart(distribucionPublicaciones_fig)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_produccion_tipo['fuente']}")
             st.markdown("---")
-            DFs['componentes']['grafico_produccion_tipo']['img'] = distribucionPublicaciones_fig.to_image(format="png", width=1200, height=600)
 
             publicacionesArea_fig = px.bar(
                 data_frame=grafico_publicaciones_area['resultado_sql'],
@@ -518,21 +576,14 @@ def panomProvincial():
             )
             publicacionesArea_fig.update_traces(showlegend=False)
             publicacionesArea_fig.update_layout(grafico_publicaciones_area['config']['layout'])
-            publicacionesArea_fig.update_layout(
-                title_font=dict(size=20),
-                margin=dict(l=20, r=40, t=50, b=0)
-            )
+
             st.plotly_chart(publicacionesArea_fig)
-            st.caption("Fuente: DNIYES")
+            st.caption(f"Fuente: {grafico_publicaciones_area['fuente']}")
             st.markdown("---")
-            DFs['componentes']['grafico_publicaciones_area']['img'] = publicacionesArea_fig.to_image(format="png", width=1200, height=600)
-            # plotly.offline.plot()
 
-            tabla_articulos_q1_q2_fig, tabla_articulos_q1_q2_DF = tabla_pivot(tabla_articulos_q1_q2)
+            tabla_articulos_q1_q2_fig = tabla_pivot(tabla_articulos_q1_q2, render_gt=True)
             great_tables(tabla_articulos_q1_q2_fig)
-            st.caption("Fuente: DNIYES")
-
-            DFs['componentes']['tabla_articulos_q1_q2']['df'] = tabla_articulos_q1_q2_DF
+            st.caption(f"Fuente: {tabla_articulos_q1_q2['fuente']}")
 
         with ciencia_sociedadTab:
             st.markdown("")
@@ -551,20 +602,60 @@ def panomProvincial():
                 height=altura
             )
             percepcionPublica_fig.update_layout(grafico_percepcion_calidad_vida['config']['layout'])
-            percepcionPublica_fig.update_layout(
-                margin=dict(l=20, r=40, t=20, b=20)
-            )
+            percepcionPublica_fig.update_layout(margin=dict(l=20, r=40, t=20, b=20))
 
             st.markdown(f"### {grafico_percepcion_calidad_vida['nombre']}")
             st.plotly_chart(percepcionPublica_fig)
-            st.caption("Fuente: SICYTAR")
+            st.caption(f"Fuente: {grafico_percepcion_calidad_vida['fuente']}")
             st.markdown("")
-            DFs['componentes']['grafico_percepcion_calidad_vida']['img'] = percepcionPublica_fig.to_image(format="png", width=1200, height=600)
 
         with test:
             st.write(DFs)
 
         style_metric_cards()
+        st.markdown("---")
+        col1, col2, col3 = st.columns(3)
+        with col2:
+            exportar = st.button("Exportar a PDF", use_container_width=True)
+            if exportar:
+                try:
+                    DFs['componentes']['grafico_expo_top5']['img'] = top5_exportaciones_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_evolucion_regional']['img'] = inversionID_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_inv_por_investigador']['img'] = inversionInvestigador_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_inv_empresaria_sector']['img'] = inversionEmpresas_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    tabla_pfi_cruce_df = tabla_pivot(tabla_pfi_cruce)
+                    DFs['componentes']['tabla_pfi_cruce']['df'] = tabla_pfi_cruce_df
+                    DFs['componentes']['grafico_unidades_por_inst']['img'] = unidadesIDxinstitucion_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_equipos_por_tipo']['img'] = equiposIDxTipo_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_distribucion_investigadores']['img'] = investigadoresxArea_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    tabla_personas_por_funcion_df = tabla_pivot(tabla_personas_por_funcion)
+                    DFs['componentes']['tabla_personas_por_funcion']['df'] = tabla_personas_por_funcion_df
+                    DFs['componentes']['grafico_evolucion_investigadores']['img'] = evolucionInvestigadores_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_expo_intensidad']['img'] = exportacionesIntensidad_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_expo_evolucion']['img'] = evolucionExportaciones_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_expo_destino']['img'] = exportacionesxPais_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    tabla_patentes_sector_df = tabla_pivot(tabla_patentes_sector)
+                    DFs['componentes']['tabla_patentes_sector']['df'] = tabla_patentes_sector_df
+                    DFs['componentes']['grafico_produccion_evolucion']['img'] = produccionProvincial_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_produccion_tipo']['img'] = distribucionPublicaciones_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    DFs['componentes']['grafico_publicaciones_area']['img'] = publicacionesArea_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    tabla_articulos_q1_q2_df = tabla_pivot(tabla_articulos_q1_q2)
+                    DFs['componentes']['tabla_articulos_q1_q2']['df'] = tabla_articulos_q1_q2_df
+                    DFs['componentes']['grafico_percepcion_calidad_vida']['img'] = percepcionPublica_fig.to_image(format="png", width=None, height=600, scale=2, validate=True)
+                    if grafico_patentes_evolucion['resultado_sql'] is not None and not grafico_patentes_evolucion['resultado_sql'].empty:
+                        DFs['componentes']['grafico_patentes_evolucion']['img'] = evolucionPatentes_fig.to_image(format="png", width=1080, height=None, scale=2, validate=True)
+                    else:
+                        DFs['componentes']['grafico_patentes_evolucion']['img'] = ''
+
+                    print('Generación del diccionario de la ficha provincial completada.')
+                except Exception as e:
+                    st.error(f"Error al generar la ficha provincial: {e}")
+
+                try:
+                    ficha_provincial_pdf(st.session_state.provincia, DFs, "output/ficha_provincial.pdf")
+                    exportar = False
+                except Exception as e:
+                    st.error(f"Error al generar la ficha provincial: {e}")
 
 
 try:

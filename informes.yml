@@ -8,6 +8,7 @@ informe:
       tipo_componente: "KPI"
       estado: true
       parametros: ["provincia_id"]
+      fuente: "INDEC"
       config:
         format: "int"
         suffix: " habs"
@@ -21,6 +22,7 @@ informe:
       nombre: "Densidad Poblacional Provincial"
       tipo_componente: "KPI"
       estado: true
+      fuente: "INDEC"
       parametros: ["provincia_id"]
       config:
         format: "float"
@@ -35,6 +37,7 @@ informe:
       nombre: "Tasa de Actividad Económica Provincial"
       tipo_componente: "KPI"
       estado: true
+      fuente: "INDEC"
       parametros: ["provincia_id"]
       config:
         format: "float"
@@ -49,6 +52,7 @@ informe:
       nombre: "Tasa de Desempleo Provincial"
       tipo_componente: "KPI"
       estado: true
+      fuente: "INDEC"
       parametros: ["provincia_id"]
       config:
         format: "float"
@@ -64,6 +68,7 @@ informe:
       nombre: "Tasa de Actividad Económica Nacional"
       tipo_componente: "KPI"
       estado: true
+      fuente: "INDEC"
       parametros: []
       config:
         format: "float"
@@ -78,6 +83,7 @@ informe:
       nombre: "Tasa de Desempleo Nacional"
       tipo_componente: "KPI"
       estado: true
+      fuente: "INDEC"
       parametros: []
       config:
         format: "float"
@@ -94,6 +100,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
+      fuente: "OPEX - INDEC"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -101,12 +108,25 @@ informe:
           y: "gran_rubro"
           labels: {"{{ anio }}": "Millones de USD (FOB)", "gran_rubro": "Producto"}
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           xaxis:
             title:
+              font_size: 18
               text: "Millones de USD (FOB)"
+            ticklabelstandoff: 10
+            tickfont_size: 16
           yaxis:
             title:
+              font_size: 18
               text: ""
+            ticklabelstandoff: 10
+            tickfont_size: 16
             categoryorder: "total descending"
       plantilla_sql: |
         SELECT "{{ anio }}", gran_rubro
@@ -124,6 +144,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "line"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id"]
       config:
         plot_mapping:
@@ -132,11 +153,28 @@ informe:
           labels: {"anio": "Año", "inversion_constante": "Inversión en I+D (MPC)", "unidad_territorial": "Región"}
           color: "unidad_territorial"
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          legend_title:
+            font_size: 18
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           xaxis:
             title:
-                text: ""
+              font_size: 18
+              text: ""
+            ticklabelstandoff: 10
             tickformat: "d"
             dtick: 1
+            tickfont_size: 16
+          yaxis:
+            title:
+              font_size: 18
+            ticklabelstandoff: 10
+            tickfont_size: 16
           colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
       plantilla_sql: |
         SELECT anio, unidad_territorial, SUM(monto_inversion_constante_2004) as inversion_constante
@@ -153,6 +191,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -160,10 +199,25 @@ informe:
           y: "unidad_territorial"
           labels: {"inversion_investigador": "Inversión (MPC)", "unidad_territorial": "Provincia"}
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 20
+          hoverlabel:
+            font_size: 16
           yaxis:
             title:
+              font_size: 18
               text: ""
+            ticklabelstandoff: 10
+            tickfont_size: 16
             categoryorder: "total descending"
+          xaxis:
+            ticklabelstandoff: 10
+            tickfont_size: 16
+            title:
+              font_size: 18
       plantilla_sql: |
         SELECT unidad_territorial, inversion_investigador
         FROM inversion_y_articulos_por_investigador_provincia_region_pais
@@ -181,6 +235,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "provincia", "anio"]
       config:
         plot_mapping:
@@ -188,10 +243,25 @@ informe:
           y: "sector_clae"
           labels: {"monto_inversion": "Inversión (MPC)", "sector_clae": "Sector"}
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           yaxis:
             title:
+              font_size: 18
               text: ""
+            ticklabelstandoff: 10
+            tickfont_size: 16
             categoryorder: "total descending"
+          xaxis:
+            tickfont_size: 16
+            ticklabelstandoff: 10
+            title:
+              font_size: 18
           colorway: ["#2C3C5F", "#B9422D", "#198769", "#5C3C7D", "#B2713F"]
       plantilla_sql: |
         SELECT
@@ -210,6 +280,7 @@ informe:
       nombre: "PFI a nivel nacional"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: []
       config:
         format: "int"
@@ -220,6 +291,7 @@ informe:
       nombre: "PFI a nivel regional"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id"]
       config:
         format: "int"
@@ -235,6 +307,7 @@ informe:
       nombre: "PFI a nivel provincial"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id"]
       config:
         format: "int"
@@ -250,6 +323,7 @@ informe:
       nombre: "PFI nacionales con contraparte privada"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: []
       config:
         format: "float"
@@ -263,6 +337,7 @@ informe:
       nombre: "PFI regionales con contraparte privada"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id"]
       config:
         format: "float"
@@ -279,6 +354,7 @@ informe:
       nombre: "PFI provinciales con contraparte privada"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id"]
       config:
         format: "float"
@@ -295,6 +371,7 @@ informe:
       nombre: "Proyectos PFI provinciales por Eje y Tecnología Estratégica"
       tipo_componente: "TABLA"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id"]
       config:
         pivot:
@@ -317,6 +394,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "pie"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -325,10 +403,17 @@ informe:
           values: "fob_millones_uss"
           hole: 0.4
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
           hoverlabel:
-            # textcase: "word caps"
-            font_family: "Arial"
-          # hoverinfo: "label+percent"
+            font_size: 16
+        traces:
+          textinfo: "label+percent"
+          rotation: -90
+          insidetextorientation: "radial"
       plantilla_sql: |
         SELECT INITCAP(LOWER("ITEnfoqueindustria")) as "ITEnfoqueindustria", SUM(fob_millones_uss) as fob_millones_uss
         FROM expo_nivel_tecnologico_provincia_region_pais
@@ -345,6 +430,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "line"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio", "provincia"]
       config:
         plot_mapping:
@@ -353,14 +439,29 @@ informe:
           labels: {"unidad_territorial": "Región", "total_fob": "Millones de USD (FOB)", "anio": "Año"}
           color: "unidad_territorial"
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          legend_title:
+            font_size: 18
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           yaxis:
+            ticklabelstandoff: 10
+            tickfont_size: 16
             title:
+              font_size: 18
               text: "Millones de USD (FOB)"
           xaxis:
+            ticklabelstandoff: 10
             title:
+              font_size: 18
               text: ""
             tickformat: "d"
             dtick: 1
+            tickfont_size: 16
       plantilla_sql: |
         SELECT anio, unidad_territorial, SUM(fob_millones_uss) as total_fob
         FROM expo_nivel_tecnologico_provincia_region_pais
@@ -381,6 +482,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "treemap"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -391,6 +493,14 @@ informe:
         traces:
           textinfo: "label+percent parent"
           textposition: "middle center"
+        layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
       plantilla_sql: |
         SELECT pais_destino, SUM(fob_millones_sum) as fob_total
         FROM expo_tecno_destino
@@ -406,6 +516,7 @@ informe:
       nombre: "Patentes de solicitantes argentinos (2014-{{anio}})"
       tipo_componente: "KPI"
       estado: true
+      fuente: "THE LENS"
       parametros: ["anio"]
       config:
         format: "int"
@@ -418,6 +529,7 @@ informe:
       nombre: "Patentes solicitadas por instituciones de CyT argentinas (2014-{{anio}})"
       tipo_componente: "KPI"
       estado: true
+      fuente: "THE LENS"
       parametros: ["anio"]
       config:
         format: "int"
@@ -431,6 +543,7 @@ informe:
       nombre: "Patentes solicitadas por instituciones de CyT provinciales (2014-{{anio}})"
       tipo_componente: "KPI"
       estado: true
+      fuente: "THE LENS"
       parametros: ["provincia_id", "anio"]
       config:
         format: "int"
@@ -450,6 +563,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "line"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -457,11 +571,26 @@ informe:
           y: "cantidad"
           labels: {"anio": "Año", "cantidad": "Patentes Solicitadas"}
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           xaxis:
+            ticklabelstandoff: 10
+            tickfont_size: 16
             tickformat: "d"
             dtick: 1
             title:
+              font_size: 18
               text: ""
+          yaxis:
+            ticklabelstandoff: 10
+            title:
+              font_size: 18
+            tickfont_size: 16
       plantilla_sql: |
         SELECT anio, COUNT(DISTINCT lens_id) as cantidad
         FROM patentes_desagregadas_ipc_provincia_region_pais
@@ -479,6 +608,7 @@ informe:
       nombre: "Cantidad de patentes solicitadas por inst. de CTI provinciales por sector de tecnología (2014-{{anio}})"
       tipo_componente: "TABLA"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         pivot:
@@ -503,6 +633,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "line"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -511,11 +642,28 @@ informe:
           labels: {"anio_publica": "Año", "cantidad": "Cantidad de Productos", "unidad_territorial": "Región"}
           color: "unidad_territorial"
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          legend_title:
+            font_size: 18
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           xaxis:
+            ticklabelstandoff: 10
+            tickfont_size: 16
             tickformat: "d"
             dtick: 1
             title:
+              font_size: 18
               text: ""
+          yaxis:
+            ticklabelstandoff: 10
+            title:
+              font_size: 18
+            tickfont_size: 16
       plantilla_sql: |
         SELECT anio_publica, unidad_territorial, COUNT(DISTINCT producto_id) as cantidad
         FROM productos_provincia_region_pais_renaprod
@@ -533,6 +681,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "treemap"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -543,6 +692,14 @@ informe:
         traces:
           textinfo: "label+percent parent"
           textposition: "middle center"
+        layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
       plantilla_sql: |
         SELECT tipo_producto_cientifico, COUNT(DISTINCT producto_id) as cantidad
         FROM productos_provincia_region_pais_renaprod
@@ -557,6 +714,7 @@ informe:
       nombre: "Cantidad de artículos publicados en revistas Q1 y Q2 (2019 - {{anio}})"
       tipo_componente: "TABLA"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         pivot:
@@ -588,6 +746,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -596,13 +755,26 @@ informe:
           labels: {"gran_area": "Área de Conocimiento", "porcentaje": "% de Publicaciones"}
           color: "gran_area"
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           xaxis:
+            ticklabelstandoff: 10
             ticksuffix: " %"
             title:
+              font_size: 18
               text: ""
+            tickfont_size: 16
           yaxis:
+            ticklabelstandoff: 10
             title:
+              font_size: 18
               text: ""
+            tickfont_size: 16
       plantilla_sql: |
         WITH total_general AS (
             SELECT COUNT(producto_id) as total FROM productos_provincia_region_pais_renaprod
@@ -626,6 +798,7 @@ informe:
       nombre: "Unidades de I+D provinciales"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         format: "int"
@@ -639,6 +812,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -646,9 +820,24 @@ informe:
           x: "cantidad"
           labels: {"cantidad": "Unidades de I+D", "nivel_1": "Institución"}
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           yaxis:
+            ticklabelstandoff: 10
             title:
+              font_size: 18
               text: ""
+            tickfont_size: 16
+          xaxis:
+            ticklabelstandoff: 10
+            title:
+              font_size: 18
+            tickfont_size: 16
       plantilla_sql: |
         SELECT nivel_1, COUNT(organizacion_id) as cantidad
         FROM listado_unidades_de_id
@@ -660,6 +849,7 @@ informe:
       nombre: "Equipos I+D a nivel nacional ({{anio}})"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: []
       config:
         format: "int"
@@ -670,6 +860,7 @@ informe:
       nombre: "Equipos I+D a nivel regional ({{anio}})"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id"]
       config:
         format: "int"
@@ -684,6 +875,7 @@ informe:
       nombre: "Equipos I+D a nivel provincial ({{anio}})"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id"]
       config:
         format: "int"
@@ -699,6 +891,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "provincia"]
       config:
         plot_mapping:
@@ -706,9 +899,24 @@ informe:
           x: "total_equipos"
           labels: {"total_equipos": "Cantidad de Equipos de I+D", "sistema_nacional": "Sistema Nacional"}
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           yaxis:
+            ticklabelstandoff: 10
             title:
               text: ""
+              font_size: 18
+            tickfont_size: 16
+          xaxis:
+            ticklabelstandoff: 10
+            title:
+              font_size: 18
+            tickfont_size: 16
       plantilla_sql: |
         SELECT sistema_nacional, SUM(cant_equipos) as total_equipos
         FROM equipos_ssnn_provincia_region_pais
@@ -724,6 +932,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "treemap"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         plot_mapping:
@@ -734,6 +943,14 @@ informe:
         traces:
           textinfo: "label+percent parent"
           textposition: "middle center"
+        layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
       plantilla_sql: |
         WITH total_general AS (
             SELECT SUM(cant_personas) as total FROM rrhh_sicytar_agregado_provincia_region_pais
@@ -753,6 +970,7 @@ informe:
       nombre: "Investigadores cada 1.000 habs de la PEA provincial ({{anio}})"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         format: "float"
@@ -776,6 +994,7 @@ informe:
       nombre: "Investigadores cada 1.000 habs de la PEA regional ({{anio}})"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         format: "float"
@@ -804,6 +1023,7 @@ informe:
       nombre: "Investigadores cada 1.000 habs de la PEA nacional ({{anio}})"
       tipo_componente: "KPI"
       estado: true
+      fuente: "DNIYES"
       parametros: ["anio"]
       config:
         format: "float"
@@ -822,6 +1042,7 @@ informe:
       nombre: "Cantidad de personas dedicadas a I+D según función ({{anio}})"
       tipo_componente: "TABLA"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio"]
       config:
         pivot:
@@ -845,6 +1066,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "line"
       estado: true
+      fuente: "DNIYES"
       parametros: ["provincia_id", "anio", "provincia"]
       config:
         plot_mapping:
@@ -852,11 +1074,26 @@ informe:
           y: "cantidad_investigadores"
           labels: {"anio": "Año", "cantidad_investigadores": "Investigadores"}
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           xaxis:
+            ticklabelstandoff: 10
             title:
+              font_size: 18
               text: ""
             tickformat: "d"
             dtick: 1
+            tickfont_size: 16
+          yaxis:
+            ticklabelstandoff: 10
+            title:
+              font_size: 18
+            tickfont_size: 16
       plantilla_sql: |
         SELECT anio, SUM(cant_personas) as cantidad_investigadores
         FROM rrhh_sicytar_agregado_provincia_region_pais
@@ -873,6 +1110,7 @@ informe:
       tipo_componente: "GRAFICO"
       tipo_grafico: "barh"
       estado: true
+      fuente: "SICYTAR"
       parametros: ["anio"]
       config:
         plot_mapping:
@@ -880,18 +1118,31 @@ informe:
           x: "valor"
           labels: {"unidad_territorial": "Provincia", "valor": "% que cree que contribuye totalmente"}
         layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
           xaxis:
+            ticklabelstandoff: 10
             range: [0, 100]
             tick0: 0
             dtick: 10
             ticksuffix: " %"
+            tickfont_size: 16
             title_standoff: 10
             title:
+              font_size: 18
               text: ""
           yaxis:
+            ticklabelstandoff: 10
+            tickfont_size: 16
             categoryorder: "total ascending"
             automargin: True
             title:
+              font_size: 18
               text: ""
           barcornerradius: 15
       plantilla_sql: |
