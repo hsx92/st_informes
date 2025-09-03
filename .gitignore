@@ -1,0 +1,9 @@
+dev_utils.py
+__pycache__/
+.streamlit/
+pages/2_🗺️_Mapa Bs As.py
+pages/5_🙋‍♂️_Control de usuarios.py
+pages/6_⚙️_Config.py
+pages/authTester.py
+output/
+logs/

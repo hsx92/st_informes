@@ -205,7 +205,7 @@ CREATE TABLE percepcion_final (
 );
 
 CREATE TABLE listado_unidades_de_id (
-    organizacion_id INTEGER PRIMARY KEY,
+    organizacion_id INTEGER,
     organizacion VARCHAR(255),
     nivel_1 VARCHAR(255),
     provincia VARCHAR(100)

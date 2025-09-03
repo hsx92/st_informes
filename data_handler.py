@@ -1,27 +1,16 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jun 25 22:11:18 2023
-
-@author: facun
-"""
+import os
 import pandas as pd
-from typing import Union
-from jinja2 import Template
+import yaml
 import psycopg2
 from psycopg2 import pool
-import streamlit as st
-import streamlit_authenticator as stauth
-from streamlit_authenticator.utilities import LoginError
-import yaml
-from yaml import SafeLoader
-from copy import deepcopy
-from typing import Dict
-from great_tables import GT, style, loc
 import logging
 from logging.handlers import RotatingFileHandler
-import os
-import textwrap
-from pathlib import Path
+import streamlit as st
+from jinja2 import Template
+from copy import deepcopy
+from typing import Dict
+from utils import render_obj
+
 
 log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
 log_level = getattr(logging, log_level_name, logging.INFO)
@@ -38,6 +27,7 @@ root_logger.addHandler(handler)
 logger = logging.getLogger(__name__)
 
 
+# CONN CLASS
 # Configuración de la conexión a la base de datos
 class Conexion:
     __HOST = st.secrets["DB_HOST"]
@@ -80,7 +70,6 @@ class Conexion:
         cls.get_pool().putconn(conn)
 
 
-# This class provides a context manager for database operations
 class Cursor:
     def __init__(self):
         self._conn = None
@@ -112,34 +101,9 @@ class Cursor:
         Conexion.free_conn(self._conn)
 
 
-def _render_str(value: str, params: dict) -> str:
-    try:
-        return Template(value).render(params)
-    except Exception:
-        return value
+# FUNCIONES
 
-
-def render_obj(obj, params):
-    if isinstance(obj, dict):
-        new_dict = {}
-        for k, v in obj.items():
-            rendered_key = _render_str(k, params) if isinstance(k, str) else k
-            new_dict[rendered_key] = render_obj(v, params)
-        return new_dict
-    if isinstance(obj, list):
-        return [render_obj(i, params) for i in obj]
-    if isinstance(obj, str):
-        return _render_str(obj, params)
-    return obj
-
-
-def insertar_saltos(cadena):
-    if not isinstance(cadena, str):
-        return cadena
-
-    return textwrap.fill(cadena, width=35).replace('\n', '<br>')
-
-
+@st.cache_data
 def get_provincias():
     """
     Obtiene un df de provincias desde la base de datos.
@@ -199,7 +163,7 @@ def ejecutar_consulta_parametrizada(plantilla_sql: str, params: dict) -> pd.Data
         return pd.DataFrame()
 
 
-@st.cache_data
+# @st.cache_data
 def _load_informes() -> Dict[str, object]:
     with open("informes.yml", "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
@@ -227,173 +191,3 @@ def get_informe(nombre_informe: str, params: Dict[str, object]) -> Dict[str, obj
             return resultado
 
     raise KeyError(f"Informe '{nombre_informe}' no encontrado")
-
-
-def procesar_kpi(df: pd.DataFrame, config: dict) -> str:
-    if df.empty or pd.isna(df.iloc[0, 0]):
-        return "N/A"
-    valor = df.iloc[0, 0]
-    formato = config.get('format', 'raw')
-    sufijo = config.get('suffix', '')
-    if formato == 'int':
-        return f"{int(float(valor)):,}{sufijo}".replace(",", ".")
-    if formato == 'float':
-        return f"{float(valor):,.2f}{sufijo}".replace(",", "X").replace(".", ",").replace("X", ".")
-    return f"{valor}{sufijo}"
-
-
-# helper to build KPI dictionaries
-def build_kpi(componentes: dict, key: str) -> dict:
-    """Construye un diccionario KPI a partir de los componentes."""
-    componente = componentes.get(key, {})
-    return {
-        "nombre": componente.get("nombre"),
-        "valor": procesar_kpi(
-            componente.get("resultado_sql"), componente.get("config")
-        ),
-        "fuente": componente.get("fuente"),
-    }
-
-
-def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame, GT, None]:
-    """
-    Crea una tabla dinámica (pivot table) y la formatea con great_tables.
-
-    Args:
-        componente (dict): Un diccionario con los datos y la configuración.
-                          Debe contener 'resultado_sql' (DataFrame) y 'config'.
-
-    Returns:
-        GT: Un objeto de great_tables listo para ser visualizado.
-    """
-    # 1. Extraer el DataFrame de los datos
-    df = componente['resultado_sql']
-
-    # 2. Crear la tabla dinámica usando la configuración del componente
-    pivot_config = componente['config']['pivot']
-    if 'index' in pivot_config:
-        tabla = (
-            df
-            .pivot_table(
-                index=pivot_config['index'],
-                columns=pivot_config['columns'],
-                values=pivot_config['values'],
-                aggfunc=pivot_config['aggfunc']
-            )
-            .reset_index()
-        )
-        # Borrar el contenido del column_header de la columna índice
-        tabla.columns = tabla.columns.where(tabla.columns != pivot_config['index'], '')
-        col_str = tabla.columns.tolist()
-        col_str = col_str[1:] if col_str else []
-    else:
-        tabla = df.pivot_table(
-            columns=pivot_config['columns'],
-            values=pivot_config['values'],
-            aggfunc=pivot_config['aggfunc']
-        )
-        col_str = tabla.columns.tolist()
-
-    # 3. Construcción del objeto GT con el formato deseado
-    if render_gt:
-        try:
-            gt = (
-                GT(tabla)
-                .tab_header(title=componente['nombre'])
-                .tab_stubhead(label='')
-                .opt_table_font(
-                    stack="geometric-humanist"
-                )
-                # 1. Formato para el cuerpo de la primera columna (el índice)
-                .tab_style(
-                    style.css("padding-top: 25px; padding-bottom: 25px;"),  # El primer valor es el padding vertical (top/bottom)
-                    locations=loc.body()
-                )
-                .tab_style(
-                    style.css("padding-top: 15px; padding-bottom: 15px;"),  # El primer valor es el padding vertical (top/bottom)
-                    locations=loc.column_header()
-                )
-                .tab_style(
-                    style.css("padding-top: 15px; padding-bottom: 15px;"),  # El primer valor es el padding vertical (top/bottom)
-                    locations=loc.header()
-                )
-                .tab_style(
-                    style.fill(color="#4D7AAE"),
-                    locations=loc.body(columns='')
-                )
-                # 2. Formato para el encabezado de la primera columna
-                .tab_style(
-                    style.text(weight="bold", color="white", align="center"),
-                    locations=loc.body(columns='')
-                )
-                # 3. Formato para el encabezado de las otras columnas
-                .tab_style(
-                    style.text(weight="bold", color="white", align="center"),
-                    locations=loc.column_labels()
-                )
-                .tab_style(
-                    style=style.text(align="center", color="gray", weight="lighter"),
-                    locations=loc.body(columns=col_str)
-                )
-                .data_color(
-                    na_color="white",
-                    palette=[
-                        "#FDF8E7", "#FBF5E0", "#F9F2DA", "#F7EFD4", "#F5EDCE", "#F3EAC8",
-                        "#F1E7C2", "#EFE4BC", "#EFE1B6", "#ECE4B1", "#EAE2AC", "#E8DFAB",
-                        "#E6DC9F", "#E4D999", "#E2D693", "#E0D38D", "#DED087", "#DCCDA1"
-                    ],
-                    domain=[df[pivot_config['values']].min(), df[pivot_config['values']].max()],
-                )
-                .fmt_integer(
-                    columns=col_str,
-                    use_seps=True,
-                    sep_mark="."
-                )
-                .tab_options(
-                    heading_background_color="#54698B",
-                    column_labels_background_color="#54698B",  # Nuevo: Color de fondo para encabezados
-                    table_border_top_color="#54698B",
-                    table_border_bottom_color="#54698B",
-                    row_striping_include_stub=True,
-                    table_font_names="Poppins"
-                )
-            )
-            return gt
-        except Exception as e:
-            st.error(f"Error al crear la tabla: {e}")
-            return None
-    else:
-        return tabla
-
-
-def login():
-    credentials_path = Path(__file__).parent / ".streamlit" / "credentials.yaml"
-    with credentials_path.open("r", encoding="utf-8") as file:
-        config = yaml.load(file, Loader=SafeLoader)
-
-    authenticator = stauth.Authenticate(
-        config["credentials"],
-        config["cookie"]["name"],
-        config["cookie"]["key"],
-        config["cookie"]["expiry_days"],
-    )
-
-    try:
-        authenticator.login(fields={'Form name': 'Login', 'Username': 'Usuario', 'Password': 'Contraseña'}, location='main')
-    except LoginError as e:
-        st.error(e)
-
-    if st.session_state["authentication_status"]:
-        st.session_state["authenticator"] = authenticator
-        st.title(f"Bienvenido/a {st.session_state['name']}!")
-        st.subheader("◀️   Seleccione una opción del menú")
-        st.markdown('''---''')
-        st.title('📰 Novedades:')
-
-        authenticator.logout('Cerrar sesión', 'main')
-
-    elif "authentication_status" not in st.session_state:
-        st.warning('Por favor ingrese usuario y contraseña')
-
-    elif st.session_state["authentication_status"] is False:
-        st.error('Usuario/contraseña incorrectos')

@@ -32,15 +32,15 @@ anio;id_pfi;cupo;region_cofecyt;provincia;tema;sector;vertical;tecnologias;verti
 2022;CT-3-PFI-2022;SI;PATAGONIA;CHUBUT;IA;PUBLICO;Sin especificar;Sin especificar;Sin especificar / Sin especificar
 2022;CT-4-PFI-2022;SI;PATAGONIA;CHUBUT;Otro;PRIVADO;Otro;Otro;Otro / Otro
 2022;CT-5-PFI-2022;SI;PATAGONIA;CHUBUT;Agroindustria;PUBLICO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
-2022;CB-1-PFI-2022;SI;CENTRO;CORDOBA;Salud;PUBLICO;Salud;Sin especificar;Salud / Sin especificar
-2022;CB-2-PFI-2022;SI;CENTRO;CORDOBA;Salud;PUBLICO;Salud;Sin especificar;Salud / Sin especificar
-2022;CB-3-PFI-2022;SI;CENTRO;CORDOBA;Energía y minería;PUBLICO;Energía y minería;IA;Energía y minería / IA
-2022;CB-4-PFI-2022;SI;CENTRO;CORDOBA;Energía y minería;PUBLICO;Energía y minería;IA;Energía y minería / IA
-2022;CB-5-PFI-2022;SI;CENTRO;CORDOBA;Salud;PRIVADO;Salud;Sin especificar;Salud / Sin especificar
-2022;CB-6-PFI-2022;SI;CENTRO;CORDOBA;Agroindustria;PRIVADO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
-2022;CB-7-PFI-2022;SI;CENTRO;CORDOBA;Energía y minería;PRIVADO;Energía y minería;IA;Energía y minería / IA
-2022;CB-9-PFI-2022;SI;CENTRO;CORDOBA;Agroindustria;PUBLICO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
-2022;CB-10-PFI-2022;SI;CENTRO;CORDOBA;"Agroindustria, Biotecnología/Nanotecnología";PRIVADO;Agroindustria;Bio y Nanotecnología;Agroindustria / Bio y Nanotecnología
+2022;CB-1-PFI-2022;SI;CENTRO;CÓRDOBA;Salud;PUBLICO;Salud;Sin especificar;Salud / Sin especificar
+2022;CB-2-PFI-2022;SI;CENTRO;CÓRDOBA;Salud;PUBLICO;Salud;Sin especificar;Salud / Sin especificar
+2022;CB-3-PFI-2022;SI;CENTRO;CÓRDOBA;Energía y minería;PUBLICO;Energía y minería;IA;Energía y minería / IA
+2022;CB-4-PFI-2022;SI;CENTRO;CÓRDOBA;Energía y minería;PUBLICO;Energía y minería;IA;Energía y minería / IA
+2022;CB-5-PFI-2022;SI;CENTRO;CÓRDOBA;Salud;PRIVADO;Salud;Sin especificar;Salud / Sin especificar
+2022;CB-6-PFI-2022;SI;CENTRO;CÓRDOBA;Agroindustria;PRIVADO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
+2022;CB-7-PFI-2022;SI;CENTRO;CÓRDOBA;Energía y minería;PRIVADO;Energía y minería;IA;Energía y minería / IA
+2022;CB-9-PFI-2022;SI;CENTRO;CÓRDOBA;Agroindustria;PUBLICO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
+2022;CB-10-PFI-2022;SI;CENTRO;CÓRDOBA;"Agroindustria, Biotecnología/Nanotecnología";PRIVADO;Agroindustria;Bio y Nanotecnología;Agroindustria / Bio y Nanotecnología
 2022;CR-1-PFI-2022;SI;NEA;CORRIENTES;TICs;PUBLICO;Sin especificar;TICs;Sin especificar / TICs
 2022;CR-2-PFI-2022;SI;NEA;CORRIENTES;Agroindustria;PRIVADO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
 2022;CR-3-PFI-2022;SI;NEA;CORRIENTES;Agroindustria;PRIVADO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
@@ -313,18 +313,18 @@ anio;id_pfi;cupo;region_cofecyt;provincia;tema;sector;vertical;tecnologias;verti
 2023;CA-11-PFI-2023;SI;NOA;CATAMARCA;TICs;PUBLICO;Sin especificar;TICs;Sin especificar / TICs
 2023;CA-12-PFI-2023;SI;NOA;CATAMARCA;IA;PUBLICO;Sin especificar;Sin especificar;Sin especificar / Sin especificar
 2023;CA-13-PFI-2023;SI;NOA;CATAMARCA;Otro;PUBLICO;Otro;Otro;Otro / Otro
-2023;CB-1-PFI-2023;SI;CENTRO;CORDOBA;Otro;PUBLICO;Otro;Otro;Otro / Otro
-2023;CB-2-PFI-2023;SI;CENTRO;CORDOBA;"Energia, Biotecnología y Nanotecnología";PUBLICO;Energía y minería;IA;Energía y minería / IA
-2023;CB-3-PFI-2023;SI;CENTRO;CORDOBA;Agroindustria;PRIVADO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
-2023;CB-4-PFI-2023;SI;CENTRO;CORDOBA;Otro;PRIVADO;Otro;Otro;Otro / Otro
-2023;CB-5-PFI-2023;SI;CENTRO;CORDOBA;Agroindustria;PUBLICO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
-2023;CB-6-PFI-2023;SI;CENTRO;CORDOBA;"Salud, IA";PRIVADO;Salud;Sin especificar;Salud / Sin especificar
-2023;CB-7-PFI-2023;SI;CENTRO;CORDOBA;Salud;PUBLICO;Salud;Sin especificar;Salud / Sin especificar
-2023;CB-8-PFI-2023;SI;CENTRO;CORDOBA;Salud;PUBLICO;Salud;Sin especificar;Salud / Sin especificar
-2023;CB-9-PFI-2023;SI;CENTRO;CORDOBA;"Biotecnología y Nanotecnología, Salud";PRIVADO;Salud;IA;Salud / IA
-2023;CB-10-PFI-2023;SI;CENTRO;CORDOBA;Agroindustria;PUBLICO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
-2023;CB-11-PFI-2023;SI;CENTRO;CORDOBA;Energía;PUBLICO;Energía y minería;Sin especificar;Energía y minería / Sin especificar
-2023;CB-12-PFI-2023;SI;CENTRO;CORDOBA;Agroindustria;PUBLICO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
+2023;CB-1-PFI-2023;SI;CENTRO;CÓRDOBA;Otro;PUBLICO;Otro;Otro;Otro / Otro
+2023;CB-2-PFI-2023;SI;CENTRO;CÓRDOBA;"Energia, Biotecnología y Nanotecnología";PUBLICO;Energía y minería;IA;Energía y minería / IA
+2023;CB-3-PFI-2023;SI;CENTRO;CÓRDOBA;Agroindustria;PRIVADO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
+2023;CB-4-PFI-2023;SI;CENTRO;CÓRDOBA;Otro;PRIVADO;Otro;Otro;Otro / Otro
+2023;CB-5-PFI-2023;SI;CENTRO;CÓRDOBA;Agroindustria;PUBLICO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
+2023;CB-6-PFI-2023;SI;CENTRO;CÓRDOBA;"Salud, IA";PRIVADO;Salud;Sin especificar;Salud / Sin especificar
+2023;CB-7-PFI-2023;SI;CENTRO;CÓRDOBA;Salud;PUBLICO;Salud;Sin especificar;Salud / Sin especificar
+2023;CB-8-PFI-2023;SI;CENTRO;CÓRDOBA;Salud;PUBLICO;Salud;Sin especificar;Salud / Sin especificar
+2023;CB-9-PFI-2023;SI;CENTRO;CÓRDOBA;"Biotecnología y Nanotecnología, Salud";PRIVADO;Salud;IA;Salud / IA
+2023;CB-10-PFI-2023;SI;CENTRO;CÓRDOBA;Agroindustria;PUBLICO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
+2023;CB-11-PFI-2023;SI;CENTRO;CÓRDOBA;Energía;PUBLICO;Energía y minería;Sin especificar;Energía y minería / Sin especificar
+2023;CB-12-PFI-2023;SI;CENTRO;CÓRDOBA;Agroindustria;PUBLICO;Agroindustria;Sin especificar;Agroindustria / Sin especificar
 2023;ER-1-PFI-2023;SI;CENTRO;ENTRE RIOS;Otro;PUBLICO;Otro;Otro;Otro / Otro
 2023;ER-2-PFI-2023;SI;CENTRO;ENTRE RIOS;"TICs, Salud";PUBLICO;Salud;TICs;Salud / TICs
 2023;ER-3-PFI-2023;SI;CENTRO;ENTRE RIOS;Economía del conocimiento y la innovación;PUBLICO;Economía del conocimiento y la innovación;IA;Economía del conocimiento y la innovación / IA
