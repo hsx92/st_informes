@@ -9,7 +9,6 @@ import streamlit as st
 from jinja2 import Template
 from copy import deepcopy
 from typing import Dict
-from utils import render_obj
 
 
 log_level_name = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -28,7 +27,6 @@ logger = logging.getLogger(__name__)
 
 
 # CONN CLASS
-# Configuración de la conexión a la base de datos
 class Conexion:
     __HOST = st.secrets["DB_HOST"]
     __PORT = st.secrets["DB_PORT"]
@@ -101,9 +99,62 @@ class Cursor:
         Conexion.free_conn(self._conn)
 
 
-# FUNCIONES
+# HELPERS
 
-@st.cache_data
+def _render_str(value: str, params: dict) -> str:
+    try:
+        return Template(value).render(params)
+    except Exception:
+        return value
+
+
+def render_obj(obj, params):
+    if isinstance(obj, dict):
+        new_dict = {}
+        for k, v in obj.items():
+            rendered_key = _render_str(k, params) if isinstance(k, str) else k
+            new_dict[rendered_key] = render_obj(v, params)
+        return new_dict
+    if isinstance(obj, list):
+        return [render_obj(i, params) for i in obj]
+    if isinstance(obj, str):
+        return _render_str(obj, params)
+    return obj
+
+
+@st.cache_data(ttl=600)
+def _load_informes() -> Dict[str, object]:
+    with open("informes.yml", "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def get_informe(nombre_informe: str, params: Dict[str, object]) -> Dict[str, object]:
+    data = _load_informes()
+
+    informes = data.get("informe")
+    if isinstance(informes, dict):
+        informes = [informes]
+
+    for informe in informes:
+        if informe.get("nombre") == nombre_informe:
+            informe_render = render_obj(deepcopy(informe), params)
+            resultado = {"nombre": informe_render["nombre"], "componentes": {}}
+
+            for comp_nombre, comp in informe_render.get("componentes", {}).items():
+                params_comp = {k: params[k] for k in comp.get("parametros", []) if k in params}
+                plantilla = comp.pop("plantilla_sql", None)
+                if plantilla:
+                    df = ejecutar_consulta_parametrizada(plantilla, params_comp)
+                    comp["resultado_sql"] = df
+                resultado["componentes"][comp_nombre] = comp
+            return resultado
+
+    raise KeyError(f"Informe '{nombre_informe}' no encontrado")
+
+
+# DB COMMS
+
+@st.cache_data(ttl=600)
 def get_provincias():
     """
     Obtiene un df de provincias desde la base de datos.
@@ -144,7 +195,7 @@ def ejecutar_consulta_parametrizada(plantilla_sql: str, params: dict) -> pd.Data
     try:
         template = Template(plantilla_sql)
         sql_renderizado = template.render(params)
-        logger.info(f"SQL Renderizado: \n{sql_renderizado}")
+        logger.info("SQL Renderizado exitosamente.")
     except Exception as e:
         logger.error(f"Error al renderizar la plantilla SQL con Jinja2: {e}")
         return pd.DataFrame()
@@ -161,33 +212,3 @@ def ejecutar_consulta_parametrizada(plantilla_sql: str, params: dict) -> pd.Data
     except Exception as e:
         logger.error(f"Error al ejecutar la consulta SQL con Pandas: {e}")
         return pd.DataFrame()
-
-
-# @st.cache_data
-def _load_informes() -> Dict[str, object]:
-    with open("informes.yml", "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
-
-
-def get_informe(nombre_informe: str, params: Dict[str, object]) -> Dict[str, object]:
-    data = _load_informes()
-
-    informes = data.get("informe")
-    if isinstance(informes, dict):
-        informes = [informes]
-
-    for informe in informes:
-        if informe.get("nombre") == nombre_informe:
-            informe_render = render_obj(deepcopy(informe), params)
-            resultado = {"nombre": informe_render["nombre"], "componentes": {}}
-
-            for comp_nombre, comp in informe_render.get("componentes", {}).items():
-                params_comp = {k: params[k] for k in comp.get("parametros", []) if k in params}
-                plantilla = comp.pop("plantilla_sql", None)
-                if plantilla:
-                    df = ejecutar_consulta_parametrizada(plantilla, params_comp)
-                    comp["resultado_sql"] = df
-                resultado["componentes"][comp_nombre] = comp
-            return resultado
-
-    raise KeyError(f"Informe '{nombre_informe}' no encontrado")

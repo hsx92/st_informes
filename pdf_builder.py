@@ -14,18 +14,9 @@ COLOR_CLARO = "#7589A3"
 IMAGE_DIMS_CACHE = {}
 
 
-def precache_images(paths):
-    """Store image dimensions to avoid repeated calculations."""
-    for path in set(filter(None, paths)):
-        if path not in IMAGE_DIMS_CACHE:
-            try:
-                with Image.open(path) as img:
-                    IMAGE_DIMS_CACHE[path] = img.size
-            except Exception:
-                continue
+# --- CLASE INFORME --- #
 
-
-class PDF(FPDF):
+class INFORME(FPDF):
     def __init__(self, provincia=None):
         super().__init__()
         self.provincia = provincia
@@ -149,6 +140,17 @@ class PDF(FPDF):
             print(f"Error al crear la tabla: {e}")
 
 
+def precache_images(paths):
+    """Store image dimensions to avoid repeated calculations."""
+    for path in set(filter(None, paths)):
+        if path not in IMAGE_DIMS_CACHE:
+            try:
+                with Image.open(path) as img:
+                    IMAGE_DIMS_CACHE[path] = img.size
+            except Exception:
+                continue
+
+
 def ficha_provincial_pdf(provincia: str, content: dict, filename):
     # Preload dimensions for all static images to avoid repeated size calculations
     image_paths = [HEADER]
@@ -159,7 +161,7 @@ def ficha_provincial_pdf(provincia: str, content: dict, filename):
     ]
     precache_images(image_paths)
 
-    pdf = PDF(provincia=provincia)
+    pdf = INFORME(provincia=provincia)
     # Agregamos las fuentes
     pdf.add_font("Poppins regular", "", "static/fonts/Poppins/Poppins-Regular.ttf")
     pdf.add_font("Poppins regular", "B", "static/fonts/Poppins/Poppins-Bold.ttf")

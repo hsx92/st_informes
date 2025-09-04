@@ -8,9 +8,9 @@ exporting the report to PDF.
 import streamlit as st
 from streamlit_extras.great_tables import great_tables
 from streamlit_extras.metric_cards import style_metric_cards
-from data_handler import get_provincias
-from pdf_constructor import ficha_provincial_pdf
-from fig_constructor import ficha_provincial_figs, preparar_data_pdf
+from sources import get_provincias
+from pdf_builder import ficha_provincial_pdf
+from ficha_builder import ficha_provincial_figs, preparar_data_pdf
 from css_utils import load_css
 
 
@@ -193,16 +193,13 @@ def panomProvincial():
 
         with infraestructuraTab:
             st.markdown("")
-            col0, col1, col2 = st.columns([.25, 2.5, 7.25], vertical_alignment="center")
-            with col1:
+            colA, colB, colC = st.columns(3)
+            with colB:
                 st.metric(
                     label=f":primary[{DFs['componentes']['kpi_unidades_id_prov']['titulo']}]",
                     value=DFs['componentes']['kpi_unidades_id_prov']['valor'],
                     delta=None,
                 )
-            with col2:
-                st.markdown(f"#### {DFs['componentes']['grafico_unidades_por_inst']['titulo']}")
-                st.markdown(f"{DFs['componentes']['grafico_unidades_por_inst']['subtitulo']}")
 
             st.plotly_chart(DFs['componentes']['grafico_unidades_por_inst']['figura'], use_container_width=True)
             st.caption(f"Fuente: {DFs['componentes']['grafico_unidades_por_inst']['fuente']}")
@@ -348,6 +345,8 @@ def panomProvincial():
 
         style_metric_cards()
         st.markdown("---")
+
+        # --- EXPORTAR PDF ---
         col1, col2, col3 = st.columns(3)
         with col2:
             exportar = st.button("Exportar a PDF", use_container_width=True)
@@ -368,7 +367,9 @@ try:
             st.stop()  # App won't run anything after this line
         elif 'admin' not in st.session_state["roles"] and 'director' not in st.session_state["roles"]:
             st.error('Acceso no autorizado.')
+            st.stop()
         else:
             panomProvincial()
 except AttributeError:
     st.warning("Debe estar logueado para acceder a esta información.")
+    st.stop()

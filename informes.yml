@@ -108,6 +108,7 @@ informe:
           x: "{{ anio }}"
           y: "gran_rubro"
           labels: {"{{ anio }}": "Millones de USD (FOB)", "gran_rubro": "Producto"}
+          color: "gran_rubro"
         layout:
           font_size: 16
           legend_font:
@@ -247,6 +248,7 @@ informe:
           x: "monto_inversion"
           y: "sector_clae"
           labels: {"monto_inversion": "Inversión (mpc)", "sector_clae": "Sector"}
+          color: "sector_clae"
         layout:
           font_size: 16
           legend_font:
@@ -846,6 +848,7 @@ informe:
           y: "nivel_1"
           x: "cantidad"
           labels: {"cantidad": "Unidades de I+D", "nivel_1": "Institución"}
+          color: "nivel_1"
         layout:
           font_size: 16
           legend_font:
@@ -862,7 +865,6 @@ informe:
             tickfont_size: 16
           xaxis:
             ticklabelstandoff: 10
-            dtick: 1
             title:
               font_size: 18
             tickfont_size: 16
@@ -943,7 +945,6 @@ informe:
             tickfont_size: 16
           xaxis:
             ticklabelstandoff: 10
-            dtick: 1
             title:
               font_size: 18
             tickfont_size: 16
