@@ -1,4 +1,4 @@
-"""Streamlit page for displaying provincial dashboards with enhanced logging.
+"""Streamlit page for displaying provincial dashboards.
 
 This module defines the :func:`panomProvincial` function, which renders
 key metrics, tables, and charts for a selected province and allows
@@ -6,891 +6,632 @@ exporting the report to PDF.
 """
 
 import streamlit as st
-import time
 from streamlit_extras.great_tables import great_tables
 from streamlit_extras.metric_cards import style_metric_cards
 from sources import get_provincias
 from pdf_builder import ficha_provincial_pdf
 from ficha_builder import ficha_provincial_figs, preparar_data_pdf
-from css_utils import load_css
-from logging_config import get_logger, setup_logging, log_execution_time
+from css_utils import load_css, get_metric_css
+import logging
+from functools import wraps
+from typing import Optional, Dict
+import time
 
-# Inicializar logging para este módulo
-logger = get_logger(__name__)
-_, audit_logger = setup_logging("SICyT_Portal")
+# Configuración de logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-st.set_page_config(page_title="Portal - SICyT", page_icon=st.secrets["LOGO_CORTO"], layout="wide")
+
+# Decoradores para logging
+def log_performance(func):
+    """Decorator to log function performance metrics."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        logger.info(f"Function '{func.__name__}' took {end_time - start_time:.2f} seconds")
+        return result
+    return wrapper
+
+
+def log_data_access(data_source: str):
+    """Decorator to log data access operations."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            user = st.session_state.get("username", "unknown")
+            provincia = kwargs.get('provincia') or st.session_state.get('provincia', 'unknown')
+            logger.info(f"User '{user}' accessing {data_source} for provincia '{provincia}'")
+            try:
+                result = func(*args, **kwargs)
+                logger.info(f"Data access successful: {data_source}")
+                return result
+            except Exception as e:
+                logger.error(f"Data access failed for {data_source}: {str(e)}")
+                raise
+        return wrapper
+    return decorator
+
+
+def log_export_action(format_type: str):
+    """Log export/download actions."""
+    user = st.session_state.get("username", "unknown")
+    provincia = st.session_state.get('provincia', 'unknown')
+    logger.info(f"User '{user}' exported {format_type} for provincia '{provincia}'")
+
+
+# Configuración de la página
+st.set_page_config(
+    page_title="Fichas Provinciales - SICyT",
+    page_icon=st.secrets["LOGO_CORTO"],
+    layout="wide"
+)
 st.logo(image=st.secrets["LOGO_LARGO"], size="large")
 
-# ---- CSS ----
-try:
-    custom_streamlit_css = """
-        div[data-testid="stMetricValue"] > div {
-            color: #354B6E;
-        }
-        div[data-testid="stMetricDelta"] > div {
-            color: #FFFFFF;
-        }
-        """
-    icon_css = load_css("static/iconos/dist/css/icono-arg.css")
-    combined_css = f"""
-    <style>
-    {icon_css}
-    {custom_streamlit_css}
-    </style>
-    """
-    
-    # Inyectar el CSS en la aplicación
-    st.markdown(combined_css, unsafe_allow_html=True)
-    logger.debug("CSS cargado correctamente para Fichas Provinciales")
-    
-except Exception as e:
-    logger.error(f"Error al cargar CSS: {e}")
-    st.warning("Algunos estilos podrían no cargarse correctamente")
+# ---- CSS MEJORADO ----
+icon_css = load_css("static/iconos/dist/css/icono-arg.css")
+metric_css = get_metric_css("dark")
+
+# CSS adicional específico para esta página
+page_specific_css = """
+/* Tabs mejorados */
+.stTabs [data-baseweb="tab-list"] {
+    background-color: rgba(53, 75, 110, 0.3);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    color: #B4C6DB;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.stTabs [aria-selected="false"][data-baseweb="tab"]:hover {
+    background-color: #54698B !important;
+    color: #FFFFFF !important;
+    border-radius: 4px;
+}
+
+/* Selectbox mejorado */
+.stSelectbox > div > div {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid #7589A3 !important;
+}
+
+/* Captions con mejor visibilidad */
+.stCaption {
+    color: #8B9DC3 !important;
+    font-style: italic;
+    font-size: 0.85rem;
+}
+
+/* Contenedor de métricas mejorado */
+div[data-testid="metric-container"] {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(117, 137, 163, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+div[data-testid="metric-container"]:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-color: rgba(117, 137, 163, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Headers mejorados */
+h2 {
+    color: #E3E7ED !important;
+    border-bottom: 2px solid #54698B;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Botón de exportar con estilo destacado */
+.export-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    border: none !important;
+    padding: 0.75rem 2rem !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+    transition: all 0.3s ease !important;
+}
+
+.export-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6) !important;
+}
+
+/* Loading spinner mejorado */
+.stSpinner > div {
+    border-color: #7DD3C0 !important;
+}
+"""
+
+combined_css = f"""
+<style>
+{icon_css}
+{metric_css}
+{page_specific_css}
+</style>
+"""
+
+# Inyectar el CSS en la aplicación
+st.markdown(combined_css, unsafe_allow_html=True)
 
 
-# ---- MAINPAGE ----
-@log_execution_time
-def panomProvincial():
-    """Render the provincial dashboard page with full logging support.
+# ---- FUNCIONES AUXILIARES ----
 
-    Loads provincial data, displays metrics and tables, and provides the
-    option to export the report as a PDF.
-
-    Returns:
-        None: This function renders the page but does not return a value.
-    """
-    logger.info("Iniciando renderizado de Fichas Provinciales")
-    
+@log_performance
+@log_data_access("provincial_data")
+def load_provincial_data(provincia_id: int, provincia: str, anio: str) -> Optional[Dict]:
+    """Load and process provincial data with error handling and logging."""
     try:
-        # Cargar datos de provincias
-        provinciasDF = get_provincias()
-        logger.debug(f"Cargadas {len(provinciasDF)} provincias")
-
-        col1, col2 = st.columns([1, 9], vertical_alignment='center')
-
-        with col1:
-            st.markdown("""
-                <div class="icon-container">
-                    <i class="icono-arg-ciencia-publicacion" style="font-size: 60px;"></i>
-                </div>
-                """, unsafe_allow_html=True)
-        with col2:
-            st.header("Ficha provincial")
-            st.write("Secretaría de Innovación, Ciencia y Tecnología")
-
-        st.markdown("""---""")
-
-        provincia = st.selectbox(
-            "Seleccione una provincia:",
-            options=provinciasDF['nombre_iso'].sort_values(),
-            label_visibility="collapsed",
-            index=None,
-            placeholder="Seleccione una provincia para visualizar los datos"
-        )
-
-        if provincia:
-            # Log de acceso a datos provinciales
-            logger.info(f"Usuario seleccionó provincia: {provincia}")
-            
-            # Configurar variables de sesión
-            st.session_state.provincia = provinciasDF[provinciasDF['nombre_iso'] == provincia]['provincia'].values[0]
-            st.session_state.provincia_id = provinciasDF[provinciasDF['nombre_iso'] == provincia]['id'].values[0]
-            st.session_state.region = provinciasDF[provinciasDF['nombre_iso'] == provincia]['region'].values[0]
-            st.session_state.pais = 'Argentina'
-            st.session_state.anio = '2023'
-            
-            # Auditar acceso a datos
-            audit_logger.log_data_access(
-                provincia_id=st.session_state.provincia_id,
-                data_type="ficha_provincial"
+        with st.spinner(f"Cargando datos para {provincia}..."):
+            DFs = ficha_provincial_figs(
+                provincia_id=provincia_id,
+                provincia=provincia,
+                anio=anio
             )
-            
-            # Indicadores de progreso
-            progress_bar = st.progress(0)
-            status_text = st.empty()
-            
-            try:
-                status_text.text("🔄 Cargando datos de la provincia...")
-                progress_bar.progress(10)
-                logger.debug(f"Iniciando carga de datos para {provincia}")
-                
-                # Medir tiempo de carga
-                start_time = time.time()
-                
-                # Cache de datos con logging
-                @st.cache_data(ttl=3600, show_spinner=False)
-                def load_provincial_data(provincia_id, provincia, anio):
-                    logger.debug(f"Cargando datos desde caché o BD para provincia_id={provincia_id}")
-                    return ficha_provincial_figs(
-                        provincia_id=provincia_id,
-                        provincia=provincia,
-                        anio=anio
-                    )
-                
-                progress_bar.progress(30)
-                status_text.text("📊 Generando visualizaciones...")
-                
-                DFs = load_provincial_data(
-                    st.session_state.provincia_id,
-                    st.session_state.provincia,
-                    st.session_state.anio
-                )
-                
-                load_time = time.time() - start_time
-                logger.info(f"Datos cargados para {provincia} en {load_time:.2f} segundos")
-                
-                progress_bar.progress(90)
-                status_text.text("✅ Datos cargados exitosamente")
-                time.sleep(0.5)
-                
-                # Limpiar indicadores
-                progress_bar.empty()
-                status_text.empty()
-                
-                # Log de componentes cargados
-                componentes_con_datos = sum(
-                    1 for c in DFs['componentes'].values()
-                    if c.get('figura') is not None or c.get('valor') is not None
-                )
-                logger.info(f"Componentes con datos: {componentes_con_datos}/{len(DFs['componentes'])}")
-
-                st.markdown(f"## {provincia}")
-
-                # Crear tabs con manejo de errores
-                try:
-                    indicadoresTab, inversionTab, proyectosTab, infraestructuraTab, capitalHumanoTab, resultadosTab, ciencia_sociedadTab = st.tabs(
-                        ["Indicadores de contexto", "Inversión en I+D", "Proyectos", "Infraestructura", "Capital Humano", "Resultados", "Ciencia y Sociedad"]
-                    )
-                    
-                    # TAB: Indicadores de Contexto
-                    with indicadoresTab:
-                        render_indicadores_tab(DFs)
-                    
-                    # TAB: Inversión en I+D
-                    with inversionTab:
-                        render_inversion_tab(DFs)
-                    
-                    # TAB: Proyectos
-                    with proyectosTab:
-                        render_proyectos_tab(DFs)
-                    
-                    # TAB: Infraestructura
-                    with infraestructuraTab:
-                        render_infraestructura_tab(DFs)
-                    
-                    # TAB: Capital Humano
-                    with capitalHumanoTab:
-                        render_capital_humano_tab(DFs)
-                    
-                    # TAB: Resultados
-                    with resultadosTab:
-                        render_resultados_tab(DFs)
-                    
-                    # TAB: Ciencia y Sociedad
-                    with ciencia_sociedadTab:
-                        render_ciencia_sociedad_tab(DFs)
-                    
-                    style_metric_cards()
-                    
-                except Exception as e:
-                    logger.error(f"Error renderizando tabs: {e}", exc_info=True)
-                    st.error("Error al mostrar algunos componentes. Por favor recargue la página.")
-
-                st.markdown("---")
-
-                # --- EXPORTAR PDF con logging ---
-                col1, col2, col3 = st.columns(3)
-                with col2:
-                    exportar = st.button("Exportar a PDF", use_container_width=True)
-                    if exportar:
-                        try:
-                            logger.info(f"Iniciando exportación PDF para {st.session_state.provincia}")
-                            
-                            with st.spinner("Generando PDF..."):
-                                start_pdf = time.time()
-                                
-                                data = preparar_data_pdf(DFs)
-                                filename = f"output/Ficha Provincial - {st.session_state.provincia}.pdf"
-                                ficha_provincial_pdf(st.session_state.provincia, data, filename)
-                                
-                                pdf_time = time.time() - start_pdf
-                                
-                                # Auditar exportación
-                                audit_logger.log_export(
-                                    provincia=st.session_state.provincia,
-                                    format="PDF"
-                                )
-                                
-                                logger.info(f"PDF generado exitosamente en {pdf_time:.2f} segundos: {filename}")
-                                st.success("✅ PDF exportado exitosamente")
-                                
-                                # Ofrecer descarga
-                                with open(filename, "rb") as pdf_file:
-                                    st.download_button(
-                                        label="📥 Descargar PDF",
-                                        data=pdf_file.read(),
-                                        file_name=filename.split('/')[-1],
-                                        mime="application/pdf"
-                                    )
-                                    
-                        except Exception as e:
-                            logger.error(f"Error al generar PDF: {e}", exc_info=True)
-                            st.error("⚠️ Error al generar el PDF. Por favor intente nuevamente.")
-                            
-            except Exception as e:
-                progress_bar.empty()
-                status_text.empty()
-                logger.error(f"Error cargando datos para {provincia}: {e}", exc_info=True)
-                st.error("⚠️ Error al cargar los datos de la provincia.")
-                st.info("Por favor, intente con otra provincia o contacte al administrador.")
-                
+        logger.info(f"Successfully loaded data for {provincia} ({provincia_id})")
+        return DFs
     except Exception as e:
-        logger.critical(f"Error crítico en panomProvincial: {e}", exc_info=True)
-        st.error("Error crítico en la aplicación. Por favor contacte al administrador.")
+        logger.error(f"Failed to load data for {provincia}: {str(e)}")
+        st.error(f"Error al cargar los datos de {provincia}. Por favor, intente nuevamente.")
+        return None
 
 
-# Funciones auxiliares para renderizar cada tab
-def render_indicadores_tab(DFs):
-    """Renderiza el tab de indicadores con logging de errores"""
-    try:
-        st.markdown("")
-        col1, col2, col3, col4, col5 = st.columns([1, 3.75, .5, 3.75, 1])
-        
-        # Renderizar métricas con validación
-        with col2:
-            for kpi_name in ['kpi_poblacion_prov', 'kpi_tasa_actividad_prov', 'kpi_tasa_desempleo_prov']:
-                try:
-                    kpi = DFs['componentes'].get(kpi_name, {})
-                    if kpi:
-                        st.metric(
-                            label=f":primary[{kpi.get('titulo', 'N/A')}]",
-                            value=kpi.get('valor', 'N/A'),
-                            delta=None,
-                        )
-                except Exception as e:
-                    logger.warning(f"Error mostrando KPI {kpi_name}: {e}")
-                    st.metric(label=":primary[Error]", value="N/A")
-        
-        with col4:
-            for kpi_name in ['kpi_densidad_prov', 'kpi_tasa_actividad_nac', 'kpi_tasa_desempleo_nac']:
-                try:
-                    kpi = DFs['componentes'].get(kpi_name, {})
-                    if kpi:
-                        st.metric(
-                            label=f":primary[{kpi.get('titulo', 'N/A')}]",
-                            value=kpi.get('valor', 'N/A'),
-                            delta=None,
-                        )
-                except Exception as e:
-                    logger.warning(f"Error mostrando KPI {kpi_name}: {e}")
-                    st.metric(label=":primary[Error]", value="N/A")
-
-        # Mostrar fuente
-        if DFs['componentes'].get('kpi_tasa_actividad_nac'):
-            st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_actividad_nac'].get('fuente', 'N/A')}")
-        st.markdown("")
-        
-        # Gráfico con validación
-        try:
-            if DFs['componentes'].get('grafico_expo_top5', {}).get('figura'):
-                st.plotly_chart(DFs['componentes']['grafico_expo_top5']['figura'], use_container_width=True)
-                st.caption(f"Fuente: {DFs['componentes']['grafico_expo_top5'].get('fuente', 'N/A')}")
-            else:
-                st.info("Gráfico de exportaciones no disponible")
-        except Exception as e:
-            logger.error(f"Error mostrando gráfico expo_top5: {e}")
-            st.warning("No se pudo cargar el gráfico de exportaciones")
-            
-    except Exception as e:
-        logger.error(f"Error en tab de indicadores: {e}", exc_info=True)
-        st.error("Error al cargar indicadores de contexto")
-
-
-def render_inversion_tab(DFs):
-    """Renderiza el tab de inversión con manejo de errores"""
-    try:
-        graficos = [
-            'grafico_evolucion_regional',
-            'grafico_inv_por_investigador',
-            'grafico_inv_empresaria_sector'
-        ]
-        
-        for grafico_name in graficos:
-            try:
-                grafico = DFs['componentes'].get(grafico_name, {})
-                if grafico.get('figura'):
-                    st.plotly_chart(grafico['figura'], use_container_width=True)
-                    st.caption(f"Fuente: {grafico.get('fuente', 'N/A')}")
-                    st.markdown("")
-                else:
-                    logger.warning(f"Gráfico {grafico_name} no tiene figura")
-                    
-            except Exception as e:
-                logger.error(f"Error mostrando gráfico {grafico_name}: {e}")
-                st.warning("No se pudo cargar el gráfico")
-                
-    except Exception as e:
-        logger.error(f"Error en tab de inversión: {e}", exc_info=True)
-        st.error("Error al cargar datos de inversión")
-
-
-def render_proyectos_tab(DFs):
-    """Renderiza el tab de proyectos con manejo robusto de errores"""
-    try:
-        logger.debug("Renderizando tab de proyectos")
-        st.markdown("")
-        
-        # KPIs en 3 columnas
-        col1, col2, col3 = st.columns(3)
-        
-        # KPIs Provinciales
-        with col1:
-            try:
-                for kpi_name in ['kpi_pfi_provincial', 'kpi_porc_privada_provincial']:
-                    kpi = DFs['componentes'].get(kpi_name, {})
-                    if kpi and kpi.get('titulo') and kpi.get('valor'):
-                        st.metric(
-                            label=f":primary[{kpi['titulo']}]",
-                            value=kpi['valor'],
-                            delta=None,
-                        )
-                        logger.debug(f"KPI {kpi_name} renderizado: {kpi['valor']}")
-                    else:
-                        logger.warning(f"KPI {kpi_name} sin datos completos")
-                        st.metric(label=":primary[Sin datos]", value="N/A")
-            except Exception as e:
-                logger.error(f"Error mostrando KPIs provinciales: {e}")
-                st.metric(label=":primary[Error]", value="N/A")
-        
-        # KPIs Regionales
-        with col2:
-            try:
-                for kpi_name in ['kpi_pfi_regional', 'kpi_porc_privada_regional']:
-                    kpi = DFs['componentes'].get(kpi_name, {})
-                    if kpi and kpi.get('titulo') and kpi.get('valor'):
-                        st.metric(
-                            label=f":primary[{kpi['titulo']}]",
-                            value=kpi['valor'],
-                            delta=None,
-                        )
-                        logger.debug(f"KPI {kpi_name} renderizado: {kpi['valor']}")
-                    else:
-                        logger.warning(f"KPI {kpi_name} sin datos completos")
-                        st.metric(label=":primary[Sin datos]", value="N/A")
-            except Exception as e:
-                logger.error(f"Error mostrando KPIs regionales: {e}")
-                st.metric(label=":primary[Error]", value="N/A")
-        
-        # KPIs Nacionales
-        with col3:
-            try:
-                for kpi_name in ['kpi_pfi_nacional', 'kpi_porc_privada_nacional']:
-                    kpi = DFs['componentes'].get(kpi_name, {})
-                    if kpi and kpi.get('titulo') and kpi.get('valor'):
-                        st.metric(
-                            label=f":primary[{kpi['titulo']}]",
-                            value=kpi['valor'],
-                            delta=None,
-                        )
-                        logger.debug(f"KPI {kpi_name} renderizado: {kpi['valor']}")
-                    else:
-                        logger.warning(f"KPI {kpi_name} sin datos completos")
-                        st.metric(label=":primary[Sin datos]", value="N/A")
-            except Exception as e:
-                logger.error(f"Error mostrando KPIs nacionales: {e}")
-                st.metric(label=":primary[Error]", value="N/A")
-        
-        # Caption y nota
-        st.caption("*PFI: Proyectos Federales de Innovación")
-        if DFs['componentes'].get('kpi_pfi_provincial', {}).get('fuente'):
-            st.caption(f"Fuente: {DFs['componentes']['kpi_pfi_provincial']['fuente']}")
-        st.markdown("")
-        
-        # Tabla de proyectos PFI
-        try:
-            tabla_pfi = DFs['componentes'].get('tabla_pfi_cruce', {})
-            if tabla_pfi.get('figura') is not None:
-                logger.debug("Mostrando tabla PFI cruce")
-                great_tables(tabla_pfi['figura'])
-                if tabla_pfi.get('fuente'):
-                    st.caption(f"Fuente: {tabla_pfi['fuente']}")
-                st.markdown("")
-            else:
-                logger.info("No hay datos disponibles para tabla PFI")
-                st.info("📊 No hay datos de proyectos PFI disponibles para esta provincia")
-        except Exception as e:
-            logger.error(f"Error mostrando tabla PFI: {e}")
-            st.warning("No se pudo cargar la tabla de proyectos")
-            
-    except Exception as e:
-        logger.error(f"Error crítico en tab de proyectos: {e}", exc_info=True)
-        st.error("Error al cargar datos de proyectos. Por favor, intente recargar la página.")
-
-
-def render_infraestructura_tab(DFs):
-    """Renderiza el tab de infraestructura con validación completa"""
-    try:
-        logger.debug("Renderizando tab de infraestructura")
-        st.markdown("")
-        
-        # KPI principal centrado
-        colA, colB, colC = st.columns(3)
-        with colB:
-            try:
-                kpi_unidades = DFs['componentes'].get('kpi_unidades_id_prov', {})
-                if kpi_unidades and kpi_unidades.get('titulo') and kpi_unidades.get('valor'):
-                    st.metric(
-                        label=f":primary[{kpi_unidades['titulo']}]",
-                        value=kpi_unidades['valor'],
-                        delta=None,
-                    )
-                    logger.debug(f"KPI unidades I+D: {kpi_unidades['valor']}")
-                else:
-                    logger.warning("KPI unidades I+D sin datos")
-                    st.metric(label=":primary[Unidades I+D]", value="N/A")
-            except Exception as e:
-                logger.error(f"Error mostrando KPI unidades: {e}")
-                st.metric(label=":primary[Error]", value="N/A")
-        
-        # Gráfico de unidades por institución
-        try:
-            grafico_unidades = DFs['componentes'].get('grafico_unidades_por_inst', {})
-            if grafico_unidades.get('figura'):
-                logger.debug("Mostrando gráfico de unidades por institución")
-                st.plotly_chart(grafico_unidades['figura'], use_container_width=True)
-                if grafico_unidades.get('fuente'):
-                    st.caption(f"Fuente: {grafico_unidades['fuente']}")
-            else:
-                logger.info("Gráfico de unidades no disponible")
-                st.info("📊 Gráfico de unidades por institución no disponible")
-        except Exception as e:
-            logger.error(f"Error mostrando gráfico de unidades: {e}")
-            st.warning("No se pudo cargar el gráfico de unidades")
-        
-        st.markdown("---")
-        
-        # KPIs de equipos en 3 columnas
-        col1, col2, col3 = st.columns(3)
-        
-        kpis_equipos = [
-            ('kpi_equipos_provincial', col1),
-            ('kpi_equipos_regional', col2),
-            ('kpi_equipos_nacional', col3)
-        ]
-        
-        for kpi_name, column in kpis_equipos:
-            with column:
-                try:
-                    kpi = DFs['componentes'].get(kpi_name, {})
-                    if kpi and kpi.get('titulo') and kpi.get('valor'):
-                        st.metric(
-                            label=f":primary[{kpi['titulo']}]",
-                            value=kpi['valor'],
-                            delta=None,
-                        )
-                        logger.debug(f"KPI {kpi_name}: {kpi['valor']}")
-                    else:
-                        logger.warning(f"KPI {kpi_name} sin datos")
-                        st.metric(label=":primary[Equipos I+D]", value="N/A")
-                except Exception as e:
-                    logger.error(f"Error mostrando KPI {kpi_name}: {e}")
-                    st.metric(label=":primary[Error]", value="N/A")
-        
-        # Fuente de equipos
-        if DFs['componentes'].get('kpi_equipos_nacional', {}).get('fuente'):
-            st.caption(f"Fuente: {DFs['componentes']['kpi_equipos_nacional']['fuente']}")
-        st.markdown("")
-        
-        # Gráfico de equipos por tipo
-        try:
-            grafico_equipos = DFs['componentes'].get('grafico_equipos_por_tipo', {})
-            if grafico_equipos.get('figura'):
-                logger.debug("Mostrando gráfico de equipos por tipo")
-                st.plotly_chart(grafico_equipos['figura'], use_container_width=True)
-                if grafico_equipos.get('fuente'):
-                    st.caption(f"Fuente: {grafico_equipos['fuente']}")
-            else:
-                logger.info("Gráfico de equipos no disponible")
-                st.info("📊 Gráfico de equipos por tipo no disponible")
-        except Exception as e:
-            logger.error(f"Error mostrando gráfico de equipos: {e}")
-            st.warning("No se pudo cargar el gráfico de equipos")
-            
-    except Exception as e:
-        logger.error(f"Error crítico en tab de infraestructura: {e}", exc_info=True)
-        st.error("Error al cargar datos de infraestructura. Por favor, intente recargar la página.")
-
-
-def render_capital_humano_tab(DFs):
-    """Renderiza el tab de capital humano con validación y logging"""
-    try:
-        logger.debug("Renderizando tab de capital humano")
-        st.markdown("")
-        
-        # Gráfico de distribución de investigadores
-        try:
-            grafico_dist = DFs['componentes'].get('grafico_distribucion_investigadores', {})
-            if grafico_dist.get('figura'):
-                logger.debug("Mostrando gráfico de distribución de investigadores")
-                st.plotly_chart(grafico_dist['figura'], use_container_width=True)
-                if grafico_dist.get('fuente'):
-                    st.caption(f"Fuente: {grafico_dist['fuente']}")
-            else:
-                logger.info("Gráfico de distribución no disponible")
-                st.info("📊 Distribución de investigadores no disponible")
-        except Exception as e:
-            logger.error(f"Error mostrando gráfico de distribución: {e}")
-            st.warning("No se pudo cargar el gráfico de distribución")
-        
-        st.markdown("")
-        
-        # KPIs de investigadores por PEA
-        col1, col2, col3 = st.columns(3, border=True)
-        
-        # KPI Provincial
-        with col1:
-            try:
-                st.markdown(f"#### {st.session_state.get('provincia', 'Provincia')}")
-                kpi = DFs['componentes'].get('kpi_tasa_pea_provincial', {})
-                if kpi and kpi.get('valor'):
-                    st.metric(
-                        label=":primary[Investigadores cada 1000 habs.]",
-                        value=kpi['valor'],
-                        delta=None,
-                    )
-                    logger.debug(f"KPI PEA provincial: {kpi['valor']}")
-                else:
-                    logger.warning("KPI PEA provincial sin datos")
-                    st.metric(label=":primary[Investigadores cada 1000 habs.]", value="N/A")
-            except Exception as e:
-                logger.error(f"Error mostrando KPI PEA provincial: {e}")
-                st.metric(label=":primary[Error]", value="N/A")
-        
-        # KPI Regional
-        with col2:
-            try:
-                st.markdown(f"#### {st.session_state.get('region', 'Región')}")
-                kpi = DFs['componentes'].get('kpi_tasa_pea_regional', {})
-                if kpi and kpi.get('valor'):
-                    st.metric(
-                        label=":primary[Investigadores cada 1000 habs.]",
-                        value=kpi['valor'],
-                        delta=None,
-                    )
-                    logger.debug(f"KPI PEA regional: {kpi['valor']}")
-                else:
-                    logger.warning("KPI PEA regional sin datos")
-                    st.metric(label=":primary[Investigadores cada 1000 habs.]", value="N/A")
-            except Exception as e:
-                logger.error(f"Error mostrando KPI PEA regional: {e}")
-                st.metric(label=":primary[Error]", value="N/A")
-        
-        # KPI Nacional
-        with col3:
-            try:
-                st.markdown(f"#### {st.session_state.get('pais', 'Argentina')}")
-                kpi = DFs['componentes'].get('kpi_tasa_pea_nacional', {})
-                if kpi and kpi.get('valor'):
-                    st.metric(
-                        label=":primary[Investigadores cada 1000 habs.]",
-                        value=kpi['valor'],
-                        delta=None
-                    )
-                    logger.debug(f"KPI PEA nacional: {kpi['valor']}")
-                else:
-                    logger.warning("KPI PEA nacional sin datos")
-                    st.metric(label=":primary[Investigadores cada 1000 habs.]", value="N/A")
-            except Exception as e:
-                logger.error(f"Error mostrando KPI PEA nacional: {e}")
-                st.metric(label=":primary[Error]", value="N/A")
-        
-        # Fuente
-        if DFs['componentes'].get('kpi_tasa_pea_nacional', {}).get('fuente'):
-            st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_pea_nacional']['fuente']}")
-        st.markdown("")
-        
-        # Tabla de personas por función
-        try:
-            tabla_personas = DFs['componentes'].get('tabla_personas_por_funcion', {})
-            if tabla_personas.get('figura') is not None:
-                logger.debug("Mostrando tabla de personas por función")
-                great_tables(tabla_personas['figura'])
-                if tabla_personas.get('fuente'):
-                    st.caption(f"Fuente: {tabla_personas['fuente']}")
-                st.markdown("---")
-            else:
-                logger.info("Tabla de personas por función no disponible")
-        except Exception as e:
-            logger.error(f"Error mostrando tabla de personas: {e}")
-            st.info("📊 Tabla de personal no disponible")
-        
-        # Gráfico de evolución de investigadores
-        try:
-            grafico_evol = DFs['componentes'].get('grafico_evolucion_investigadores', {})
-            if grafico_evol.get('figura'):
-                logger.debug("Mostrando gráfico de evolución de investigadores")
-                st.plotly_chart(grafico_evol['figura'])
-                if grafico_evol.get('fuente'):
-                    st.caption(f"Fuente: {grafico_evol['fuente']}")
-            else:
-                logger.info("Gráfico de evolución no disponible")
-                st.info("📊 Evolución de investigadores no disponible")
-        except Exception as e:
-            logger.error(f"Error mostrando gráfico de evolución: {e}")
-            st.warning("No se pudo cargar el gráfico de evolución")
-            
-    except Exception as e:
-        logger.error(f"Error crítico en tab de capital humano: {e}", exc_info=True)
-        st.error("Error al cargar datos de capital humano. Por favor, intente recargar la página.")
-
-
-def render_resultados_tab(DFs):
-    """Renderiza el tab de resultados con manejo completo de errores"""
-    try:
-        logger.debug("Renderizando tab de resultados")
-        st.markdown("")
-        
-        # Sección de Exportaciones
-        graficos_exportaciones = [
-            ('grafico_expo_intensidad', 'Composición de exportaciones'),
-            ('grafico_expo_evolucion', 'Evolución de exportaciones'),
-            ('grafico_expo_destino', 'Destino de exportaciones')
-        ]
-        
-        for grafico_name, descripcion in graficos_exportaciones:
-            try:
-                grafico = DFs['componentes'].get(grafico_name, {})
-                if grafico.get('figura'):
-                    logger.debug(f"Mostrando {descripcion}")
-                    st.plotly_chart(grafico['figura'])
-                    if grafico.get('fuente'):
-                        st.caption(f"Fuente: {grafico['fuente']}")
-                    st.markdown("")
-                else:
-                    logger.info(f"{descripcion} no disponible")
-            except Exception as e:
-                logger.error(f"Error mostrando {grafico_name}: {e}")
-                st.warning(f"No se pudo cargar {descripcion.lower()}")
-        
-        st.markdown("---")
-        
-        # Sección de Patentes - KPIs
-        col1, col2, col3 = st.columns([6, 1, 3], vertical_alignment="center")
-        
-        try:
-            # KPI Provincial
-            with col1:
-                kpi_prov = DFs['componentes'].get('kpi_patentes_cyt_prov', {})
-                if kpi_prov and kpi_prov.get('titulo') and kpi_prov.get('valor'):
-                    st.metric(
-                        label=f":primary[{kpi_prov['titulo']}]",
-                        value=kpi_prov['valor'],
-                        delta=None,
-                    )
-                    logger.debug(f"KPI patentes provincial: {kpi_prov['valor']}")
-                else:
-                    logger.warning("KPI patentes provincial sin datos")
-                    st.metric(label=":primary[Patentes provinciales]", value="N/A")
-        except Exception as e:
-            logger.error(f"Error en KPI patentes provincial: {e}")
-        
-        col1b, col2b, col3b = st.columns([2, 6, 2])
-        try:
-            # KPI CyT Argentina
-            with col2b:
-                kpi_cyt = DFs['componentes'].get('kpi_patentes_cyt_arg', {})
-                if kpi_cyt and kpi_cyt.get('titulo') and kpi_cyt.get('valor'):
-                    st.metric(
-                        label=f":primary[{kpi_cyt['titulo']}]",
-                        value=kpi_cyt['valor'],
-                        delta=None
-                    )
-                    logger.debug(f"KPI patentes CyT: {kpi_cyt['valor']}")
-                else:
-                    logger.warning("KPI patentes CyT sin datos")
-                    st.metric(label=":primary[Patentes CyT Argentina]", value="N/A")
-        except Exception as e:
-            logger.error(f"Error en KPI patentes CyT: {e}")
-        
-        col1c, col2c, col3c = st.columns([2, 2, 6])
-        try:
-            # KPI Argentina total
-            with col3c:
-                kpi_arg = DFs['componentes'].get('kpi_patentes_arg', {})
-                if kpi_arg and kpi_arg.get('titulo') and kpi_arg.get('valor'):
-                    st.metric(
-                        label=f":primary[{kpi_arg['titulo']}]",
-                        value=kpi_arg['valor'],
-                        delta=None
-                    )
-                    logger.debug(f"KPI patentes Argentina: {kpi_arg['valor']}")
-                else:
-                    logger.warning("KPI patentes Argentina sin datos")
-                    st.metric(label=":primary[Patentes Argentina]", value="N/A")
-        except Exception as e:
-            logger.error(f"Error en KPI patentes Argentina: {e}")
-        
-        # Fuente de patentes
-        if DFs['componentes'].get('kpi_patentes_arg', {}).get('fuente'):
-            st.caption(f"Fuente: {DFs['componentes']['kpi_patentes_arg']['fuente']}")
-        st.markdown("---")
-        
-        # Gráfico de evolución de patentes
-        try:
-            grafico_patentes = DFs['componentes'].get('grafico_patentes_evolucion', {})
-            if grafico_patentes.get('figura') is not None:
-                logger.debug("Mostrando evolución de patentes")
-                st.plotly_chart(grafico_patentes['figura'])
-                if grafico_patentes.get('fuente'):
-                    st.caption(f"Fuente: {grafico_patentes['fuente']}")
-                st.markdown("---")
-            else:
-                logger.info("Gráfico de patentes no disponible")
-        except Exception as e:
-            logger.error(f"Error mostrando evolución de patentes: {e}")
-        
-        # Tabla de patentes por sector
-        try:
-            tabla_patentes = DFs['componentes'].get('tabla_patentes_sector', {})
-            if tabla_patentes.get('figura') is not None:
-                logger.debug("Mostrando tabla de patentes por sector")
-                great_tables(tabla_patentes['figura'])
-                if tabla_patentes.get('fuente'):
-                    st.caption(f"Fuente: {tabla_patentes['fuente']}")
-                st.markdown("---")
-            else:
-                logger.info("Tabla de patentes no disponible")
-        except Exception as e:
-            logger.error(f"Error mostrando tabla de patentes: {e}")
-        
-        # Sección de Producción Científica
-        graficos_produccion = [
-            ('grafico_produccion_evolucion', 'Evolución de producción científica'),
-            ('grafico_produccion_tipo', 'Distribución por tipo de publicación'),
-            ('grafico_publicaciones_area', 'Publicaciones por área de conocimiento')
-        ]
-        
-        for grafico_name, descripcion in graficos_produccion:
-            try:
-                grafico = DFs['componentes'].get(grafico_name, {})
-                if grafico.get('figura'):
-                    logger.debug(f"Mostrando {descripcion}")
-                    st.plotly_chart(grafico['figura'])
-                    if grafico.get('fuente'):
-                        st.caption(f"Fuente: {grafico['fuente']}")
-                    st.markdown("---")
-                else:
-                    logger.info(f"{descripcion} no disponible")
-            except Exception as e:
-                logger.error(f"Error mostrando {grafico_name}: {e}")
-                st.warning(f"No se pudo cargar {descripcion.lower()}")
-        
-        # Tabla de artículos Q1/Q2
-        try:
-            tabla_articulos = DFs['componentes'].get('tabla_articulos_q1_q2', {})
-            if tabla_articulos.get('figura') is not None:
-                logger.debug("Mostrando tabla de artículos Q1/Q2")
-                great_tables(tabla_articulos['figura'])
-                if tabla_articulos.get('fuente'):
-                    st.caption(f"Fuente: {tabla_articulos['fuente']}")
-            else:
-                logger.info("Tabla de artículos Q1/Q2 no disponible")
-        except Exception as e:
-            logger.error(f"Error mostrando tabla de artículos: {e}")
-            
-    except Exception as e:
-        logger.error(f"Error crítico en tab de resultados: {e}", exc_info=True)
-        st.error("Error al cargar datos de resultados. Por favor, intente recargar la página.")
-
-
-def render_ciencia_sociedad_tab(DFs):
-    """Renderiza el tab de ciencia y sociedad con validación"""
-    try:
-        logger.debug("Renderizando tab de ciencia y sociedad")
-        st.markdown("")
-        
-        # Gráfico de percepción de temas prioritarios
-        try:
-            grafico_temas = DFs['componentes'].get('grafico_percepcion_temas_prioritarios', {})
-            if grafico_temas.get('figura'):
-                logger.debug("Mostrando gráfico de percepción de temas prioritarios")
-                st.plotly_chart(grafico_temas['figura'], use_container_width=True)
-                if grafico_temas.get('fuente'):
-                    st.caption(f"Fuente: {grafico_temas['fuente']}")
-                st.markdown("---")
-            else:
-                logger.info("Gráfico de temas prioritarios no disponible")
-                st.info("📊 Datos de percepción sobre temas prioritarios no disponibles")
-        except Exception as e:
-            logger.error(f"Error mostrando gráfico de temas prioritarios: {e}")
-            st.warning("No se pudo cargar el gráfico de temas prioritarios")
-        
-        # Gráfico de percepción sobre calidad de vida
-        try:
-            grafico_calidad = DFs['componentes'].get('grafico_percepcion_calidad_vida', {})
-            if grafico_calidad.get('figura'):
-                logger.debug("Mostrando gráfico de percepción de calidad de vida")
-                st.plotly_chart(grafico_calidad['figura'], use_container_width=True)
-                if grafico_calidad.get('fuente'):
-                    st.caption(f"Fuente: {grafico_calidad['fuente']}")
-                st.markdown("")
-            else:
-                logger.info("Gráfico de calidad de vida no disponible")
-                st.info("📊 Datos de percepción sobre calidad de vida no disponibles")
-        except Exception as e:
-            logger.error(f"Error mostrando gráfico de calidad de vida: {e}")
-            st.warning("No se pudo cargar el gráfico de calidad de vida")
-        
-        # Información adicional o mensaje si no hay datos
-        componentes_disponibles = sum(
-            1 for comp in ['grafico_percepcion_temas_prioritarios', 'grafico_percepcion_calidad_vida']
-            if DFs['componentes'].get(comp, {}).get('figura')
+def render_metric_with_icon(icon: str, title: str, value: str, delta: str = None, help_text: str = None):
+    """Render a metric with an icon and optional help text."""
+    col1, col2 = st.columns([1, 11])
+    with col1:
+        st.markdown(
+            f'<i class="{icon}" style="font-size: 24px; color: #7DD3C0;"></i>',
+            unsafe_allow_html=True
         )
-        
-        if componentes_disponibles == 0:
-            st.info("""
-            📊 **Sección en desarrollo**
-            
-            Los datos de percepción ciudadana sobre ciencia y tecnología están siendo recolectados
-            y estarán disponibles próximamente.
-            """)
-            logger.info("Tab ciencia y sociedad sin datos disponibles")
+    with col2:
+        if help_text:
+            st.metric(label=f":primary[{title}]", value=value, delta=delta, help=help_text)
         else:
-            logger.info(f"Tab ciencia y sociedad con {componentes_disponibles} componentes disponibles")
+            st.metric(label=f":primary[{title}]", value=value, delta=delta)
+
+
+def render_chart_with_source(component: Dict, use_container_width: bool = True):
+    """Render a chart with its source caption."""
+    if component.get('figura') is not None:
+        st.plotly_chart(component['figura'], use_container_width=use_container_width)
+        if component.get('fuente'):
+            st.caption(f"Fuente: {component['fuente']}")
+
+
+def render_table_with_source(component: Dict):
+    """Render a great_tables table with its source caption."""
+    if component.get('figura') is not None:
+        great_tables(component['figura'])
+        if component.get('fuente'):
+            st.caption(f"Fuente: {component['fuente']}")
+
+
+@log_performance
+def generate_pdf_report(provincia: str, data: Dict) -> bool:
+    """Generate PDF report with error handling and logging."""
+    try:
+        with st.spinner("Generando reporte PDF..."):
+            processed_data = preparar_data_pdf(data)
+            output_path = f"output/Ficha Provincial - {provincia}.pdf"
+            ficha_provincial_pdf(provincia, processed_data, output_path)
             
+        log_export_action("PDF")
+        st.success(f"✅ Reporte PDF generado exitosamente: {output_path}")
+        logger.info(f"PDF report generated successfully for {provincia}")
+        
+        # Mostrar botón de descarga si el archivo existe
+        try:
+            with open(output_path, "rb") as pdf_file:
+                pdf_bytes = pdf_file.read()
+                st.download_button(
+                    label="📥 Descargar PDF",
+                    data=pdf_bytes,
+                    file_name=f"Ficha_Provincial_{provincia}.pdf",
+                    mime="application/pdf",
+                    key="download_pdf"
+                )
+        except FileNotFoundError:
+            logger.error(f"PDF file not found: {output_path}")
+            
+        return True
+        
     except Exception as e:
-        logger.error(f"Error crítico en tab de ciencia y sociedad: {e}", exc_info=True)
-        st.error("Error al cargar datos de ciencia y sociedad. Por favor, intente recargar la página.")
+        logger.error(f"Error generating PDF for {provincia}: {str(e)}")
+        st.error(f"❌ Error al generar el reporte PDF: {str(e)}")
+        return False
 
 
-# ---- AUTENTICACIÓN Y AUTORIZACIÓN ----
+# ---- PÁGINA PRINCIPAL ----
+def panomProvincial():
+    """Render the provincial dashboard page with enhanced logging and error handling."""
+    
+    logger.info(f"Provincial dashboard accessed by user: {st.session_state.get('username', 'unknown')}")
+    
+    # Cargar datos de provincias
+    try:
+        provinciasDF = get_provincias()
+        logger.info(f"Loaded {len(provinciasDF)} provinces")
+    except Exception as e:
+        logger.error(f"Failed to load provinces: {str(e)}")
+        st.error("Error al cargar la lista de provincias. Por favor, contacte al administrador.")
+        return
+
+    # Header con ícono
+    col1, col2 = st.columns([1, 9], vertical_alignment='center')
+    with col1:
+        st.markdown("""
+            <div class="icon-container">
+                <i class="icono-arg-ciencia-publicacion" style="font-size: 76px; color: #FFFFFF;"></i>
+            </div>
+            """, unsafe_allow_html=True)
+    with col2:
+        st.header("Ficha Provincial")
+        st.markdown("")
+        st.write("Secretaría de Innovación, Ciencia y Tecnología")
+
+    st.markdown("""---""")
+
+    # Selector de provincia con placeholder mejorado
+    provincia = st.selectbox(
+        "Seleccione una provincia:",
+        options=provinciasDF['nombre_iso'].sort_values(),
+        label_visibility="collapsed",
+        index=None,
+        placeholder="🔍 Seleccione una provincia para visualizar los datos",
+        help="Seleccione una provincia para ver sus indicadores de ciencia y tecnología"
+    )
+
+    if provincia:
+        # Guardar selección en session state
+        st.session_state.provincia = provinciasDF[provinciasDF['nombre_iso'] == provincia]['provincia'].values[0]
+        st.session_state.provincia_id = provinciasDF[provinciasDF['nombre_iso'] == provincia]['id'].values[0]
+        st.session_state.region = provinciasDF[provinciasDF['nombre_iso'] == provincia]['region'].values[0]
+        st.session_state.pais = 'Argentina'
+        st.session_state.anio = '2023'
+        
+        logger.info(f"Province selected: {st.session_state.provincia} (ID: {st.session_state.provincia_id})")
+
+        # Cargar datos de la provincia
+        DFs = load_provincial_data(
+            provincia_id=st.session_state.provincia_id,
+            provincia=st.session_state.provincia,
+            anio=st.session_state.anio
+        )
+
+        if DFs is None:
+            return
+
+        # Título de la provincia con información adicional
+        col1, col2, col3 = st.columns([3, 1, 1])
+        with col1:
+            st.markdown(f"## {provincia}")
+        with col2:
+            st.info(f"📍 Región: {st.session_state.region}")
+        with col3:
+            st.info(f"📅 Año: {st.session_state.anio}")
+
+        # Tabs para las diferentes secciones
+        tabs = st.tabs([
+            "Indicadores de contexto",
+            "Inversión en I+D",
+            "Proyectos",
+            "Infraestructura",
+            "Capital Humano",
+            "Resultados",
+            "Ciencia y Sociedad"
+        ])
+
+        # Tab 1: Indicadores de contexto
+        with tabs[0]:
+            st.markdown("")
+            
+            # Métricas principales
+            col1, col2, col3, col4, col5 = st.columns([1, 3.75, .5, 3.75, 1])
+            with col2:
+                st.subheader("📍 Provincial")
+                for key in ['kpi_poblacion_prov', 'kpi_tasa_actividad_prov', 'kpi_tasa_desempleo_prov']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            with col4:
+                st.subheader("🇦🇷 Nacional")
+                for key in ['kpi_densidad_prov', 'kpi_tasa_actividad_nac', 'kpi_tasa_desempleo_nac']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            
+            st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_actividad_nac']['fuente']}")
+            st.markdown("")
+            
+            # Gráfico de exportaciones
+            render_chart_with_source(DFs['componentes']['grafico_expo_top5'])
+
+        # Tab 2: Inversión en I+D
+        with tabs[1]:
+            render_chart_with_source(DFs['componentes']['grafico_evolucion_regional'])
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_inv_por_investigador'])
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_inv_empresaria_sector'])
+
+        # Tab 3: Proyectos
+        with tabs[2]:
+            st.markdown("")
+            
+            # KPIs de proyectos
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.subheader("📍 Provincial")
+                for key in ['kpi_pfi_provincial', 'kpi_porc_privada_provincial']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            with col2:
+                st.subheader("🗺️ Regional")
+                for key in ['kpi_pfi_regional', 'kpi_porc_privada_regional']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            with col3:
+                st.subheader("🇦🇷 Nacional")
+                for key in ['kpi_pfi_nacional', 'kpi_porc_privada_nacional']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            
+            st.caption("*PFI: Proyectos Federales de Innovación")
+            st.caption(f"Fuente: {DFs['componentes']['kpi_pfi_provincial']['fuente']}")
+            st.markdown("")
+            
+            # Tabla de proyectos
+            if DFs['componentes']['tabla_pfi_cruce']['figura'] is not None:
+                render_table_with_source(DFs['componentes']['tabla_pfi_cruce'])
+
+        # Tab 4: Infraestructura
+        with tabs[3]:
+            st.markdown("")
+            
+            # KPI central
+            colA, colB, colC = st.columns(3)
+            with colB:
+                comp = DFs['componentes']['kpi_unidades_id_prov']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            
+            render_chart_with_source(DFs['componentes']['grafico_unidades_por_inst'])
+            st.markdown("---")
+            
+            # KPIs de equipos
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                comp = DFs['componentes']['kpi_equipos_provincial']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            with col2:
+                comp = DFs['componentes']['kpi_equipos_regional']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            with col3:
+                comp = DFs['componentes']['kpi_equipos_nacional']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            
+            st.caption(f"Fuente: {DFs['componentes']['kpi_equipos_nacional']['fuente']}")
+            st.markdown("")
+            
+            render_chart_with_source(DFs['componentes']['grafico_equipos_por_tipo'])
+
+        # Tab 5: Capital Humano
+        with tabs[4]:
+            st.markdown("")
+            
+            render_chart_with_source(DFs['componentes']['grafico_distribucion_investigadores'])
+            st.markdown("")
+            
+            # KPIs comparativos
+            col1, col2, col3 = st.columns(3, border=True)
+            with col1:
+                st.markdown(f"#### {st.session_state.provincia}")
+                comp = DFs['componentes']['kpi_tasa_pea_provincial']
+                st.metric(
+                    label=":primary[Investigadores cada 1000 habs.]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            with col2:
+                st.markdown(f"#### {st.session_state.region}")
+                comp = DFs['componentes']['kpi_tasa_pea_regional']
+                st.metric(
+                    label=":primary[Investigadores cada 1000 habs.]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            with col3:
+                st.markdown(f"#### {st.session_state.pais}")
+                comp = DFs['componentes']['kpi_tasa_pea_nacional']
+                st.metric(
+                    label=":primary[Investigadores cada 1000 habs.]",
+                    value=comp['valor'],
+                    delta=None
+                )
+            
+            st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_pea_nacional']['fuente']}")
+            st.markdown("")
+            
+            if DFs['componentes']['tabla_personas_por_funcion']['figura'] is not None:
+                render_table_with_source(DFs['componentes']['tabla_personas_por_funcion'])
+                st.markdown("---")
+            
+            render_chart_with_source(DFs['componentes']['grafico_evolucion_investigadores'])
+
+        # Tab 6: Resultados
+        with tabs[5]:
+            st.markdown("")
+            
+            render_chart_with_source(DFs['componentes']['grafico_expo_intensidad'])
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_expo_evolucion'])
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_expo_destino'])
+            st.markdown("---")
+            
+            # KPIs de patentes
+            col1, col2, col3 = st.columns([6, 1, 3], vertical_alignment="center")
+            with col1:
+                comp = DFs['componentes']['kpi_patentes_cyt_prov']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            
+            col1b, col2b, col3b = st.columns([2, 6, 2])
+            with col2b:
+                comp = DFs['componentes']['kpi_patentes_cyt_arg']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None
+                )
+            
+            col1c, col2c, col3c = st.columns([2, 2, 6])
+            with col3c:
+                comp = DFs['componentes']['kpi_patentes_arg']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None
+                )
+            
+            st.caption(f"Fuente: {DFs['componentes']['kpi_patentes_arg']['fuente']}")
+            st.markdown("---")
+            
+            # Gráficos y tablas de resultados
+            if DFs['componentes']['grafico_patentes_evolucion']['figura'] is not None:
+                render_chart_with_source(DFs['componentes']['grafico_patentes_evolucion'])
+                st.markdown("---")
+            
+            if DFs['componentes']['tabla_patentes_sector']['figura'] is not None:
+                render_table_with_source(DFs['componentes']['tabla_patentes_sector'])
+                st.markdown("---")
+            
+            render_chart_with_source(DFs['componentes']['grafico_produccion_evolucion'])
+            st.markdown("---")
+            render_chart_with_source(DFs['componentes']['grafico_produccion_tipo'])
+            st.markdown("---")
+            render_chart_with_source(DFs['componentes']['grafico_publicaciones_area'])
+            st.markdown("---")
+            
+            if DFs['componentes']['tabla_articulos_q1_q2']['figura'] is not None:
+                render_table_with_source(DFs['componentes']['tabla_articulos_q1_q2'])
+
+        # Tab 7: Ciencia y Sociedad
+        with tabs[6]:
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_percepcion_temas_prioritarios'])
+            st.markdown("---")
+            render_chart_with_source(DFs['componentes']['grafico_percepcion_calidad_vida'])
+            st.markdown("")
+
+        # Aplicar estilos a las metric cards
+        style_metric_cards()
+        st.markdown("---")
+
+        # --- SECCIÓN DE EXPORTACIÓN ---
+        st.markdown("### 📄 Exportar Reporte")
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button(
+                "🎯 Generar Reporte PDF",
+                use_container_width=True,
+                help="Generar un reporte PDF completo con todos los datos de la provincia",
+                type="primary"
+            ):
+                generate_pdf_report(st.session_state.provincia, DFs)
+
+    else:
+        # Mensaje cuando no hay provincia seleccionada
+        st.info("👆 Por favor, seleccione una provincia del menú desplegable para visualizar sus datos.")
+        
+        # Mostrar algunas estadísticas generales
+        if not provinciasDF.empty:
+            st.markdown("### 📊 Estadísticas Generales")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("Total de Provincias", len(provinciasDF))
+            with col2:
+                regions = provinciasDF['region'].nunique()
+                st.metric("Regiones", regions)
+            with col3:
+                st.metric("Año de Datos", "2023")
+
+
+# ---- VERIFICACIÓN DE AUTENTICACIÓN ----
 try:
-    st.session_state.authenticator.login(location='unrendered')
+    # Verificar si el authenticator existe en session_state
+    if 'authenticator' in st.session_state:
+        st.session_state.authenticator.login(location='unrendered')
     
     if 'authentication_status' in st.session_state:
-        if "authentication_status" not in st.session_state or not st.session_state["authentication_status"]:
-            logger.warning("Intento de acceso no autenticado a Fichas Provinciales")
-            st.warning("Debe estar logueado para acceder a esta información.")
+        if not st.session_state["authentication_status"]:
+            st.warning("⚠️ Debe estar logueado para acceder a esta información.")
+            logger.warning("Unauthenticated access attempt to provincial dashboard")
             st.stop()
-            
-        elif 'admin' not in st.session_state["roles"] and 'director' not in st.session_state["roles"]:
-            username = st.session_state.get('username', 'unknown')
-            logger.warning(f"Acceso no autorizado de usuario {username} a Fichas Provinciales")
-            st.error('Acceso no autorizado.')
+        elif 'admin' not in st.session_state.get("roles", []) and 'director' not in st.session_state.get("roles", []):
+            st.error('🚫 Acceso no autorizado.')
+            logger.warning(f"Unauthorized access attempt by user: {st.session_state.get('username', 'unknown')}")
             st.stop()
-            
         else:
-            username = st.session_state.get('username', 'unknown')
-            logger.info(f"Usuario {username} accedió a Fichas Provinciales")
             panomProvincial()
-            
+    else:
+        st.warning("⚠️ Debe estar logueado para acceder a esta información.")
+        st.stop()
+        
 except AttributeError as e:
-    logger.error(f"Error de autenticación: {e}")
-    st.warning("Debe estar logueado para acceder a esta información.")
+    logger.error(f"Authentication error: {str(e)}")
+    st.warning("⚠️ Debe estar logueado para acceder a esta información.")
     st.stop()
-    
 except Exception as e:
-    logger.critical(f"Error crítico en página Fichas Provinciales: {e}", exc_info=True)
-    st.error("Error crítico. Por favor contacte al administrador.")
+    logger.error(f"Unexpected error in provincial dashboard: {str(e)}")
+    st.error(f"Ha ocurrido un error inesperado: {str(e)}")
     st.stop()

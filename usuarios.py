@@ -333,7 +333,14 @@ class UserManager:
                 self._process_password_reset(current_password, new_password, confirm_new_password)
     
     def _process_password_reset(self, current_password, new_password, confirm_password):
-        """Procesa el cambio de contraseña"""
+        """
+        Procesa el cambio de contraseña.
+
+        Args:
+            current_password (str): La contraseña actual del usuario.
+            new_password (str): La nueva contraseña que el usuario desea establecer.
+            confirm_password (str): Confirmación de la nueva contraseña.
+        """
         if not all([current_password, new_password, confirm_password]):
             st.error("❌ Todos los campos son obligatorios")
             return
@@ -349,16 +356,19 @@ class UserManager:
         
         try:
             # Verificar contraseña actual
-            username = st.session_state["username"]
+            username = st.session_state.get("username")
+            if not username:
+                st.error("❌ No se encontró el usuario en la sesión. Por favor inicie sesión nuevamente.")
+                return
             stored_password = self.config["credentials"]["usernames"][username]["password"]
             
             if not stauth.Hasher([current_password]).check([stored_password])[0]:
                 st.error("❌ La contraseña actual es incorrecta")
                 return
-            
             # Actualizar contraseña
             hashed_new_password = stauth.Hasher([new_password]).generate()[0]
             self.config["credentials"]["usernames"][username]["password"] = hashed_new_password
+            self.config["credentials"]["usernames"][username]["failed_login_attempts"] = 0
             
             if self._save_config():
                 st.success("✅ Contraseña cambiada exitosamente")

@@ -38,6 +38,7 @@ custom_css = """
         margin: 1rem 0;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         transition: transform 0.2s ease;
+        color: #333;
     }
     
     .news-card:hover {
@@ -73,6 +74,7 @@ custom_css = """
         padding: 1rem;
         border-radius: 8px;
         text-align: center;
+        color: #333;
         border: 1px solid #e9ecef;
     }
     
@@ -83,6 +85,7 @@ custom_css = """
         border-radius: 8px;
         border-left: 4px solid #2196f3;
         margin: 1rem 0;
+        color: #0d47a1;
     }
     
     .custom-success {
@@ -91,6 +94,7 @@ custom_css = """
         border-radius: 8px;
         border-left: 4px solid #4caf50;
         margin: 1rem 0;
+        color: #2e7d32;
     }
     
     /* Footer */
@@ -191,7 +195,7 @@ def show_system_status():
     """Muestra el estado general del sistema"""
     st.markdown("### 📊 Estado del Sistema")
     
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
@@ -201,8 +205,9 @@ def show_system_status():
             <p style="margin: 0; color: #666; font-size: 0.9rem;">Operativo</p>
         </div>
         """, unsafe_allow_html=True)
-    
-    with col2:
+
+        st.markdown("")
+   
         st.markdown("""
         <div class="system-metric">
             <h3 style="color: #4D7AAE; margin: 0;">🔒</h3>
@@ -211,7 +216,7 @@ def show_system_status():
         </div>
         """, unsafe_allow_html=True)
     
-    with col3:
+    with col2:
         st.markdown("""
         <div class="system-metric">
             <h3 style="color: #4D7AAE; margin: 0;">📊</h3>
@@ -220,7 +225,8 @@ def show_system_status():
         </div>
         """, unsafe_allow_html=True)
     
-    with col4:
+        st.markdown("")
+
         st.markdown("""
         <div class="system-metric">
             <h3 style="color: #4D7AAE; margin: 0;">⚡</h3>
@@ -245,7 +251,7 @@ def show_quick_access():
             user_roles = st.session_state.get("roles", [])
             if "admin" in user_roles:
                 if st.button("👥 Gestión de Usuarios", use_container_width=True):
-                    st.switch_page("pages/Admin_Usuarios.py")
+                    st.switch_page("pages/98_👤_Admin Usuarios.py")
             else:
                 st.button("👥 Gestión de Usuarios", disabled=True, help="Requiere permisos de administrador")
         
