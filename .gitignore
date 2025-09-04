@@ -1,8 +1,68 @@
-dev_utils.py
+# Python
 __pycache__/
-pages/2_🗺️_Mapa Bs As.py
-pages/5_🙋‍♂️_Control de usuarios.py
-pages/6_⚙️_Config.py
-pages/authTester.py
-output/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Logs
+logs/
 *.log
+*.log.*
+InformesApp-dh.log*
+
+# Configuración sensible
+.streamlit/credentials.yaml
+.streamlit/credentials.json
+.streamlit/secrets.toml
+.env
+
+# Archivos de desarrollo
+dev_utils.py
+pages/authTester.py
+
+# Output
+output/
+*.pdf
+*.xlsx
+*.csv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*.ipynb
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Backups
+*.backup
+*.bak
+*.old
