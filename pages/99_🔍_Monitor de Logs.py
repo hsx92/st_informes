@@ -174,7 +174,7 @@ def main():
                     labels={'hour': 'Hora', 'count': 'Cantidad', 'level': 'Nivel'},
                     color_discrete_map={
                         'DEBUG': '#808080',
-                        'INFO': "#3234c4",
+                        'INFO': "#83A2EB",
                         'WARNING': '#FFA500',
                         'ERROR': '#FF0000',
                         'CRITICAL': "#680202"

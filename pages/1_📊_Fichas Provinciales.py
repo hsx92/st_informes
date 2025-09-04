@@ -250,7 +250,7 @@ def panomProvincial():
         st.error("Error crítico en la aplicación. Por favor contacte al administrador.")
 
 
-# Funciones auxiliares para renderizar cada tab con manejo de errores
+# Funciones auxiliares para renderizar cada tab
 def render_indicadores_tab(DFs):
     """Renderiza el tab de indicadores con logging de errores"""
     try:
@@ -335,228 +335,533 @@ def render_inversion_tab(DFs):
         st.error("Error al cargar datos de inversión")
 
 
-# Optimizar funciones para los demás tabs...
 def render_proyectos_tab(DFs):
-    """Renderiza el tab de proyectos"""
-    logger.debug("Renderizando tab de proyectos")
+    """Renderiza el tab de proyectos con manejo robusto de errores"""
     try:
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_pfi_provincial']['titulo']}]",
-                value=DFs['componentes']['kpi_pfi_provincial']['valor'],
-                delta=None,
-            )
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_porc_privada_provincial']['titulo']}]",
-                value=DFs['componentes']['kpi_porc_privada_provincial']['valor'],
-                delta=None,
-            )
-        with col2:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_pfi_regional']['titulo']}]",
-                value=DFs['componentes']['kpi_pfi_regional']['valor'],
-                delta=None,
-            )
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_porc_privada_regional']['titulo']}]",
-                value=DFs['componentes']['kpi_porc_privada_regional']['valor'],
-                delta=None,
-            )
-        with col3:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_pfi_nacional']['titulo']}]",
-                value=DFs['componentes']['kpi_pfi_nacional']['valor'],
-                delta=None,
-            )
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_porc_privada_nacional']['titulo']}]",
-                value=DFs['componentes']['kpi_porc_privada_nacional']['valor'],
-                delta=None,
-            )
-        st.caption("*PFI: Proyectos Federales de Innovación")
-        st.caption(f"Fuente: {DFs['componentes']['kpi_pfi_provincial']['fuente']}")
+        logger.debug("Renderizando tab de proyectos")
         st.markdown("")
-
-        if DFs['componentes']['tabla_pfi_cruce']['figura'] is not None:
-            great_tables(DFs['componentes']['tabla_pfi_cruce']['figura'])
-            st.caption(f"Fuente: {DFs['componentes']['tabla_pfi_cruce']['fuente']}")
-            st.markdown("")
+        
+        # KPIs en 3 columnas
+        col1, col2, col3 = st.columns(3)
+        
+        # KPIs Provinciales
+        with col1:
+            try:
+                for kpi_name in ['kpi_pfi_provincial', 'kpi_porc_privada_provincial']:
+                    kpi = DFs['componentes'].get(kpi_name, {})
+                    if kpi and kpi.get('titulo') and kpi.get('valor'):
+                        st.metric(
+                            label=f":primary[{kpi['titulo']}]",
+                            value=kpi['valor'],
+                            delta=None,
+                        )
+                        logger.debug(f"KPI {kpi_name} renderizado: {kpi['valor']}")
+                    else:
+                        logger.warning(f"KPI {kpi_name} sin datos completos")
+                        st.metric(label=":primary[Sin datos]", value="N/A")
+            except Exception as e:
+                logger.error(f"Error mostrando KPIs provinciales: {e}")
+                st.metric(label=":primary[Error]", value="N/A")
+        
+        # KPIs Regionales
+        with col2:
+            try:
+                for kpi_name in ['kpi_pfi_regional', 'kpi_porc_privada_regional']:
+                    kpi = DFs['componentes'].get(kpi_name, {})
+                    if kpi and kpi.get('titulo') and kpi.get('valor'):
+                        st.metric(
+                            label=f":primary[{kpi['titulo']}]",
+                            value=kpi['valor'],
+                            delta=None,
+                        )
+                        logger.debug(f"KPI {kpi_name} renderizado: {kpi['valor']}")
+                    else:
+                        logger.warning(f"KPI {kpi_name} sin datos completos")
+                        st.metric(label=":primary[Sin datos]", value="N/A")
+            except Exception as e:
+                logger.error(f"Error mostrando KPIs regionales: {e}")
+                st.metric(label=":primary[Error]", value="N/A")
+        
+        # KPIs Nacionales
+        with col3:
+            try:
+                for kpi_name in ['kpi_pfi_nacional', 'kpi_porc_privada_nacional']:
+                    kpi = DFs['componentes'].get(kpi_name, {})
+                    if kpi and kpi.get('titulo') and kpi.get('valor'):
+                        st.metric(
+                            label=f":primary[{kpi['titulo']}]",
+                            value=kpi['valor'],
+                            delta=None,
+                        )
+                        logger.debug(f"KPI {kpi_name} renderizado: {kpi['valor']}")
+                    else:
+                        logger.warning(f"KPI {kpi_name} sin datos completos")
+                        st.metric(label=":primary[Sin datos]", value="N/A")
+            except Exception as e:
+                logger.error(f"Error mostrando KPIs nacionales: {e}")
+                st.metric(label=":primary[Error]", value="N/A")
+        
+        # Caption y nota
+        st.caption("*PFI: Proyectos Federales de Innovación")
+        if DFs['componentes'].get('kpi_pfi_provincial', {}).get('fuente'):
+            st.caption(f"Fuente: {DFs['componentes']['kpi_pfi_provincial']['fuente']}")
+        st.markdown("")
+        
+        # Tabla de proyectos PFI
+        try:
+            tabla_pfi = DFs['componentes'].get('tabla_pfi_cruce', {})
+            if tabla_pfi.get('figura') is not None:
+                logger.debug("Mostrando tabla PFI cruce")
+                great_tables(tabla_pfi['figura'])
+                if tabla_pfi.get('fuente'):
+                    st.caption(f"Fuente: {tabla_pfi['fuente']}")
+                st.markdown("")
+            else:
+                logger.info("No hay datos disponibles para tabla PFI")
+                st.info("📊 No hay datos de proyectos PFI disponibles para esta provincia")
+        except Exception as e:
+            logger.error(f"Error mostrando tabla PFI: {e}")
+            st.warning("No se pudo cargar la tabla de proyectos")
+            
     except Exception as e:
-        logger.error(f"Error en tab de proyectos: {e}", exc_info=True)
-        st.error("Error al cargar datos de proyectos")
+        logger.error(f"Error crítico en tab de proyectos: {e}", exc_info=True)
+        st.error("Error al cargar datos de proyectos. Por favor, intente recargar la página.")
 
 
 def render_infraestructura_tab(DFs):
-    """Renderiza el tab de infraestructura"""
-    logger.debug("Renderizando tab de infraestructura")
+    """Renderiza el tab de infraestructura con validación completa"""
     try:
+        logger.debug("Renderizando tab de infraestructura")
+        st.markdown("")
+        
+        # KPI principal centrado
         colA, colB, colC = st.columns(3)
         with colB:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_unidades_id_prov']['titulo']}]",
-                value=DFs['componentes']['kpi_unidades_id_prov']['valor'],
-                delta=None,
-            )
-
-        st.plotly_chart(DFs['componentes']['grafico_unidades_por_inst']['figura'], use_container_width=True)
-        st.caption(f"Fuente: {DFs['componentes']['grafico_unidades_por_inst']['fuente']}")
+            try:
+                kpi_unidades = DFs['componentes'].get('kpi_unidades_id_prov', {})
+                if kpi_unidades and kpi_unidades.get('titulo') and kpi_unidades.get('valor'):
+                    st.metric(
+                        label=f":primary[{kpi_unidades['titulo']}]",
+                        value=kpi_unidades['valor'],
+                        delta=None,
+                    )
+                    logger.debug(f"KPI unidades I+D: {kpi_unidades['valor']}")
+                else:
+                    logger.warning("KPI unidades I+D sin datos")
+                    st.metric(label=":primary[Unidades I+D]", value="N/A")
+            except Exception as e:
+                logger.error(f"Error mostrando KPI unidades: {e}")
+                st.metric(label=":primary[Error]", value="N/A")
+        
+        # Gráfico de unidades por institución
+        try:
+            grafico_unidades = DFs['componentes'].get('grafico_unidades_por_inst', {})
+            if grafico_unidades.get('figura'):
+                logger.debug("Mostrando gráfico de unidades por institución")
+                st.plotly_chart(grafico_unidades['figura'], use_container_width=True)
+                if grafico_unidades.get('fuente'):
+                    st.caption(f"Fuente: {grafico_unidades['fuente']}")
+            else:
+                logger.info("Gráfico de unidades no disponible")
+                st.info("📊 Gráfico de unidades por institución no disponible")
+        except Exception as e:
+            logger.error(f"Error mostrando gráfico de unidades: {e}")
+            st.warning("No se pudo cargar el gráfico de unidades")
+        
         st.markdown("---")
-
+        
+        # KPIs de equipos en 3 columnas
         col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_equipos_provincial']['titulo']}]",
-                value=DFs['componentes']['kpi_equipos_provincial']['valor'],
-                delta=None,
-            )
-        with col2:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_equipos_regional']['titulo']}]",
-                value=DFs['componentes']['kpi_equipos_regional']['valor'],
-                delta=None,
-            )
-        with col3:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_equipos_nacional']['titulo']}]",
-                value=DFs['componentes']['kpi_equipos_nacional']['valor'],
-                delta=None,
-            )
-        st.caption(f"Fuente: {DFs['componentes']['kpi_equipos_nacional']['fuente']}")
+        
+        kpis_equipos = [
+            ('kpi_equipos_provincial', col1),
+            ('kpi_equipos_regional', col2),
+            ('kpi_equipos_nacional', col3)
+        ]
+        
+        for kpi_name, column in kpis_equipos:
+            with column:
+                try:
+                    kpi = DFs['componentes'].get(kpi_name, {})
+                    if kpi and kpi.get('titulo') and kpi.get('valor'):
+                        st.metric(
+                            label=f":primary[{kpi['titulo']}]",
+                            value=kpi['valor'],
+                            delta=None,
+                        )
+                        logger.debug(f"KPI {kpi_name}: {kpi['valor']}")
+                    else:
+                        logger.warning(f"KPI {kpi_name} sin datos")
+                        st.metric(label=":primary[Equipos I+D]", value="N/A")
+                except Exception as e:
+                    logger.error(f"Error mostrando KPI {kpi_name}: {e}")
+                    st.metric(label=":primary[Error]", value="N/A")
+        
+        # Fuente de equipos
+        if DFs['componentes'].get('kpi_equipos_nacional', {}).get('fuente'):
+            st.caption(f"Fuente: {DFs['componentes']['kpi_equipos_nacional']['fuente']}")
         st.markdown("")
-
-        st.plotly_chart(DFs['componentes']['grafico_equipos_por_tipo']['figura'], use_container_width=True)
-        st.caption(f"Fuente: {DFs['componentes']['grafico_equipos_por_tipo']['fuente']}")
+        
+        # Gráfico de equipos por tipo
+        try:
+            grafico_equipos = DFs['componentes'].get('grafico_equipos_por_tipo', {})
+            if grafico_equipos.get('figura'):
+                logger.debug("Mostrando gráfico de equipos por tipo")
+                st.plotly_chart(grafico_equipos['figura'], use_container_width=True)
+                if grafico_equipos.get('fuente'):
+                    st.caption(f"Fuente: {grafico_equipos['fuente']}")
+            else:
+                logger.info("Gráfico de equipos no disponible")
+                st.info("📊 Gráfico de equipos por tipo no disponible")
+        except Exception as e:
+            logger.error(f"Error mostrando gráfico de equipos: {e}")
+            st.warning("No se pudo cargar el gráfico de equipos")
+            
     except Exception as e:
-        logger.error(f"Error en tab de infraestructura: {e}", exc_info=True)
-        st.error("Error al cargar datos de infraestructura")
+        logger.error(f"Error crítico en tab de infraestructura: {e}", exc_info=True)
+        st.error("Error al cargar datos de infraestructura. Por favor, intente recargar la página.")
 
 
 def render_capital_humano_tab(DFs):
-    """Renderiza el tab de capital humano"""
-    logger.debug("Renderizando tab de capital humano")
+    """Renderiza el tab de capital humano con validación y logging"""
     try:
-        st.plotly_chart(DFs['componentes']['grafico_distribucion_investigadores']['figura'], use_container_width=True)
-        st.caption(f"Fuente: {DFs['componentes']['grafico_distribucion_investigadores']['fuente']}")
+        logger.debug("Renderizando tab de capital humano")
         st.markdown("")
-
+        
+        # Gráfico de distribución de investigadores
+        try:
+            grafico_dist = DFs['componentes'].get('grafico_distribucion_investigadores', {})
+            if grafico_dist.get('figura'):
+                logger.debug("Mostrando gráfico de distribución de investigadores")
+                st.plotly_chart(grafico_dist['figura'], use_container_width=True)
+                if grafico_dist.get('fuente'):
+                    st.caption(f"Fuente: {grafico_dist['fuente']}")
+            else:
+                logger.info("Gráfico de distribución no disponible")
+                st.info("📊 Distribución de investigadores no disponible")
+        except Exception as e:
+            logger.error(f"Error mostrando gráfico de distribución: {e}")
+            st.warning("No se pudo cargar el gráfico de distribución")
+        
+        st.markdown("")
+        
+        # KPIs de investigadores por PEA
         col1, col2, col3 = st.columns(3, border=True)
+        
+        # KPI Provincial
         with col1:
-            st.markdown(f"#### {st.session_state.provincia}")
-            st.metric(
-                label=":primary[Investigadores cada 1000 habs.]",
-                value=DFs['componentes']['kpi_tasa_pea_provincial']['valor'],
-                delta=None,
-            )
+            try:
+                st.markdown(f"#### {st.session_state.get('provincia', 'Provincia')}")
+                kpi = DFs['componentes'].get('kpi_tasa_pea_provincial', {})
+                if kpi and kpi.get('valor'):
+                    st.metric(
+                        label=":primary[Investigadores cada 1000 habs.]",
+                        value=kpi['valor'],
+                        delta=None,
+                    )
+                    logger.debug(f"KPI PEA provincial: {kpi['valor']}")
+                else:
+                    logger.warning("KPI PEA provincial sin datos")
+                    st.metric(label=":primary[Investigadores cada 1000 habs.]", value="N/A")
+            except Exception as e:
+                logger.error(f"Error mostrando KPI PEA provincial: {e}")
+                st.metric(label=":primary[Error]", value="N/A")
+        
+        # KPI Regional
         with col2:
-            st.markdown(f"#### {st.session_state.region}")
-            st.metric(
-                label=":primary[Investigadores cada 1000 habs.]",
-                value=DFs['componentes']['kpi_tasa_pea_regional']['valor'],
-                delta=None,
-            )
+            try:
+                st.markdown(f"#### {st.session_state.get('region', 'Región')}")
+                kpi = DFs['componentes'].get('kpi_tasa_pea_regional', {})
+                if kpi and kpi.get('valor'):
+                    st.metric(
+                        label=":primary[Investigadores cada 1000 habs.]",
+                        value=kpi['valor'],
+                        delta=None,
+                    )
+                    logger.debug(f"KPI PEA regional: {kpi['valor']}")
+                else:
+                    logger.warning("KPI PEA regional sin datos")
+                    st.metric(label=":primary[Investigadores cada 1000 habs.]", value="N/A")
+            except Exception as e:
+                logger.error(f"Error mostrando KPI PEA regional: {e}")
+                st.metric(label=":primary[Error]", value="N/A")
+        
+        # KPI Nacional
         with col3:
-            st.markdown(f"#### {st.session_state.pais}")
-            st.metric(label=":primary[Investigadores cada 1000 habs.]", value=DFs['componentes']['kpi_tasa_pea_nacional']['valor'], delta=None)
-        st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_pea_nacional']['fuente']}")
+            try:
+                st.markdown(f"#### {st.session_state.get('pais', 'Argentina')}")
+                kpi = DFs['componentes'].get('kpi_tasa_pea_nacional', {})
+                if kpi and kpi.get('valor'):
+                    st.metric(
+                        label=":primary[Investigadores cada 1000 habs.]",
+                        value=kpi['valor'],
+                        delta=None
+                    )
+                    logger.debug(f"KPI PEA nacional: {kpi['valor']}")
+                else:
+                    logger.warning("KPI PEA nacional sin datos")
+                    st.metric(label=":primary[Investigadores cada 1000 habs.]", value="N/A")
+            except Exception as e:
+                logger.error(f"Error mostrando KPI PEA nacional: {e}")
+                st.metric(label=":primary[Error]", value="N/A")
+        
+        # Fuente
+        if DFs['componentes'].get('kpi_tasa_pea_nacional', {}).get('fuente'):
+            st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_pea_nacional']['fuente']}")
         st.markdown("")
-
-        if DFs['componentes']['tabla_personas_por_funcion']['figura'] is not None:
-            great_tables(DFs['componentes']['tabla_personas_por_funcion']['figura'])
-            st.caption(f"Fuente: {DFs['componentes']['tabla_personas_por_funcion']['fuente']}")
-            st.markdown("---")
-
-        st.plotly_chart(DFs['componentes']['grafico_evolucion_investigadores']['figura'])
-        st.caption(f"Fuente: {DFs['componentes']['grafico_evolucion_investigadores']['fuente']}")
+        
+        # Tabla de personas por función
+        try:
+            tabla_personas = DFs['componentes'].get('tabla_personas_por_funcion', {})
+            if tabla_personas.get('figura') is not None:
+                logger.debug("Mostrando tabla de personas por función")
+                great_tables(tabla_personas['figura'])
+                if tabla_personas.get('fuente'):
+                    st.caption(f"Fuente: {tabla_personas['fuente']}")
+                st.markdown("---")
+            else:
+                logger.info("Tabla de personas por función no disponible")
+        except Exception as e:
+            logger.error(f"Error mostrando tabla de personas: {e}")
+            st.info("📊 Tabla de personal no disponible")
+        
+        # Gráfico de evolución de investigadores
+        try:
+            grafico_evol = DFs['componentes'].get('grafico_evolucion_investigadores', {})
+            if grafico_evol.get('figura'):
+                logger.debug("Mostrando gráfico de evolución de investigadores")
+                st.plotly_chart(grafico_evol['figura'])
+                if grafico_evol.get('fuente'):
+                    st.caption(f"Fuente: {grafico_evol['fuente']}")
+            else:
+                logger.info("Gráfico de evolución no disponible")
+                st.info("📊 Evolución de investigadores no disponible")
+        except Exception as e:
+            logger.error(f"Error mostrando gráfico de evolución: {e}")
+            st.warning("No se pudo cargar el gráfico de evolución")
+            
     except Exception as e:
-        logger.error(f"Error en tab de capital humano: {e}", exc_info=True)
-        st.error("Error al cargar datos de capital humano")
+        logger.error(f"Error crítico en tab de capital humano: {e}", exc_info=True)
+        st.error("Error al cargar datos de capital humano. Por favor, intente recargar la página.")
 
 
 def render_resultados_tab(DFs):
-    """Renderiza el tab de resultados"""
-    logger.debug("Renderizando tab de resultados")
+    """Renderiza el tab de resultados con manejo completo de errores"""
     try:
-        st.plotly_chart(DFs['componentes']['grafico_expo_intensidad']['figura'])
-        st.caption(f"Fuente: {DFs['componentes']['grafico_expo_intensidad']['fuente']}")
+        logger.debug("Renderizando tab de resultados")
         st.markdown("")
-
-        st.plotly_chart(DFs['componentes']['grafico_expo_evolucion']['figura'])
-        st.caption(f"Fuente: {DFs['componentes']['grafico_expo_evolucion']['fuente']}")
-        st.markdown("")
-
-        st.plotly_chart(DFs['componentes']['grafico_expo_destino']['figura'])
-        st.caption(f"Fuente: {DFs['componentes']['grafico_expo_destino']['fuente']}")
+        
+        # Sección de Exportaciones
+        graficos_exportaciones = [
+            ('grafico_expo_intensidad', 'Composición de exportaciones'),
+            ('grafico_expo_evolucion', 'Evolución de exportaciones'),
+            ('grafico_expo_destino', 'Destino de exportaciones')
+        ]
+        
+        for grafico_name, descripcion in graficos_exportaciones:
+            try:
+                grafico = DFs['componentes'].get(grafico_name, {})
+                if grafico.get('figura'):
+                    logger.debug(f"Mostrando {descripcion}")
+                    st.plotly_chart(grafico['figura'])
+                    if grafico.get('fuente'):
+                        st.caption(f"Fuente: {grafico['fuente']}")
+                    st.markdown("")
+                else:
+                    logger.info(f"{descripcion} no disponible")
+            except Exception as e:
+                logger.error(f"Error mostrando {grafico_name}: {e}")
+                st.warning(f"No se pudo cargar {descripcion.lower()}")
+        
         st.markdown("---")
-
+        
+        # Sección de Patentes - KPIs
         col1, col2, col3 = st.columns([6, 1, 3], vertical_alignment="center")
-        with col1:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_patentes_cyt_prov']['titulo']}]",
-                value=DFs['componentes']['kpi_patentes_cyt_prov']['valor'],
-                delta=None,
-            )
+        
+        try:
+            # KPI Provincial
+            with col1:
+                kpi_prov = DFs['componentes'].get('kpi_patentes_cyt_prov', {})
+                if kpi_prov and kpi_prov.get('titulo') and kpi_prov.get('valor'):
+                    st.metric(
+                        label=f":primary[{kpi_prov['titulo']}]",
+                        value=kpi_prov['valor'],
+                        delta=None,
+                    )
+                    logger.debug(f"KPI patentes provincial: {kpi_prov['valor']}")
+                else:
+                    logger.warning("KPI patentes provincial sin datos")
+                    st.metric(label=":primary[Patentes provinciales]", value="N/A")
+        except Exception as e:
+            logger.error(f"Error en KPI patentes provincial: {e}")
+        
         col1b, col2b, col3b = st.columns([2, 6, 2])
-        with col2b:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_patentes_cyt_arg']['titulo']}]",
-                value=DFs['componentes']['kpi_patentes_cyt_arg']['valor'],
-                delta=None
-            )
+        try:
+            # KPI CyT Argentina
+            with col2b:
+                kpi_cyt = DFs['componentes'].get('kpi_patentes_cyt_arg', {})
+                if kpi_cyt and kpi_cyt.get('titulo') and kpi_cyt.get('valor'):
+                    st.metric(
+                        label=f":primary[{kpi_cyt['titulo']}]",
+                        value=kpi_cyt['valor'],
+                        delta=None
+                    )
+                    logger.debug(f"KPI patentes CyT: {kpi_cyt['valor']}")
+                else:
+                    logger.warning("KPI patentes CyT sin datos")
+                    st.metric(label=":primary[Patentes CyT Argentina]", value="N/A")
+        except Exception as e:
+            logger.error(f"Error en KPI patentes CyT: {e}")
+        
         col1c, col2c, col3c = st.columns([2, 2, 6])
-        with col3c:
-            st.metric(
-                label=f":primary[{DFs['componentes']['kpi_patentes_arg']['titulo']}]",
-                value=DFs['componentes']['kpi_patentes_arg']['valor'],
-                delta=None
-            )
-        st.caption(f"Fuente: {DFs['componentes']['kpi_patentes_arg']['fuente']}")
+        try:
+            # KPI Argentina total
+            with col3c:
+                kpi_arg = DFs['componentes'].get('kpi_patentes_arg', {})
+                if kpi_arg and kpi_arg.get('titulo') and kpi_arg.get('valor'):
+                    st.metric(
+                        label=f":primary[{kpi_arg['titulo']}]",
+                        value=kpi_arg['valor'],
+                        delta=None
+                    )
+                    logger.debug(f"KPI patentes Argentina: {kpi_arg['valor']}")
+                else:
+                    logger.warning("KPI patentes Argentina sin datos")
+                    st.metric(label=":primary[Patentes Argentina]", value="N/A")
+        except Exception as e:
+            logger.error(f"Error en KPI patentes Argentina: {e}")
+        
+        # Fuente de patentes
+        if DFs['componentes'].get('kpi_patentes_arg', {}).get('fuente'):
+            st.caption(f"Fuente: {DFs['componentes']['kpi_patentes_arg']['fuente']}")
         st.markdown("---")
-
-        if DFs['componentes']['grafico_patentes_evolucion']['figura'] is not None:
-            st.plotly_chart(DFs['componentes']['grafico_patentes_evolucion']['figura'])
-            st.caption(f"Fuente: {DFs['componentes']['grafico_patentes_evolucion']['fuente']}")
-            st.markdown("---")
-
-        if DFs['componentes']['tabla_patentes_sector']['figura'] is not None:
-            great_tables(DFs['componentes']['tabla_patentes_sector']['figura'])
-            st.caption(f"Fuente: {DFs['componentes']['tabla_patentes_sector']['fuente']}")
-
-            st.markdown("---")
-
-        st.plotly_chart(DFs['componentes']['grafico_produccion_evolucion']['figura'])
-        st.caption(f"Fuente: {DFs['componentes']['grafico_produccion_evolucion']['fuente']}")
-        st.markdown("---")
-
-        st.plotly_chart(DFs['componentes']['grafico_produccion_tipo']['figura'])
-        st.caption(f"Fuente: {DFs['componentes']['grafico_produccion_tipo']['fuente']}")
-        st.markdown("---")
-
-        st.plotly_chart(DFs['componentes']['grafico_publicaciones_area']['figura'])
-        st.caption(f"Fuente: {DFs['componentes']['grafico_publicaciones_area']['fuente']}")
-        st.markdown("---")
-
-        if DFs['componentes']['tabla_articulos_q1_q2']['figura'] is not None:
-            great_tables(DFs['componentes']['tabla_articulos_q1_q2']['figura'])
-            st.caption(f"Fuente: {DFs['componentes']['tabla_articulos_q1_q2']['fuente']}")
+        
+        # Gráfico de evolución de patentes
+        try:
+            grafico_patentes = DFs['componentes'].get('grafico_patentes_evolucion', {})
+            if grafico_patentes.get('figura') is not None:
+                logger.debug("Mostrando evolución de patentes")
+                st.plotly_chart(grafico_patentes['figura'])
+                if grafico_patentes.get('fuente'):
+                    st.caption(f"Fuente: {grafico_patentes['fuente']}")
+                st.markdown("---")
+            else:
+                logger.info("Gráfico de patentes no disponible")
+        except Exception as e:
+            logger.error(f"Error mostrando evolución de patentes: {e}")
+        
+        # Tabla de patentes por sector
+        try:
+            tabla_patentes = DFs['componentes'].get('tabla_patentes_sector', {})
+            if tabla_patentes.get('figura') is not None:
+                logger.debug("Mostrando tabla de patentes por sector")
+                great_tables(tabla_patentes['figura'])
+                if tabla_patentes.get('fuente'):
+                    st.caption(f"Fuente: {tabla_patentes['fuente']}")
+                st.markdown("---")
+            else:
+                logger.info("Tabla de patentes no disponible")
+        except Exception as e:
+            logger.error(f"Error mostrando tabla de patentes: {e}")
+        
+        # Sección de Producción Científica
+        graficos_produccion = [
+            ('grafico_produccion_evolucion', 'Evolución de producción científica'),
+            ('grafico_produccion_tipo', 'Distribución por tipo de publicación'),
+            ('grafico_publicaciones_area', 'Publicaciones por área de conocimiento')
+        ]
+        
+        for grafico_name, descripcion in graficos_produccion:
+            try:
+                grafico = DFs['componentes'].get(grafico_name, {})
+                if grafico.get('figura'):
+                    logger.debug(f"Mostrando {descripcion}")
+                    st.plotly_chart(grafico['figura'])
+                    if grafico.get('fuente'):
+                        st.caption(f"Fuente: {grafico['fuente']}")
+                    st.markdown("---")
+                else:
+                    logger.info(f"{descripcion} no disponible")
+            except Exception as e:
+                logger.error(f"Error mostrando {grafico_name}: {e}")
+                st.warning(f"No se pudo cargar {descripcion.lower()}")
+        
+        # Tabla de artículos Q1/Q2
+        try:
+            tabla_articulos = DFs['componentes'].get('tabla_articulos_q1_q2', {})
+            if tabla_articulos.get('figura') is not None:
+                logger.debug("Mostrando tabla de artículos Q1/Q2")
+                great_tables(tabla_articulos['figura'])
+                if tabla_articulos.get('fuente'):
+                    st.caption(f"Fuente: {tabla_articulos['fuente']}")
+            else:
+                logger.info("Tabla de artículos Q1/Q2 no disponible")
+        except Exception as e:
+            logger.error(f"Error mostrando tabla de artículos: {e}")
+            
     except Exception as e:
-        logger.error(f"Error en tab de resultados: {e}", exc_info=True)
-        st.error("Error al cargar datos de resultados")
+        logger.error(f"Error crítico en tab de resultados: {e}", exc_info=True)
+        st.error("Error al cargar datos de resultados. Por favor, intente recargar la página.")
 
 
 def render_ciencia_sociedad_tab(DFs):
-    """Renderiza el tab de ciencia y sociedad"""
-    logger.debug("Renderizando tab de ciencia y sociedad")
+    """Renderiza el tab de ciencia y sociedad con validación"""
     try:
-        st.plotly_chart(DFs['componentes']['grafico_percepcion_temas_prioritarios']['figura'], use_container_width=True)
-        st.caption(f"Fuente: {DFs['componentes']['grafico_percepcion_temas_prioritarios']['fuente']}")
-        st.markdown("---")
-
-        st.plotly_chart(DFs['componentes']['grafico_percepcion_calidad_vida']['figura'], use_container_width=True)
-        st.caption(f"Fuente: {DFs['componentes']['grafico_percepcion_calidad_vida']['fuente']}")
+        logger.debug("Renderizando tab de ciencia y sociedad")
+        st.markdown("")
+        
+        # Gráfico de percepción de temas prioritarios
+        try:
+            grafico_temas = DFs['componentes'].get('grafico_percepcion_temas_prioritarios', {})
+            if grafico_temas.get('figura'):
+                logger.debug("Mostrando gráfico de percepción de temas prioritarios")
+                st.plotly_chart(grafico_temas['figura'], use_container_width=True)
+                if grafico_temas.get('fuente'):
+                    st.caption(f"Fuente: {grafico_temas['fuente']}")
+                st.markdown("---")
+            else:
+                logger.info("Gráfico de temas prioritarios no disponible")
+                st.info("📊 Datos de percepción sobre temas prioritarios no disponibles")
+        except Exception as e:
+            logger.error(f"Error mostrando gráfico de temas prioritarios: {e}")
+            st.warning("No se pudo cargar el gráfico de temas prioritarios")
+        
+        # Gráfico de percepción sobre calidad de vida
+        try:
+            grafico_calidad = DFs['componentes'].get('grafico_percepcion_calidad_vida', {})
+            if grafico_calidad.get('figura'):
+                logger.debug("Mostrando gráfico de percepción de calidad de vida")
+                st.plotly_chart(grafico_calidad['figura'], use_container_width=True)
+                if grafico_calidad.get('fuente'):
+                    st.caption(f"Fuente: {grafico_calidad['fuente']}")
+                st.markdown("")
+            else:
+                logger.info("Gráfico de calidad de vida no disponible")
+                st.info("📊 Datos de percepción sobre calidad de vida no disponibles")
+        except Exception as e:
+            logger.error(f"Error mostrando gráfico de calidad de vida: {e}")
+            st.warning("No se pudo cargar el gráfico de calidad de vida")
+        
+        # Información adicional o mensaje si no hay datos
+        componentes_disponibles = sum(
+            1 for comp in ['grafico_percepcion_temas_prioritarios', 'grafico_percepcion_calidad_vida']
+            if DFs['componentes'].get(comp, {}).get('figura')
+        )
+        
+        if componentes_disponibles == 0:
+            st.info("""
+            📊 **Sección en desarrollo**
+            
+            Los datos de percepción ciudadana sobre ciencia y tecnología están siendo recolectados
+            y estarán disponibles próximamente.
+            """)
+            logger.info("Tab ciencia y sociedad sin datos disponibles")
+        else:
+            logger.info(f"Tab ciencia y sociedad con {componentes_disponibles} componentes disponibles")
+            
     except Exception as e:
-        logger.error(f"Error en tab de ciencia y sociedad: {e}", exc_info=True)
-        st.error("Error al cargar datos de ciencia y sociedad")
+        logger.error(f"Error crítico en tab de ciencia y sociedad: {e}", exc_info=True)
+        st.error("Error al cargar datos de ciencia y sociedad. Por favor, intente recargar la página.")
 
 
 # ---- AUTENTICACIÓN Y AUTORIZACIÓN ----
