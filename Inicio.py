@@ -307,22 +307,19 @@ def main():
             <p style="margin: 0.5rem 0 0 0; font-size: 1.2rem; opacity: 0.9;">
                 Secretaría de Innovación, Ciencia y Tecnología
             </p>
-            <p style="margin: 0.5rem 0 0 0; opacity: 0.8;">
-                Sistema de Información y Gestión Científico-Tecnológica
-            </p>
         </div>
         """, unsafe_allow_html=True)
         
         # Contenedor principal para el login
-        col1, col2, col3 = st.columns([1, 2, 1])
+        col1, col2, col3 = st.columns([1, 5, 1])
         
         with col2:
-            st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+            # st.markdown('<div class="auth-container">', unsafe_allow_html=True)
             
             # Sistema de autenticación
             login()
             
-            st.markdown('</div>', unsafe_allow_html=True)
+            # st.markdown('</div>', unsafe_allow_html=True)
         
         # Mostrar contenido adicional basado en el estado de autenticación
         if st.session_state.get("authentication_status"):
