@@ -7,9 +7,10 @@ import pandas as pd
 import time
 from auth_manager import get_auth_manager
 from css_utils import load_css
-from logging_config import get_logger
+from logging_config import get_logger, get_audit_logger
 
 logger = get_logger(__name__)
+audit_logger = get_audit_logger()
 
 # Configuración de la página
 st.set_page_config(
@@ -47,6 +48,13 @@ st.markdown(combined_css, unsafe_allow_html=True)
 # Inicializar AuthManager
 auth_manager = get_auth_manager()
 auth_manager.require_role('admin')
+
+# Registrar acceso a la página de usuarios
+audit_logger.log_data_access(
+    user=st.session_state.get('username', 'unknown'),
+    resource='user_admin',
+    action='view'
+)
 
 # Header
 col1, col2 = st.columns([1, 9], vertical_alignment='center')
@@ -178,23 +186,29 @@ with tabs[1]:
         )
         
         if email:
-            logger.info(f"Nuevo usuario registrado: {username} ({email}) con roles: {selected_roles}. Creado por: {st.session_state.get('username', 'sistema')}")
+            audit_logger.log_user_registration(
+                new_user=username,
+                email=email,
+                roles=selected_roles,
+                requested_by=st.session_state.get('username', 'unknown')
+            )
             st.success(f"✅ Usuario '{username}' registrado exitosamente")
             st.balloons()
     
     with col2:
-        st.markdown("### 📋 Instrucciones")
-        st.markdown("""
-        1. Complete todos los campos requeridos
-        2. La contraseña debe cumplir con:
-           - Entre 8 y 20 caracteres
-           - Al menos una mayúscula
-           - Al menos una minúscula
-           - Al menos un número
-           - Al menos un carácter especial
-        3. Asigne los roles apropiados
-        4. El usuario recibirá sus credenciales
-        """)
+        with st.container(border=True):
+            st.markdown("### 📋 Instrucciones")
+            st.markdown("""
+            1. Complete todos los campos requeridos
+            2. La contraseña debe cumplir con:
+                - Entre 8 y 20 caracteres
+                - Al menos una mayúscula
+                - Al menos una minúscula
+                - Al menos un número
+                - Al menos un carácter especial
+            3. Asigne los roles apropiados
+            4. Haga clic en 'Registrar'
+            """)
 
 # Tab 3: Editar Usuario
 with tabs[2]:
@@ -229,8 +243,12 @@ with tabs[2]:
                     with st.container():
                         result = auth_manager.update_user_details(selected_user)
                         if result:
+                            audit_logger.log_user_update(
+                                user=selected_user,
+                                requested_by=st.session_state.get('username', 'unknown')
+                            )
                             st.success("✅ Información actualizada exitosamente")
-                            time.sleep(1)
+                            time.sleep(2)
                             st.rerun()
             
             # Sección para eliminar usuario
@@ -246,6 +264,10 @@ with tabs[2]:
                         st.error("Presione nuevamente para confirmar, esta acción es irreversible.")
                     else:
                         if auth_manager.delete_user(selected_user):
+                            audit_logger.log_user_deletion(
+                                user=selected_user,
+                                requested_by=st.session_state.get('username', 'unknown')
+                            )
                             st.success(f"Usuario {selected_user} eliminado")
                             del st.session_state['confirm_delete']
                             time.sleep(2)
@@ -261,26 +283,28 @@ with tabs[3]:
     
     password_option = st.radio(
         "Seleccione una opción:",
-        ["Reset de Contraseña (Usuario Logueado)", "Contraseña Olvidada", "Usuario Olvidado"]
+        ["Actualizar Contraseña (Usuario actual)", "Recuperar Contraseña", "Recuperar Usuario"]
     )
-    
-    if password_option == "Reset de Contraseña (Usuario Logueado)":
-        st.markdown("### Cambiar Contraseña de Usuario Actual")
-        
+
+    if password_option == "Actualizar Contraseña (Usuario actual)":
         if st.session_state.get('username'):
             result = auth_manager.reset_password(st.session_state['username'])
             if result:
-                st.success("✅ Contraseña actualizada exitosamente")
+                audit_logger.log_password_change(user=st.session_state['username'])
+                st.success(" ✅ Contraseña actualizada exitosamente")
         else:
-            st.warning("No hay usuario logueado actualmente")
+            st.warning("Debe estar logueado para actualizar su contraseña.")
     
-    elif password_option == "Contraseña Olvidada":
-        st.markdown("### Recuperación de Contraseña")
+    elif password_option == "Recuperar Contraseña":
         st.info("Ingrese el nombre de usuario para generar una nueva contraseña")
         
         username, email, new_password = auth_manager.forgot_password(send_email=True)
         
         if username:
+            audit_logger.log_password_change(
+                user=username,
+                requested_by=st.session_state.get('username', 'unknown')
+            )
             st.success(f"✅ Nueva contraseña generada para {username}, enviada a: {email}")
             with st.expander("Ver detalles"):
                 st.code(f"""
@@ -291,22 +315,26 @@ with tabs[3]:
                 st.warning("⚠️ Comunique esta contraseña al usuario de forma segura")
         elif username is False:
             st.error("Usuario no encontrado")
-    
-    else:  # Usuario Olvidado
-        st.markdown("### Recuperación de Nombre de Usuario")
+
+    elif password_option == "Recuperar Usuario":
         st.info("Ingrese el email para recuperar el nombre de usuario")
-        
-        username, email = auth_manager.forgot_username()
-        
+
+        username, email = auth_manager.forgot_username(send_email=True)
+
         if username:
-            st.success("✅ Usuario encontrado")
+            audit_logger.log_username_recovery(
+                user=username,
+                email=email,
+                requested_by=st.session_state.get('username', 'unknown')
+            )
+            st.success(f"✅ Nombre de usuario enviado a {email}")
             with st.expander("Ver detalles"):
                 st.code(f"""
                 Usuario: {username}
                 Email: {email}
                 """)
         elif username is False:
-            st.error("Email no encontrado")
+            st.error(f"No existe usuario con email: {email}")
 
 # Tab 5: Gestión de Roles
 with tabs[4]:
@@ -346,7 +374,12 @@ with tabs[4]:
         
         if st.button("🔄 Actualizar Roles"):
             if auth_manager.update_user_roles(selected_user, new_roles):
-                st.success("Roles actualizados exitosamente")
+                audit_logger.log_role_update(
+                    user=selected_user,
+                    roles=new_roles,
+                    requested_by=st.session_state.get('username', 'unknown')
+                )
+                st.success(" ✅ Roles actualizados exitosamente")
                 time.sleep(2)
                 st.rerun()
             else:

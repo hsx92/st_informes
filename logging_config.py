@@ -223,6 +223,73 @@ class AuditLogger:
         }
         self.logger.info(f"Exportación: {user} exportó {data_type} como {format}", extra=extra)
 
+    def log_user_registration(self, new_user: str, email: str, roles: List[str], requested_by: str = 'self'):
+        """Registra el registro de un nuevo usuario."""
+        extra = {
+            'audit_type': 'user_registration',
+            'user': new_user,
+            'email': email,
+            'roles': roles,
+            'requested_by': requested_by
+        }
+        self.logger.info(f"Registro de usuario: {new_user} ({email}) con roles {roles} por {requested_by}", extra=extra)
+
+    def log_user_update(self, user: str, requested_by: str = 'self'):
+        """Registra actualizaciones en la información del usuario."""
+                
+        extra = {
+            'audit_type': 'user_update',
+            'user': user,
+            'requested_by': requested_by
+        }
+        self.logger.info(f"Actualización de datos de usuario: {user} por {requested_by}", extra=extra)
+
+    def log_user_deletion(self, user: str, requested_by: str):
+        """Registra la eliminación de un usuario."""
+        extra = {
+            'audit_type': 'user_deletion',
+            'user': user,
+            'requested_by': requested_by
+        }
+        self.logger.warning(f"Eliminación de usuario: {user} por {requested_by}", extra=extra)
+
+    def log_password_change(self, user: str, requested_by: str = 'self', failed: bool = False):
+        """Registra cambios de contraseña."""
+        if failed is False:
+            extra = {
+                'audit_type': 'password_change',
+                'user': user,
+                'requested_by': requested_by
+            }
+            self.logger.info(f"Cambio de contraseña para usuario: {user} por {requested_by}", extra=extra)
+        else:
+            extra = {
+                'audit_type': 'password_change_failed',
+                'user': user,
+                'requested_by': requested_by
+            }
+            self.logger.warning(f"Intento fallido de cambio de contraseña para usuario: {user} por {requested_by}", extra=extra)
+
+    def log_role_update(self, user: str, roles: List[str], requested_by: str = 'self'):
+        """Registra cambios en los roles de un usuario."""
+        extra = {
+            'audit_type': 'role_change',
+            'user': user,
+            'roles': roles,
+            'requested_by': requested_by
+        }
+        self.logger.info(f"Cambio de roles para usuario: {user} a {roles} por {requested_by}", extra=extra)
+
+    def log_username_recovery(self, user: str, email: str, requested_by: str = 'self'):
+        """Registra intentos de recuperación de nombre de usuario."""
+        extra = {
+            'audit_type': 'username_recovery',
+            'user': user,
+            'email': email,
+            'requested_by': requested_by
+        }
+        self.logger.info(f"Recuperación de nombre de usuario: {user} ({email}) por {requested_by}", extra=extra)
+
 
 class PerformanceLogger:
     """Logger especializado para métricas de rendimiento."""

@@ -9,7 +9,7 @@ import yaml
 from yaml import SafeLoader
 from pathlib import Path
 from typing import Optional, Dict, List, Tuple
-from logging_config import get_logger, log_user_activity
+from logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -48,7 +48,6 @@ class AuthManager:
         try:
             with open(self.config_path, 'w', encoding='utf-8') as file:
                 yaml.dump(self.config, file, default_flow_style=False, allow_unicode=True)
-            logger.info("Configuración guardada exitosamente")
         except Exception as e:
             logger.error(f"Error al guardar configuración: {e}")
             raise
@@ -71,9 +70,17 @@ class AuthManager:
             location: Ubicación del widget ('main', 'sidebar', 'unrendered')
         """
         try:
-            self.authenticator.login(location=location)
+            self.authenticator.login(
+                location=location,
+                fields={
+                    'Username': 'Usuario',
+                    'Password': 'Contraseña',
+                    'Login': 'Iniciar Sesión'
+                },
+            )
         except stauth.LoginError as e:
             st.error(f"Error de login: {e}")
+            logger.error(f"Error de login: {e}")
     
     def logout(self, location: str = 'sidebar', key: str = 'logout_sidebar') -> None:
         """
@@ -84,9 +91,8 @@ class AuthManager:
             key: Clave única para el widget
         """
         if st.session_state.get('authentication_status'):
-            self.authenticator.logout(location=location, key=key)
+            self.authenticator.logout(location=location, key=key, button_name='Cerrar Sesión')
     
-    @log_user_activity(activity_type="register_user")
     def register_user(
         self,
         location: str = 'main',
@@ -108,6 +114,15 @@ class AuthManager:
             result = self.authenticator.register_user(
                 location=location,
                 pre_authorized=self.config.get('pre-authorized', {}).get('emails') if pre_authorized else None,
+                fields={
+                    'Form name': 'Nuevo Usuario',
+                    'First name': 'Nombre',
+                    'Last name': 'Apellido',
+                    'Username': 'Usuario',
+                    'Password': 'Contraseña',
+                    'Repeat password': 'Repetir Contraseña',
+                    'Register': 'Crear usuario',
+                },
                 roles=roles,
                 password_hint=False
             )
@@ -116,9 +131,9 @@ class AuthManager:
             return result
         except stauth.RegisterError as e:
             st.error(f"Error de registro: {e}")
+            logger.error(f"Error de registro de usuario: {e}")
             return None, None, None
     
-    @log_user_activity(activity_type="reset_password")
     def reset_password(self, username: str, location: str = 'main') -> bool:
         """
         Widget para resetear contraseña del usuario actual.
@@ -131,7 +146,17 @@ class AuthManager:
             True si la contraseña se cambió exitosamente
         """
         try:
-            result = self.authenticator.reset_password(username, location=location)
+            result = self.authenticator.reset_password(
+                username,
+                location=location,
+                fields={
+                    'Form name': 'Actualizar Contraseña de Usuario actual',
+                    'Current password': 'Contraseña Actual',
+                    'New password': 'Nueva Contraseña',
+                    'Repeat password': 'Repetir Nueva Contraseña',
+                    'Reset': 'Actualizar'
+                }
+            )
             if result:
                 self._save_config()
             return result
@@ -139,7 +164,6 @@ class AuthManager:
             st.error(f"Error al resetear contraseña: {e}")
             return False
     
-    @log_user_activity(activity_type="forgot_password")
     def forgot_password(
         self,
         location: str = 'main',
@@ -158,7 +182,12 @@ class AuthManager:
         try:
             result = self.authenticator.forgot_password(
                 location=location,
-                send_email=send_email
+                send_email=send_email,
+                fields={
+                    'Username': 'Usuario',
+                    'Form name': 'Recuperar contraseña',
+                    'Submit': 'Enviar por email'
+                }
             )
             if result[0]:  # Si se generó nueva contraseña
                 self._save_config()
@@ -167,7 +196,6 @@ class AuthManager:
             st.error(f"Error: {e}")
             return None, None, None
     
-    @log_user_activity(activity_type="forgot_username")
     def forgot_username(
         self,
         location: str = 'main',
@@ -186,14 +214,18 @@ class AuthManager:
         try:
             result = self.authenticator.forgot_username(
                 location=location,
-                send_email=send_email
+                send_email=send_email,
+                fields={
+                    'Email': 'Email',
+                    'Form name': 'Recuperar usuario',
+                    'Submit': 'Recuperar'
+                }
             )
             return result
         except stauth.ForgotError as e:
             st.error(f"Error: {e}")
             return None, None
     
-    @log_user_activity(activity_type="update_user_details")
     def update_user_details(self, username: str, location: str = 'main') -> bool:
         """
         Widget para actualizar detalles del usuario.
@@ -206,7 +238,18 @@ class AuthManager:
             True si se actualizó exitosamente
         """
         try:
-            result = self.authenticator.update_user_details(username, location=location)
+            result = self.authenticator.update_user_details(
+                username,
+                location=location,
+                fields={
+                    'Form name': 'Actualizar detalles',
+                    'First name': 'Nombre',
+                    'Last name': 'Apellido',
+                    'Update': 'Actualizar',
+                    'Field': 'Campo',
+                    'New value': 'Nuevo valor'
+                }
+            )
             if result:
                 self._save_config()
             return result
@@ -235,7 +278,6 @@ class AuthManager:
         """
         return self.config['credentials']['usernames']
     
-    @log_user_activity(activity_type="delete_user")
     def delete_user(self, username: str) -> bool:
         """
         Elimina un usuario del sistema.
@@ -250,14 +292,12 @@ class AuthManager:
             if username in self.config['credentials']['usernames']:
                 del self.config['credentials']['usernames'][username]
                 self._save_config()
-                logger.info(f"Usuario {username} eliminado exitosamente")
                 return True
             return False
         except Exception as e:
             logger.error(f"Error al eliminar usuario: {e}")
             return False
     
-    @log_user_activity(activity_type="add_role")
     def add_role_to_user(self, username: str, role: str) -> bool:
         """
         Agrega un rol a un usuario.
@@ -283,7 +323,6 @@ class AuthManager:
             logger.error(f"Error al agregar rol: {e}")
             return False
     
-    @log_user_activity(activity_type="remove_role")
     def remove_role_from_user(self, username: str, role: str) -> bool:
         """
         Elimina un rol de un usuario.
@@ -306,7 +345,6 @@ class AuthManager:
             logger.error(f"Error al eliminar rol: {e}")
             return False
     
-    @log_user_activity(activity_type="update_roles")
     def update_user_roles(self, username: str, roles: List[str]) -> bool:
         """
         Actualiza completamente los roles de un usuario.
