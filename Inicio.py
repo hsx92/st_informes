@@ -1,5 +1,10 @@
+"""
+Página principal del sistema de informes con autenticación mejorada.
+Utiliza streamlit-authenticator de forma correcta y completa.
+"""
+
 import streamlit as st
-from usuarios import login
+from auth_manager import get_auth_manager
 from css_utils import load_css
 
 # Configuración de la página
@@ -10,128 +15,64 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Logo
 st.logo(image=st.secrets.get('LOGO_LARGO', ''), size="large")
 
-# CSS
-icon_css = load_css("static/iconos/dist/css/icono-arg.css")
+# Cargar CSS
+icon_css = load_css("static/iconos/dist/css/icono-arg.css") if st.secrets.get("USE_ICONS", False) else ""
 
 # CSS personalizado mejorado
 custom_css = """
-    /* Estilos generales */
+    /* Estilos para el formulario de login */
+    div[data-testid="stForm"] {
+        max-width: 500px;
+        margin: auto;
+        padding: 2rem;
+        background-color: #232D4F;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    /* Estilos para métricas */
+    div[data-testid="stMetricValue"] > div {
+        color: #7589A3;
+        font-weight: 500;
+        font-size: 1.5rem;
+    }
+    
+    /* Estilos para el header */
     .main-header {
-        background: linear-gradient(90deg, #4D7AAE 0%, #354B6E 100%);
-        padding: 2rem;
-        border-radius: 15px;
-        color: white;
         text-align: center;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Cards de noticias */
-    .news-card {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: 1.5rem;
-        border-radius: 12px;
-        border-left: 4px solid #4D7AAE;
-        margin: 1rem 0;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s ease;
-        color: #333;
-    }
-    
-    .news-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    /* Estilos de formularios */
-    .auth-container {
-        background: white;
-        padding: 2rem;
-        border-radius: 15px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        border: 1px solid #e9ecef;
-    }
-    
-    /* Botones mejorados */
-    .stButton > button {
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        border: none;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    }
-    
-    /* Métricas del sistema */
-    .system-metric {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 8px;
-        text-align: center;
-        color: #333;
-        border: 1px solid #e9ecef;
-    }
-    
-    /* Alertas personalizadas */
-    .custom-info {
-        background: linear-gradient(90deg, #e3f2fd 0%, #f3e5f5 100%);
-        padding: 1rem;
-        border-radius: 8px;
-        border-left: 4px solid #2196f3;
-        margin: 1rem 0;
-        color: #0d47a1;
-    }
-    
-    .custom-success {
-        background: linear-gradient(90deg, #e8f5e8 0%, #f1f8e9 100%);
-        padding: 1rem;
-        border-radius: 8px;
-        border-left: 4px solid #4caf50;
-        margin: 1rem 0;
-        color: #2e7d32;
-    }
-    
-    /* Footer */
-    .footer {
-        text-align: center;
-        padding: 2rem;
-        background: #354B6E;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #354B6E 0%, #7589A3 100%);
         color: white;
         border-radius: 10px;
-        margin-top: 3rem;
+        margin-bottom: 2rem;
     }
     
-    /* Responsive */
-    @media (max-width: 768px) {
-        .main-header {
-            padding: 1rem;
-        }
-        .news-card {
-            padding: 1rem;
-        }
-        .auth-container {
-            padding: 1rem;
-        }
+    /* Estilos para las tarjetas de bienvenida */
+    .welcome-card {
+        background-color: #ffffff;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+        margin-bottom: 1rem;
+        color: #232D4F;
     }
     
-    /* Animaciones */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+    .feature-card {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        transition: transform 0.3s ease;
+        color: #232D4F;
     }
     
-    .fade-in {
-        animation: fadeIn 0.6s ease-out;
+    .feature-card:hover {
+        transform: translateY(-5px);
     }
 """
 
-# Combinar estilos
 combined_css = f"""
 <style>
 {icon_css}
@@ -139,238 +80,241 @@ combined_css = f"""
 </style>
 """
 
+st.markdown(combined_css, unsafe_allow_html=True)
 
-def show_news_section():
-    """Muestra la sección de noticias y novedades del sistema"""
-    st.markdown("### 📰 Últimas Novedades")
+# Inicializar AuthManager
+auth_manager = get_auth_manager()
+
+
+def show_login_page():
+    """Muestra la página de login."""
     
-    # Noticias del sistema
-    news_items = [
-        {
-            "title": "🔐 Sistema de usuarios mejorado",
-            "content": "Se ha implementado un sistema completo de gestión de usuarios con funcionalidades de registro, recuperación de contraseña y administración.",
-            "date": "Septiembre 2025",
-            "type": "feature"
-        },
-        {
-            "title": "📊 Nuevas visualizaciones disponibles",
-            "content": "Se agregaron gráficos interactivos mejorados para las fichas provinciales con mejor rendimiento y opciones de exportación.",
-            "date": "Agosto 2025",
-            "type": "update"
-        },
-        {
-            "title": "🛡️ Mejoras de seguridad",
-            "content": "Implementación de nuevas medidas de seguridad incluyendo validación robusta de contraseñas y protección contra ataques de fuerza bruta.",
-            "date": "Agosto 2025",
-            "type": "security"
-        },
-        {
-            "title": "📱 Interfaz móvil mejorada",
-            "content": "La aplicación ahora cuenta con una interfaz optimizada para dispositivos móviles y tabletas.",
-            "date": "Julio 2025",
-            "type": "ui"
-        }
-    ]
+    # Header principal
+    st.markdown("""
+    <div class="main-header">
+        <h1>🏛️ Portal de Informes - SICyT</h1>
+        <p>Secretaría de Innovación, Ciencia y Tecnología</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    for item in news_items:
-        icon_map = {
-            "feature": "🚀",
-            "update": "🔄",
-            "security": "🛡️",
-            "ui": "🎨"
-        }
+    col1, col2, col3 = st.columns([1, 2, 1])
+    
+    with col2:
+        # Tabs para diferentes opciones de acceso
+        tab1, tab2, tab3 = st.tabs(["🔐 Iniciar Sesión", "📝 Registrarse", "🔑 Recuperar Acceso"])
         
-        icon = icon_map.get(item["type"], "📢")
+        with tab1:
+            st.markdown("### Bienvenido de vuelta")
+            st.markdown("Por favor, ingrese sus credenciales para acceder al sistema.")
+            
+            # Widget de login
+            try:
+                auth_manager.login(location='main')
+            except Exception as e:
+                st.error(f"Error en el login: {e}")
+            
+            # Información adicional
+            with st.expander("ℹ️ ¿Problemas para acceder?"):
+                st.markdown("""
+                - Verifique que su usuario y contraseña sean correctos
+                - Las contraseñas son sensibles a mayúsculas y minúsculas
+                - Después de 5 intentos fallidos, su cuenta será bloqueada
+                - Contacte al administrador si necesita ayuda: dgicyt@sicyt.gob.ar
+                """)
         
-        st.markdown(f"""
-        <div class="news-card fade-in">
-            <h4>{icon} {item["title"]}</h4>
-            <p style="color: #666; margin: 0.5rem 0;">{item["date"]}</p>
-            <p style="line-height: 1.6;">{item["content"]}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        with tab2:
+            st.markdown("### Crear Nueva Cuenta")
+            st.info("Complete el formulario para solicitar acceso al sistema.")
+            
+            # Widget de registro
+            email, username, name = auth_manager.register_user(
+                location='main',
+                roles=['viewer']  # Rol por defecto para nuevos usuarios
+            )
+            
+            if email:
+                st.success(f"""
+                ✅ Registro exitoso!
+                
+                **Usuario:** {username}
+                **Nombre:** {name}
+                **Email:** {email}
+                
+                Ahora puede iniciar sesión con sus credenciales.
+                """)
+                st.balloons()
+        
+        with tab3:
+            st.markdown("### Recuperación de Acceso")
+            
+            recovery_option = st.radio(
+                "¿Qué necesita recuperar?",
+                ["Contraseña", "Nombre de Usuario"]
+            )
+            
+            if recovery_option == "Contraseña":
+                st.info("Ingrese su nombre de usuario para recibir una nueva contraseña.")
+                
+                username, email, new_password = auth_manager.forgot_password(location='main', send_email=True)
+                
+                if username:
+                    st.success(f"""
+                    ✅ Nueva contraseña generada exitosamente
+                    
+                    Se ha generado una nueva contraseña para el usuario **{username}**,
+                    la misma se ha enviado a: {email}
+                    """)
+                elif username is False:
+                    st.error("❌ Usuario inexistente. Verifique e intente nuevamente.")
+            
+            else:  # Recuperar nombre de usuario
+                st.info("Ingrese su email para recuperar su nombre de usuario.")
+                
+                username, email = auth_manager.forgot_username(location='main')
+                
+                if username:
+                    st.success(f"""
+                    ✅ Usuario encontrado!
+                    
+                    Su nombre de usuario es: **{username}**
+                    """)
+                elif username is False:
+                    st.error("❌ No se encontró ningún usuario con ese email.")
 
 
-def show_system_status():
-    """Muestra el estado general del sistema"""
-    st.markdown("### 📊 Estado del Sistema")
+def show_home_page():
+    """Muestra la página principal para usuarios autenticados."""
+    
+    # Obtener información del usuario
+    username = st.session_state.get('username', 'Usuario')
+    name = st.session_state.get('name', username)
+    roles = st.session_state.get('roles', [])
+    email = st.session_state.get('email', '')
+    
+    # Header de bienvenida
+    st.markdown(f"""
+    <div class="welcome-card">
+        <h1>¡Bienvenido/a, {name}! 👋</h1>
+        <p>Has iniciado sesión exitosamente en el Portal de Informes de la SICyT</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Información del usuario y métricas
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Usuario", username, delta=None)
+    
+    with col2:
+        st.metric("Email", email if email else "No especificado", delta=None)
+    
+    with col3:
+        role_display = ", ".join(roles) if roles else "Sin roles"
+        st.metric("Roles", role_display, delta=None)
+    
+    with col4:
+        st.metric("Estado", "✅ Activo", delta=None)
+    
+    st.markdown("---")
+    
+    # Secciones disponibles basadas en roles
+    st.subheader("📊 Secciones Disponibles")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.markdown("""
-        <div class="system-metric">
-            <h3 style="color: #4D7AAE; margin: 0;">✅</h3>
-            <p style="margin: 0.5rem 0 0 0; font-weight: 600;">Sistema</p>
-            <p style="margin: 0; color: #666; font-size: 0.9rem;">Operativo</p>
+        <div class="feature-card">
+            <h3>📈 Fichas Provinciales</h3>
+            <p>Acceda a información detallada y estadísticas de cada provincia.</p>
         </div>
         """, unsafe_allow_html=True)
-
-        st.markdown("")
-   
-        st.markdown("""
-        <div class="system-metric">
-            <h3 style="color: #4D7AAE; margin: 0;">🔒</h3>
-            <p style="margin: 0.5rem 0 0 0; font-weight: 600;">Seguridad</p>
-            <p style="margin: 0; color: #666; font-size: 0.9rem;">Activa</p>
-        </div>
-        """, unsafe_allow_html=True)
+        
+        if st.button("Ir a Fichas Provinciales", use_container_width=True):
+            st.switch_page("pages/1_📊_Fichas Provinciales.py")
     
     with col2:
-        st.markdown("""
-        <div class="system-metric">
-            <h3 style="color: #4D7AAE; margin: 0;">📊</h3>
-            <p style="margin: 0.5rem 0 0 0; font-weight: 600;">Base de Datos</p>
-            <p style="margin: 0; color: #666; font-size: 0.9rem;">Conectada</p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-        st.markdown("")
-
-        st.markdown("""
-        <div class="system-metric">
-            <h3 style="color: #4D7AAE; margin: 0;">⚡</h3>
-            <p style="margin: 0.5rem 0 0 0; font-weight: 600;">Rendimiento</p>
-            <p style="margin: 0; color: #666; font-size: 0.9rem;">Óptimo</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-def show_quick_access():
-    """Muestra accesos rápidos para usuarios autenticados"""
-    if st.session_state.get("authentication_status"):
-        st.markdown("### ⚡ Acceso Rápido")
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            if st.button("📊 Fichas Provinciales", use_container_width=True):
-                st.switch_page("pages/1_📊_Fichas Provinciales.py")
-        
-        with col2:
-            user_roles = st.session_state.get("roles", [])
-            if "admin" in user_roles:
-                if st.button("👥 Gestión de Usuarios", use_container_width=True):
-                    st.switch_page("pages/98_👤_Admin Usuarios.py")
-            else:
-                st.button("👥 Gestión de Usuarios", disabled=True, help="Requiere permisos de administrador")
-        
-        with col3:
-            if st.button("⚙️ Configuración", use_container_width=True):
-                st.info("🔧 Configuración de perfil disponible en el panel de usuario")
-
-
-def show_help_section():
-    """Muestra sección de ayuda y contacto"""
-    st.markdown("### 📞 Ayuda y Contacto")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        <div class="custom-info">
-            <h4>🆘 ¿Necesita ayuda?</h4>
-            <p>Si tiene problemas para acceder al sistema o necesita asistencia técnica:</p>
-            <ul>
-                <li>📧 Email: dgicyt@sicyt.gob.ar</li>
-                <li>📱 Teléfono: [Número de contacto]</li>
-                <li>🕒 Horario: Lunes a Viernes 9:00 - 18:00</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class="custom-success">
-            <h4>📚 Recursos Útiles</h4>
-            <p>Enlaces y recursos importantes:</p>
-            <ul>
-                <li>📖 Manual de usuario</li>
-                <li>🎥 Tutoriales en video</li>
-                <li>❓ Preguntas frecuentes</li>
-                <li>📋 Formularios de solicitud</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-def main():
-    """Función principal del portal de inicio"""
-    try:
-        # Inyectar CSS
-        st.markdown(combined_css, unsafe_allow_html=True)
-        
-        # Header principal
-        st.markdown("""
-        <div class="main-header fade-in">
-            <h1 style="margin: 0; font-size: 2.5rem;">🏛️ Portal SICyT</h1>
-            <p style="margin: 0.5rem 0 0 0; font-size: 1.2rem; opacity: 0.9;">
-                Secretaría de Innovación, Ciencia y Tecnología
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Contenedor principal para el login
-        col1, col2, col3 = st.columns([1, 5, 1])
-        
-        with col2:
-            # st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+        if auth_manager.has_any_role(['admin', 'director']):
+            st.markdown("""
+            <div class="feature-card">
+                <h3>👥 Administración de Usuarios</h3>
+                <p>Gestione usuarios, roles y permisos del sistema.</p>
+            </div>
+            """, unsafe_allow_html=True)
             
-            # Sistema de autenticación
-            login()
-            
-            # st.markdown('</div>', unsafe_allow_html=True)
-        
-        # Mostrar contenido adicional basado en el estado de autenticación
-        if st.session_state.get("authentication_status"):
-            # Usuario autenticado - mostrar accesos rápidos
-            show_quick_access()
-            
-            # Información del usuario actual
-            col1, col2 = st.columns([2, 1])
-            with col1:
-                show_news_section()
-            with col2:
-                show_system_status()
-        
+            if st.button("Ir a Administración", use_container_width=True):
+                st.switch_page("pages/98_👤_Admin Usuarios.py")
         else:
-            # Usuario no autenticado - mostrar información general
-            col1, col2 = st.columns([2, 1])
-            
-            with col1:
-                show_news_section()
-            
-            with col2:
-                show_system_status()
-        
-        # Sección de ayuda (siempre visible)
-        st.markdown("---")
-        show_help_section()
-        
-        # Footer
+            st.markdown("""
+            <div class="feature-card" style="opacity: 0.5;">
+                <h3>🔒 Administración</h3>
+                <p>Requiere permisos de administrador o director.</p>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Novedades y actualizaciones
+    st.markdown("---")
+    st.subheader("📰 Novedades y Actualizaciones")
+    
+    with st.container():
         st.markdown("""
-        <div class="footer">
-            <p style="margin: 0; font-size: 0.9rem;">
-                <strong>Secretaría de Innovación, Ciencia y Tecnología</strong><br>
-                República Argentina • 2025<br>
-                <small>Versión del sistema: 2.1.0</small>
-            </p>
+        <div class="welcome-card">
+            <h4>🚀 Últimas Actualizaciones del Sistema</h4>
+            <ul>
+                <li>✨ <strong>Nueva interfaz de usuario:</strong> Diseño mejorado y más intuitivo</li>
+                <li>🔐 <strong>Sistema de autenticación actualizado:</strong> Mayor seguridad y facilidad de uso</li>
+                <li>📊 <strong>Nuevos indicadores provinciales:</strong> Más datos disponibles para análisis</li>
+                <li>📱 <strong>Mejoras en responsividad:</strong> Mejor experiencia en dispositivos móviles</li>
+            </ul>
         </div>
         """, unsafe_allow_html=True)
+    
+    # Acciones rápidas en el sidebar
+    with st.sidebar:
+        # Botón de logout
+        auth_manager.logout(location='sidebar', key='logout_main')
+    
+    # Footer con información
+    st.markdown("---")
+    with st.expander("ℹ️ Información del Sistema"):
+        st.markdown("""
+        ### Portal de Informes - SICyT
         
-    except KeyError as e:
-        st.error(f"❌ Error de configuración: {e}")
-        st.info("💡 Verifique que el archivo de configuración esté correctamente configurado.")
+        **Versión:** 1.0.0
+        **Última actualización:** Enero 2025
+        **Desarrollado por:** Dirección Nacional de Informes y Estudios
         
-        # Mostrar información básica incluso con errores
-        st.markdown("### ℹ️ Información del Sistema")
-        st.write("Portal de la Secretaría de Innovación, Ciencia y Tecnología")
-        st.write("Sistema de gestión científico-tecnológica")
+        ### Soporte Técnico
         
-    except Exception as e:
-        st.error(f"❌ Error inesperado: {e}")
-        st.info("🔄 Recargue la página o contacte al administrador del sistema.")
+        Para asistencia técnica o consultas sobre el sistema:
+        - 📧 Email: dgicyt@sicyt.gob.ar
+        - 📞 Teléfono: (011) 4XXX-XXXX
+        - 🏢 Dirección: [Dirección de la oficina]
+        
+        ### Recursos Útiles
+        
+        - [Manual de Usuario](/)
+        - [Preguntas Frecuentes](/)
+        - [Reportar un Problema](/)
+        """)
+
+
+# MAIN APP LOGIC
+def main():
+    """Función principal de la aplicación."""
+    
+    # Verificar estado de autenticación
+    if not st.session_state.get('authentication_status'):
+        # Intentar autenticación con cookie
+        show_login_page()
+    else:
+        # Usuario autenticado - mostrar página principal
+        show_home_page()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        st.error(f"Error en la aplicación: {e}")
+        st.info("Por favor, recargue la página o contacte al administrador si el problema persiste.")

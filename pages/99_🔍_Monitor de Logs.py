@@ -10,6 +10,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import plotly.express as px
 from logging_config import get_logger
+from auth_manager import get_auth_manager
 
 logger = get_logger(__name__)
 
@@ -20,6 +21,10 @@ st.set_page_config(
 )
 
 st.logo(image=st.secrets['LOGO_LARGO'], size="large")
+
+# Inicializar AuthManager
+auth_manager = get_auth_manager()
+auth_manager.require_role('admin')
 
 
 def load_json_logs(log_file: Path, hours: int = 24) -> pd.DataFrame:
@@ -54,7 +59,8 @@ def load_audit_logs(hours: int = 24) -> pd.DataFrame:
     return pd.DataFrame()
 
 
-def main():
+# ---- AUTENTICACIÓN Y AUTORIZACIÓN ----
+try:
     st.title("🔍 Monitor de Logs del Sistema")
     
     # Verificar permisos de administrador
@@ -121,7 +127,6 @@ def main():
     
     if df_logs.empty:
         st.info("No hay logs disponibles para el período seleccionado")
-        return
     
     # Filtrar por nivel
     if 'level' in df_logs.columns and log_level:
@@ -305,33 +310,6 @@ def main():
                 mime="text/csv"
             )
 
-
-# ---- AUTENTICACIÓN Y AUTORIZACIÓN ----
-try:
-    st.session_state.authenticator.login(location='unrendered')
-    
-    if 'authentication_status' in st.session_state:
-        if "authentication_status" not in st.session_state or not st.session_state["authentication_status"]:
-            logger.warning("Intento de acceso no autenticado a Monitor de Logs")
-            st.warning("Debe estar logueado para acceder a esta información.")
-            st.stop()
-            
-        elif 'admin' not in st.session_state["roles"] and 'director' not in st.session_state["roles"]:
-            username = st.session_state.get('username', 'unknown')
-            logger.warning(f"Acceso no autorizado de usuario {username} a Monitor de Logs")
-            st.error('Acceso no autorizado.')
-            st.stop()
-            
-        else:
-            username = st.session_state.get('username', 'unknown')
-            logger.info(f"Usuario {username} accedió a Monitor de Logs")
-            main()
-            
-except AttributeError as e:
-    logger.error(f"Error de autenticación: {e}")
-    st.warning("Debe estar logueado para acceder a esta información.")
-    st.stop()
-    
 except Exception as e:
     logger.critical(f"Error crítico en página Monitor de Logs: {e}", exc_info=True)
     st.error("Error crítico. Por favor contacte al administrador.")
