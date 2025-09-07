@@ -1,21 +1,27 @@
-"""Centralized logging configuration for the SICyT application.
-
-This module provides a unified logging setup with rotation, formatting,
-and different log levels for development and production environments.
+"""
+Sistema centralizado de logging para la aplicación de Informes SICyT.
+Autor: Secretaría de Innovación, Ciencia y Tecnología
 """
 
 import logging
 import logging.handlers
 import os
-from pathlib import Path
+import sys
 from datetime import datetime
-from typing import Optional
+from functools import wraps
+from pathlib import Path
+from typing import Optional, Any, Callable
+import json
+import traceback
+import streamlit as st
 
-# Crear directorio de logs si no existe
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
 
-# Configuración de niveles de log
+# Configuración de directorios
+BASE_DIR = Path(__file__).parent
+LOGS_DIR = BASE_DIR / "logs"
+LOGS_DIR.mkdir(exist_ok=True)
+
+# Configuración de niveles
 LOG_LEVELS = {
     "DEBUG": logging.DEBUG,
     "INFO": logging.INFO,
@@ -24,277 +30,397 @@ LOG_LEVELS = {
     "CRITICAL": logging.CRITICAL
 }
 
+# Obtener nivel de log del entorno o usar INFO por defecto
+LOG_LEVEL = LOG_LEVELS.get(os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO)
 
-class ColoredFormatter(logging.Formatter):
-    """Custom formatter that adds colors to console output."""
+
+class CustomJSONFormatter(logging.Formatter):
+    """Formateador personalizado para logs en formato JSON."""
     
+    def format(self, record):
+        log_obj = {
+            "timestamp": datetime.utcnow().isoformat(),
+            "level": record.levelname,
+            "logger": record.name,
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno,
+            "message": record.getMessage(),
+            "user": getattr(st.session_state, 'username', 'sistema'),
+            "session_id": getattr(st.session_state, 'session_id', None)
+        }
+        
+        # Agregar información de excepción si existe
+        if record.exc_info:
+            log_obj["exception"] = {
+                "type": record.exc_info[0].__name__,
+                "message": str(record.exc_info[1]),
+                "traceback": traceback.format_exception(*record.exc_info)
+            }
+        
+        # Agregar campos extra si existen
+        for key, value in record.__dict__.items():
+            if key not in ['name', 'msg', 'args', 'created', 'filename', 'funcName',
+                           'levelname', 'levelno', 'lineno', 'module', 'msecs',
+                           'pathname', 'process', 'processName', 'relativeCreated',
+                           'thread', 'threadName', 'exc_info', 'exc_text', 'stack_info']:
+                log_obj[key] = value
+                
+        return json.dumps(log_obj, ensure_ascii=False)
+
+
+class CustomTextFormatter(logging.Formatter):
+    """Formateador personalizado para logs en formato texto legible."""
+    
+    # Colores ANSI para la consola
     COLORS = {
-        'DEBUG': '\033[36m',     # Cyan
-        'INFO': '\033[32m',      # Green
-        'WARNING': '\033[33m',   # Yellow
-        'ERROR': '\033[31m',     # Red
+        'DEBUG': '\033[36m',    # Cyan
+        'INFO': '\033[32m',     # Verde
+        'WARNING': '\033[33m',  # Amarillo
+        'ERROR': '\033[31m',    # Rojo
         'CRITICAL': '\033[35m',  # Magenta
-        'RESET': '\033[0m'       # Reset
+        'RESET': '\033[0m'      # Reset
     }
     
     def format(self, record):
-        log_color = self.COLORS.get(record.levelname, self.COLORS['RESET'])
-        record.levelname = f"{log_color}{record.levelname}{self.COLORS['RESET']}"
-        return super().format(record)
+        # Formato base
+        if sys.stdout.isatty():  # Si es consola interactiva, usar colores
+            color = self.COLORS.get(record.levelname, self.COLORS['RESET'])
+            reset = self.COLORS['RESET']
+            levelname = f"{color}{record.levelname:8s}{reset}"
+        else:
+            levelname = f"{record.levelname:8s}"
+            
+        # Usuario actual
+        user = getattr(st.session_state, 'username', 'sistema')
+        
+        # Construir mensaje
+        timestamp = datetime.fromtimestamp(record.created).strftime('%Y-%m-%d %H:%M:%S')
+        message = f"{timestamp} | {levelname} | {user:15s} | {record.name:20s} | {record.funcName:20s} | {record.getMessage()}"
+        
+        # Agregar información de excepción si existe
+        if record.exc_info:
+            message += f"\nException: {record.exc_info[0].__name__}: {record.exc_info[1]}"
+            
+        return message
 
 
-def setup_logging(
-    app_name: str = "SICyT",
-    log_level: str = None,
+def setup_logger(
+    name: str = "InformesApp",
+    log_file: Optional[str] = None,
     console_output: bool = True,
-    file_output: bool = True,
-    max_bytes: int = 10 * 1024 * 1024,  # 10MB
-    backup_count: int = 5
+    json_format: bool = True
 ) -> logging.Logger:
-    """Configure and return a logger with rotation and formatting.
+    """
+    Configura y retorna un logger personalizado.
     
     Args:
-        app_name: Name of the application/module for the logger
-        log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        console_output: Whether to output logs to console
-        file_output: Whether to output logs to file
-        max_bytes: Maximum size of each log file before rotation
-        backup_count: Number of backup files to keep
-        
+        name: Nombre del logger
+        log_file: Nombre del archivo de log (sin extensión)
+        console_output: Si mostrar logs en consola
+        json_format: Si usar formato JSON (True) o texto (False)
+    
     Returns:
-        Configured logger instance
+        Logger configurado
     """
+    logger = logging.getLogger(name)
     
-    # Determinar el nivel de log desde variable de entorno o parámetro
-    if log_level is None:
-        log_level = os.getenv("LOG_LEVEL", "INFO").upper()
+    # Evitar duplicación de handlers
+    if logger.handlers:
+        return logger
+        
+    logger.setLevel(LOG_LEVEL)
+    logger.propagate = False
     
-    level = LOG_LEVELS.get(log_level, logging.INFO)
-    
-    # Crear logger
-    logger = logging.getLogger(app_name)
-    logger.setLevel(level)
-    
-    # Limpiar handlers existentes
-    logger.handlers.clear()
-    
-    # Formato para los logs
-    detailed_format = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    
-    simple_format = logging.Formatter(
-        '%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%H:%M:%S'
-    )
-    
-    # Handler para archivo con rotación
-    if file_output:
-        timestamp = datetime.now().strftime("%Y%m%d")
-        file_handler = logging.handlers.RotatingFileHandler(
-            LOG_DIR / f"{app_name}_{timestamp}.log",
-            maxBytes=max_bytes,
-            backupCount=backup_count,
+    # Handler para archivo principal (JSON)
+    if log_file:
+        json_file = LOGS_DIR / f"{log_file}.json"
+        json_handler = logging.handlers.RotatingFileHandler(
+            json_file,
+            maxBytes=10 * 1024 * 1024,  # 10MB
+            backupCount=5,
             encoding='utf-8'
         )
-        file_handler.setLevel(level)
-        file_handler.setFormatter(detailed_format)
-        logger.addHandler(file_handler)
+        json_handler.setFormatter(CustomJSONFormatter())
+        json_handler.setLevel(LOG_LEVEL)
+        logger.addHandler(json_handler)
+        
+        # Handler para archivo de texto legible
+        text_file = LOGS_DIR / f"{log_file}.log"
+        text_handler = logging.handlers.RotatingFileHandler(
+            text_file,
+            maxBytes=5 * 1024 * 1024,  # 5MB
+            backupCount=3,
+            encoding='utf-8'
+        )
+        text_handler.setFormatter(CustomTextFormatter())
+        text_handler.setLevel(LOG_LEVEL)
+        logger.addHandler(text_handler)
     
-    # Handler para consola con colores
+    # Handler para consola
     if console_output:
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(level)
-        
-        # Usar formato con colores si es posible
-        if os.name != 'nt':  # No Windows
-            console_handler.setFormatter(ColoredFormatter(
-                '%(asctime)s - %(levelname)s - %(message)s',
-                datefmt='%H:%M:%S'
-            ))
+        console_handler = logging.StreamHandler(sys.stdout)
+        if json_format and not sys.stdout.isatty():
+            console_handler.setFormatter(CustomJSONFormatter())
         else:
-            console_handler.setFormatter(simple_format)
-        
+            console_handler.setFormatter(CustomTextFormatter())
+        console_handler.setLevel(LOG_LEVEL)
         logger.addHandler(console_handler)
-    
-    # Handler especial para errores críticos
-    error_handler = logging.handlers.RotatingFileHandler(
-        LOG_DIR / f"{app_name}_errors.log",
-        maxBytes=max_bytes,
-        backupCount=backup_count,
-        encoding='utf-8'
-    )
-    error_handler.setLevel(logging.ERROR)
-    error_handler.setFormatter(detailed_format)
-    logger.addHandler(error_handler)
     
     return logger
 
 
-def get_logger(name: str) -> logging.Logger:
-    """Get a logger instance with the app's configuration.
+# Decoradores para logging automático
+def log_execution(logger: Optional[logging.Logger] = None, log_args: bool = True):
+    """
+    Decorador para loguear automáticamente la ejecución de funciones.
     
     Args:
-        name: Name for the logger (usually __name__)
-        
-    Returns:
-        Configured logger instance
+        logger: Logger a usar (si None, usa el logger por defecto)
+        log_args: Si loguear los argumentos de la función
     """
-    return logging.getLogger(f"SICyT.{name}")
-
-
-# Logging decorators
-def log_execution(logger: Optional[logging.Logger] = None):
-    """Decorator to log function execution with parameters and results."""
-    def decorator(func):
-        def wrapper(*args, **kwargs):
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
             nonlocal logger
             if logger is None:
                 logger = get_logger(func.__module__)
-            
+                
             func_name = func.__name__
-            logger.debug(f"Executing {func_name} with args={args}, kwargs={kwargs}")
+            
+            # Log de entrada
+            if log_args:
+                logger.debug(
+                    f"Ejecutando {func_name}",
+                    extra={
+                        "function": func_name,
+                        "args": str(args)[:200] if args else None,
+                        "kwargs": str(kwargs)[:200] if kwargs else None
+                    }
+                )
+            else:
+                logger.debug(f"Ejecutando {func_name}")
             
             try:
+                # Ejecutar función
+                start_time = datetime.now()
                 result = func(*args, **kwargs)
-                logger.debug(f"{func_name} completed successfully")
+                end_time = datetime.now()
+                duration = (end_time - start_time).total_seconds()
+                
+                # Log de éxito
+                logger.debug(
+                    f"Completado {func_name}",
+                    extra={
+                        "function": func_name,
+                        "duration_seconds": duration,
+                        "success": True
+                    }
+                )
                 return result
+                
             except Exception as e:
-                logger.error(f"{func_name} failed with error: {str(e)}", exc_info=True)
+                # Log de error
+                logger.error(
+                    f"Error en {func_name}: {str(e)}",
+                    exc_info=True,
+                    extra={
+                        "function": func_name,
+                        "error_type": type(e).__name__,
+                        "success": False
+                    }
+                )
                 raise
-        
+                
         return wrapper
     return decorator
 
 
-def log_database_operation(operation_type: str):
-    """Decorator to log database operations."""
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            logger = get_logger(func.__module__)
-            operation_id = datetime.now().strftime("%Y%m%d%H%M%S%f")
-            
-            logger.info(f"[{operation_id}] Starting {operation_type} operation: {func.__name__}")
-            
-            try:
-                result = func(*args, **kwargs)
-                logger.info(f"[{operation_id}] {operation_type} operation completed successfully")
-                return result
-            except Exception as e:
-                logger.error(f"[{operation_id}] {operation_type} operation failed: {str(e)}", exc_info=True)
-                raise
-        
-        return wrapper
-    return decorator
-
-
-def log_user_activity(activity_type: str):
-    """Decorator to log user activities."""
-    def decorator(func):
-        def wrapper(*args, **kwargs):
-            import streamlit as st
-            logger = get_logger(func.__module__)
-            
-            user = st.session_state.get("username", "anonymous")
-            session_id = st.session_state.get("session_id", "unknown")
-            
-            logger.info(f"User '{user}' (session: {session_id}) - {activity_type}: {func.__name__}")
-            
-            try:
-                result = func(*args, **kwargs)
-                logger.info(f"Activity '{activity_type}' completed for user '{user}'")
-                return result
-            except Exception as e:
-                logger.error(f"Activity '{activity_type}' failed for user '{user}': {str(e)}")
-                raise
-        
-        return wrapper
-    return decorator
-
-
-# Funciones auxiliares para análisis de logs
-def get_recent_errors(hours: int = 24, app_name: str = "SICyT") -> list:
-    """Get recent error messages from log files.
+def log_database_operation(operation_type: str = "query"):
+    """
+    Decorador específico para operaciones de base de datos.
     
     Args:
-        hours: Number of hours to look back
-        app_name: Name of the application
-        
-    Returns:
-        List of recent error log entries
+        operation_type: Tipo de operación (query, insert, update, delete)
     """
-    from datetime import datetime, timedelta
-    
-    errors = []
-    error_log = LOG_DIR / f"{app_name}_errors.log"
-    
-    if error_log.exists():
-        cutoff_time = datetime.now() - timedelta(hours=hours)
-        
-        with open(error_log, 'r', encoding='utf-8') as f:
-            for line in f:
-                try:
-                    # Parse timestamp from log line
-                    timestamp_str = line.split(' - ')[0]
-                    timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            logger = get_logger("database")
+            
+            # Extraer información SQL si está disponible
+            sql = None
+            if len(args) > 1 and isinstance(args[1], str):
+                sql = args[1][:500]  # Limitar longitud del SQL
+            elif 'plantilla_sql' in kwargs:
+                sql = str(kwargs.get('plantilla_sql', ''))[:500]
+                
+            logger.info(
+                f"Operación DB: {operation_type}",
+                extra={
+                    "operation": operation_type,
+                    "function": func.__name__,
+                    "sql_preview": sql
+                }
+            )
+            
+            try:
+                start_time = datetime.now()
+                result = func(*args, **kwargs)
+                duration = (datetime.now() - start_time).total_seconds()
+                
+                # Log resultado
+                rows_affected = 0
+                if hasattr(result, '__len__'):
+                    rows_affected = len(result)
                     
-                    if timestamp >= cutoff_time:
-                        errors.append(line.strip())
-                except Exception:
-                    continue
-    
-    return errors
+                logger.info(
+                    f"Operación DB completada: {operation_type}",
+                    extra={
+                        "operation": operation_type,
+                        "duration_seconds": duration,
+                        "rows_affected": rows_affected,
+                        "success": True
+                    }
+                )
+                return result
+                
+            except Exception as e:
+                logger.error(
+                    f"Error en operación DB: {operation_type}",
+                    exc_info=True,
+                    extra={
+                        "operation": operation_type,
+                        "error_type": type(e).__name__,
+                        "sql_preview": sql,
+                        "success": False
+                    }
+                )
+                raise
+                
+        return wrapper
+    return decorator
 
 
-def get_user_activity_summary(username: str = None) -> dict:
-    """Get summary of user activities from logs.
+def log_streamlit_interaction(interaction_type: str = "click"):
+    """
+    Decorador para loguear interacciones de usuario en Streamlit.
     
     Args:
-        username: Username to filter (None for all users)
-        
-    Returns:
-        Dictionary with activity summary
+        interaction_type: Tipo de interacción (click, input, select, etc.)
     """
-    summary = {
-        "total_activities": 0,
-        "activities_by_type": {},
-        "recent_activities": []
-    }
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            logger = get_logger("ui")
+            
+            # Información del usuario
+            user = getattr(st.session_state, 'username', 'anónimo')
+            page = getattr(st.session_state, 'current_page', 'desconocida')
+            
+            logger.info(
+                f"Interacción UI: {interaction_type}",
+                extra={
+                    "interaction": interaction_type,
+                    "function": func.__name__,
+                    "page": page,
+                    "user": user
+                }
+            )
+            
+            try:
+                result = func(*args, **kwargs)
+                logger.debug(f"Interacción completada: {func.__name__}")
+                return result
+                
+            except Exception as e:
+                logger.error(
+                    f"Error en interacción UI: {func.__name__}. Error: {str(e)}",
+                    exc_info=True,
+                    extra={
+                        "interaction": interaction_type,
+                        "page": page
+                    }
+                )
+                raise
+                
+        return wrapper
+    return decorator
+
+
+# Funciones auxiliares
+def get_logger(name: str = None) -> logging.Logger:
+    """
+    Obtiene un logger configurado.
     
-    # Parse main log file for user activities
-    for log_file in LOG_DIR.glob("SICyT_*.log"):
-        with open(log_file, 'r', encoding='utf-8') as f:
-            for line in f:
-                if "User" in line and (username is None or username in line):
-                    summary["total_activities"] += 1
-                    
-                    # Extract activity type if present
-                    if " - " in line:
-                        parts = line.split(" - ")
-                        if len(parts) > 2:
-                            activity = parts[2].strip()
-                            summary["activities_by_type"][activity] = \
-                                summary["activities_by_type"].get(activity, 0) + 1
-                    
-                    # Add to recent activities (last 100)
-                    if len(summary["recent_activities"]) < 100:
-                        summary["recent_activities"].append(line.strip())
+    Args:
+        name: Nombre del logger (si None, usa el nombre por defecto)
     
-    return summary
+    Returns:
+        Logger configurado
+    """
+    if name is None:
+        name = "InformesApp"
+    
+    # Si es un módulo específico, crear logger hijo
+    if name != "InformesApp" and not name.startswith("InformesApp."):
+        name = f"InformesApp.{name}"
+    
+    return setup_logger(name, log_file="informes_app")
 
 
-# Configuración inicial del logger principal
-main_logger = setup_logging("SICyT")
-main_logger.info("Logging system initialized")
+def log_error(message: str, error: Exception = None, **extra):
+    """
+    Función auxiliar para loguear errores rápidamente.
+    
+    Args:
+        message: Mensaje de error
+        error: Excepción capturada (opcional)
+        **extra: Campos adicionales para el log
+    """
+    logger = get_logger()
+    if error:
+        logger.error(message, exc_info=True, extra=extra)
+    else:
+        logger.error(message, extra=extra)
 
-# Export principal
-__all__ = [
-    'setup_logging',
-    'get_logger',
-    'log_execution',
-    'log_database_operation',
-    'log_user_activity',
-    'get_recent_errors',
-    'get_user_activity_summary'
-]
+
+def log_info(message: str, **extra):
+    """
+    Función auxiliar para loguear información rápidamente.
+    
+    Args:
+        message: Mensaje informativo
+        **extra: Campos adicionales para el log
+    """
+    logger = get_logger()
+    logger.info(message, extra=extra)
+
+
+def log_warning(message: str, **extra):
+    """
+    Función auxiliar para loguear advertencias rápidamente.
+    
+    Args:
+        message: Mensaje de advertencia
+        **extra: Campos adicionales para el log
+    """
+    logger = get_logger()
+    logger.warning(message, extra=extra)
+
+
+def log_debug(message: str, **extra):
+    """
+    Función auxiliar para loguear debug rápidamente.
+    
+    Args:
+        message: Mensaje de debug
+        **extra: Campos adicionales para el log
+    """
+    logger = get_logger()
+    logger.debug(message, extra=extra)
+
+
+# Inicializar logger principal al importar el módulo
+main_logger = setup_logger("InformesApp", log_file="informes_app")
+log_info("Sistema de logging inicializado", version="1.0.0")
