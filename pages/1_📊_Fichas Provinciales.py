@@ -18,6 +18,7 @@ from functools import wraps
 from typing import Optional, Dict
 import time
 
+
 logger = get_logger(__name__)
 
 
@@ -261,6 +262,10 @@ logger.info(f"Provincial dashboard accessed by user: {st.session_state.get('user
 # Cargar datos de provincias
 try:
     provinciasDF = get_provincias()
+    # Eliminar entrada where 'provincia' is 'C.A.B.A.' or 'Tierra del Fuego, Antártida e Islas del Atlántico Sur'
+    provinciasDF = provinciasDF[provinciasDF['provincia'] != 'C.A.B.A.']
+    provinciasDF = provinciasDF[provinciasDF['provincia'] != 'Tierra del Fuego, Antártida e Islas del Atlántico Sur']
+
     logger.info(f"Loaded {len(provinciasDF)} provinces")
 except Exception as e:
     logger.error(f"Failed to load provinces: {str(e)}")
@@ -293,7 +298,7 @@ provincia = st.selectbox(
 
 if provincia:
     # Guardar selección en session state
-    st.session_state.provincia = provinciasDF[provinciasDF['nombre_iso'] == provincia]['provincia'].values[0]
+    st.session_state.provincia = provincia
     st.session_state.provincia_id = provinciasDF[provinciasDF['nombre_iso'] == provincia]['id'].values[0]
     st.session_state.region = provinciasDF[provinciasDF['nombre_iso'] == provincia]['region'].values[0]
     st.session_state.pais = 'Argentina'

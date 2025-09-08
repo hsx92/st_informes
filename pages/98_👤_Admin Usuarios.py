@@ -186,12 +186,6 @@ with tabs[1]:
         )
         
         if email:
-            audit_logger.log_user_registration(
-                new_user=username,
-                email=email,
-                roles=selected_roles,
-                requested_by=st.session_state.get('username', 'unknown')
-            )
             st.success(f"✅ Usuario '{username}' registrado exitosamente")
             st.balloons()
     
@@ -243,10 +237,6 @@ with tabs[2]:
                     with st.container():
                         result = auth_manager.update_user_details(selected_user)
                         if result:
-                            audit_logger.log_user_update(
-                                user=selected_user,
-                                requested_by=st.session_state.get('username', 'unknown')
-                            )
                             st.success("✅ Información actualizada exitosamente")
                             time.sleep(2)
                             st.rerun()
@@ -264,10 +254,6 @@ with tabs[2]:
                         st.error("Presione nuevamente para confirmar, esta acción es irreversible.")
                     else:
                         if auth_manager.delete_user(selected_user):
-                            audit_logger.log_user_deletion(
-                                user=selected_user,
-                                requested_by=st.session_state.get('username', 'unknown')
-                            )
                             st.success(f"Usuario {selected_user} eliminado")
                             del st.session_state['confirm_delete']
                             time.sleep(2)
@@ -290,7 +276,6 @@ with tabs[3]:
         if st.session_state.get('username'):
             result = auth_manager.reset_password(st.session_state['username'])
             if result:
-                audit_logger.log_password_change(user=st.session_state['username'])
                 st.success(" ✅ Contraseña actualizada exitosamente")
         else:
             st.warning("Debe estar logueado para actualizar su contraseña.")
@@ -301,10 +286,6 @@ with tabs[3]:
         username, email, new_password = auth_manager.forgot_password(send_email=True)
         
         if username:
-            audit_logger.log_password_change(
-                user=username,
-                requested_by=st.session_state.get('username', 'unknown')
-            )
             st.success(f"✅ Nueva contraseña generada para {username}, enviada a: {email}")
             with st.expander("Ver detalles"):
                 st.code(f"""
@@ -322,11 +303,6 @@ with tabs[3]:
         username, email = auth_manager.forgot_username(send_email=True)
 
         if username:
-            audit_logger.log_username_recovery(
-                user=username,
-                email=email,
-                requested_by=st.session_state.get('username', 'unknown')
-            )
             st.success(f"✅ Nombre de usuario enviado a {email}")
             with st.expander("Ver detalles"):
                 st.code(f"""
@@ -374,11 +350,6 @@ with tabs[4]:
         
         if st.button("🔄 Actualizar Roles"):
             if auth_manager.update_user_roles(selected_user, new_roles):
-                audit_logger.log_role_update(
-                    user=selected_user,
-                    roles=new_roles,
-                    requested_by=st.session_state.get('username', 'unknown')
-                )
                 st.success(" ✅ Roles actualizados exitosamente")
                 time.sleep(2)
                 st.rerun()

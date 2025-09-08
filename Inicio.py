@@ -6,6 +6,11 @@ Utiliza streamlit-authenticator de forma correcta y completa.
 import streamlit as st
 from auth_manager import get_auth_manager
 from css_utils import load_css
+from logging_config import get_logger, get_audit_logger, log_execution, log_streamlit_interaction
+
+# Inicializar loggers
+logger = get_logger(__name__)
+audit_logger = get_audit_logger()
 
 # Configuración de la página
 st.set_page_config(
@@ -18,9 +23,14 @@ st.set_page_config(
 st.logo(image=st.secrets.get('LOGO_LARGO', ''), size="large")
 
 # Cargar CSS
-icon_css = load_css("static/iconos/dist/css/icono-arg.css") if st.secrets.get("USE_ICONS", False) else ""
+try:
+    icon_css = load_css("static/iconos/dist/css/icono-arg.css") if st.secrets.get("USE_ICONS", False) else ""
+    logger.debug("CSS de iconos cargado correctamente.")
+except Exception as e:
+    icon_css = ""
+    logger.error(f"Error cargando CSS de iconos: {e}")
 
-# CSS personalizado mejorado
+# CSS personalizado
 custom_css = """
     /* Estilos para el formulario de login */
     div[data-testid="stForm"] {
@@ -83,12 +93,24 @@ combined_css = f"""
 st.markdown(combined_css, unsafe_allow_html=True)
 
 # Inicializar AuthManager
-auth_manager = get_auth_manager()
+try:
+    auth_manager = get_auth_manager()
+    logger.debug("AuthManager inicializado correctamente.")
+except Exception as e:
+    st.error("Error inicializando el sistema de autenticación. Por favor, contacte al administrador.")
+    logger.critical(f"Error crítico con autenticación en AuthManager: {e}")
+    st.stop()
 
 
+@log_execution(log_args=False)
 def show_login_page():
     """Muestra la página de login."""
-    
+    ip = st.context.ip_address
+    if ip:
+        logger.info(f"Página principal accedida por IP: {ip}")
+    else:
+        logger.info("Página principal accedida por IP local.")
+
     # Header principal
     st.markdown("""
     <div class="main-header">
@@ -111,7 +133,9 @@ def show_login_page():
             try:
                 auth_manager.login(location='main')
             except Exception as e:
-                st.error(f"Error en el login: {e}")
+                st.error("Error en el login. Contacte al administrador.")
+                logger.critical(f"Error crítico en el widget de login: {e}")
+                st.stop()
             
             # Información adicional
             with st.expander("ℹ️ ¿Problemas para acceder?"):
@@ -126,24 +150,29 @@ def show_login_page():
             st.markdown("### Crear Nueva Cuenta")
             st.info("Complete el formulario para solicitar acceso al sistema.")
             
-            # Widget de registro
-            email, username, name = auth_manager.register_user(
-                location='main',
-                roles=['viewer']  # Rol por defecto para nuevos usuarios
-            )
-            
-            if email:
-                st.success(f"""
-                ✅ Registro exitoso!
+            try:
+                # Widget de registro
+                email, username, name = auth_manager.register_user(
+                    location='main',
+                    roles=['viewer']  # Rol por defecto para nuevos usuarios
+                )
                 
-                **Usuario:** {username}
-                **Nombre:** {name}
-                **Email:** {email}
-                
-                Ahora puede iniciar sesión con sus credenciales.
-                """)
-                st.balloons()
-        
+                if email:
+                    st.success(f"""
+                    ✅ Registro exitoso!
+                    
+                    **Usuario:** {username}
+                    **Nombre:** {name}
+                    **Email:** {email}
+                    
+                    Ahora puede iniciar sesión con sus credenciales.
+                    """)
+                    st.balloons()
+            except Exception as e:
+                st.error("Error en el registro. Contacte al administrador.")
+                logger.critical(f"Error crítico en el widget de registro: {e}")
+                st.stop()
+
         with tab3:
             st.markdown("### Recuperación de Acceso")
             
@@ -159,10 +188,7 @@ def show_login_page():
                 
                 if username:
                     st.success(f"""
-                    ✅ Nueva contraseña generada exitosamente
-                    
-                    Se ha generado una nueva contraseña para el usuario **{username}**,
-                    la misma se ha enviado a: {email}
+                    ✅ Nueva contraseña generada exitosamente para el usuario **{username}**, la misma ha sido enviada a la dirección de email asociada a la cuenta.
                     """)
                 elif username is False:
                     st.error("❌ Usuario inexistente. Verifique e intente nuevamente.")
@@ -170,27 +196,37 @@ def show_login_page():
             else:  # Recuperar nombre de usuario
                 st.info("Ingrese su email para recuperar su nombre de usuario.")
                 
-                username, email = auth_manager.forgot_username(location='main')
+                username, email = auth_manager.forgot_username(location='main', send_email=True)
                 
                 if username:
                     st.success(f"""
-                    ✅ Usuario encontrado!
-                    
-                    Su nombre de usuario es: **{username}**
+                    ✅ Usuario encontrado! Nombre de usuario enviado a: **{email}**
                     """)
                 elif username is False:
                     st.error("❌ No se encontró ningún usuario con ese email.")
 
 
+@log_execution(log_args=False)
 def show_home_page():
     """Muestra la página principal para usuarios autenticados."""
     
+    # Acciones rápidas en el sidebar
+    with st.sidebar:
+        # Botón de logout
+        auth_manager.logout(location='sidebar', key='logout_main')
+
     # Obtener información del usuario
     username = st.session_state.get('username', 'Usuario')
     name = st.session_state.get('name', username)
     roles = st.session_state.get('roles', [])
     email = st.session_state.get('email', '')
     
+    audit_logger.log_data_access(
+        user=username,
+        resource='home_page',
+        action='view'
+    )
+
     # Header de bienvenida
     st.markdown(f"""
     <div class="welcome-card">
@@ -234,7 +270,7 @@ def show_home_page():
             st.switch_page("pages/1_📊_Fichas Provinciales.py")
     
     with col2:
-        if auth_manager.has_any_role(['admin', 'director']):
+        if auth_manager.has_role('admin'):
             st.markdown("""
             <div class="feature-card">
                 <h3>👥 Administración de Usuarios</h3>
@@ -248,7 +284,7 @@ def show_home_page():
             st.markdown("""
             <div class="feature-card" style="opacity: 0.5;">
                 <h3>🔒 Administración</h3>
-                <p>Requiere permisos de administrador o director.</p>
+                <p>Requiere permisos de administrador.</p>
             </div>
             """, unsafe_allow_html=True)
     
@@ -268,11 +304,6 @@ def show_home_page():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-    
-    # Acciones rápidas en el sidebar
-    with st.sidebar:
-        # Botón de logout
-        auth_manager.logout(location='sidebar', key='logout_main')
     
     # Footer con información
     st.markdown("---")
@@ -300,21 +331,28 @@ def show_home_page():
 
 
 # MAIN APP LOGIC
+@log_streamlit_interaction('main_page_load')
 def main():
     """Función principal de la aplicación."""
     
-    # Verificar estado de autenticación
-    if not st.session_state.get('authentication_status'):
-        # Intentar autenticación con cookie
-        show_login_page()
-    else:
-        # Usuario autenticado - mostrar página principal
-        show_home_page()
+    try:
+        # Verificar estado de autenticación
+        if not st.session_state.get('authentication_status'):
+            # Intentar autenticación con cookie
+            show_login_page()
+        else:
+            # Usuario autenticado - mostrar página principal
+            show_home_page()
+    except Exception as e:
+        st.error("Error inesperado en la aplicación. Por favor, contacte al administrador.")
+        logger.critical(f"Error crítico en la función main_page: {e}")
+        st.stop()
 
 
 if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        st.error(f"Error en la aplicación: {e}")
+        st.error("Error en la aplicación.")
         st.info("Por favor, recargue la página o contacte al administrador si el problema persiste.")
+        logger.critical(f"Error crítico en la ejecución principal: {e}")

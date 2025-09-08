@@ -173,7 +173,7 @@ class AuditLogger:
     
     def log_logout(self, username: str):
         """Registra logout de usuarios."""
-        self.logger.info(f"Logout: {username}", extra={'audit_type': 'logout', 'username': username})
+        self.logger.info(f"Logout exitoso: {username.get('username')}", extra={'audit_type': 'logout', 'user': username})
     
     def log_data_access(self, user: str, resource: str, action: str = "read", details: Dict = None):
         """Registra acceso a datos."""
@@ -253,22 +253,17 @@ class AuditLogger:
         }
         self.logger.warning(f"Eliminación de usuario: {user} por {requested_by}", extra=extra)
 
-    def log_password_change(self, user: str, requested_by: str = 'self', failed: bool = False):
+    def log_password_change(self, user: str = 'unknown', requested_by: str = 'self', failed: bool = False):
         """Registra cambios de contraseña."""
-        if failed is False:
-            extra = {
-                'audit_type': 'password_change',
-                'user': user,
-                'requested_by': requested_by
-            }
-            self.logger.info(f"Cambio de contraseña para usuario: {user} por {requested_by}", extra=extra)
-        else:
-            extra = {
-                'audit_type': 'password_change_failed',
-                'user': user,
-                'requested_by': requested_by
-            }
+        extra = {
+            'audit_type': 'password_change',
+            'user': user,
+            'requested_by': requested_by
+        }
+        if failed:
             self.logger.warning(f"Intento fallido de cambio de contraseña para usuario: {user} por {requested_by}", extra=extra)
+        else:
+            self.logger.info(f"Cambio de contraseña para usuario: {user} por {requested_by}", extra=extra)
 
     def log_role_update(self, user: str, roles: List[str], requested_by: str = 'self'):
         """Registra cambios en los roles de un usuario."""
@@ -280,7 +275,7 @@ class AuditLogger:
         }
         self.logger.info(f"Cambio de roles para usuario: {user} a {roles} por {requested_by}", extra=extra)
 
-    def log_username_recovery(self, user: str, email: str, requested_by: str = 'self'):
+    def log_username_recovery(self, user: str = 'unknown', email: str = 'unknown', requested_by: str = 'unknown', failed: bool = False):
         """Registra intentos de recuperación de nombre de usuario."""
         extra = {
             'audit_type': 'username_recovery',
@@ -288,7 +283,10 @@ class AuditLogger:
             'email': email,
             'requested_by': requested_by
         }
-        self.logger.info(f"Recuperación de nombre de usuario: {user} ({email}) por {requested_by}", extra=extra)
+        if failed:
+            self.logger.warning(f"Recuperación de nombre de usuario fallida: {user} ({email}) por {requested_by}", extra=extra)
+        else:
+            self.logger.info(f"Recuperación de nombre de usuario: {user} ({email}) por {requested_by}", extra=extra)
 
 
 class PerformanceLogger:

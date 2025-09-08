@@ -6,7 +6,11 @@ from typing import Union
 from great_tables import GT, style, loc, google_font
 from sources import get_informe
 from fig_builders import build_line, build_bar, build_pie, build_treemap
+from logging_config import get_logger, log_execution
+import time
 
+# Inicializar logger
+logger = get_logger(__name__)
 
 pio.templates.default = 'seaborn'
 BASE_FONT = dict(family="Poppins", size=16)
@@ -35,19 +39,29 @@ def insertar_saltos(cadena: str, width: int = 35) -> str:
 
 
 def procesar_kpi(df: pd.DataFrame, config: dict) -> str:
-    if df.empty or pd.isna(df.iloc[0, 0]):
-        return "N/A"
-    valor = df.iloc[0, 0]
-    formato = config.get('format', 'raw')
-    sufijo = config.get('suffix', '')
-    if formato == 'int':
-        return f"{int(float(valor)):,}{sufijo}".replace(",", ".")
-    if formato == 'float':
-        return f"{float(valor):,.2f}{sufijo}".replace(",", "X").replace(".", ",").replace("X", ".")
-    return f"{valor}{sufijo}"
+    """Procesa un KPI según su configuración."""
+    try:
+        if df.empty or pd.isna(df.iloc[0, 0]):
+            logger.debug("KPI sin datos, retornando 'N/A'")
+            return "N/A"
+        
+        valor = df.iloc[0, 0]
+        formato = config.get('format', 'raw')
+        sufijo = config.get('suffix', '')
+        
+        if formato == 'int':
+            return f"{int(float(valor)):,}{sufijo}".replace(",", ".")
+        if formato == 'float':
+            return f"{float(valor):,.2f}{sufijo}".replace(",", "X").replace(".", ",").replace("X", ".")
+        return f"{valor}{sufijo}"
+        
+    except Exception as e:
+        logger.error(f"Error procesando KPI: {e}")
+        return "Error"
 
 
 # Renderiza una tabla dinámica y la formatea con great_tables para su visualización en Streamlit
+@log_execution(log_result=False)
 def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame, GT, None]:
     """
     Crea una tabla dinámica (pivot table) y la formatea con great_tables.
@@ -55,161 +69,198 @@ def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame
     Args:
         componente (dict): Un diccionario con los datos y la configuración.
                           Debe contener 'resultado_sql' (DataFrame) y 'config'.
+        render_gt: Si renderizar como great_tables o devolver DataFrame
 
     Returns:
         GT: Un objeto de great_tables listo para ser visualizado.
     """
-    # 1. Extraer el DataFrame de los datos
-    df = componente['resultado_sql']
+    try:
+        logger.debug(f"Generando tabla pivot para componente: {componente.get('titulo', 'sin título')}")
+        
+        # 1. Extraer el DataFrame de los datos
+        df = componente['resultado_sql']
 
-    # 2. Crear la tabla dinámica usando la configuración del componente
-    pivot_config = componente['config']['pivot']
-    if 'index' in pivot_config:
-        tabla = (
-            df
-            .pivot_table(
-                index=pivot_config['index'],
+        # 2. Crear la tabla dinámica usando la configuración del componente
+        pivot_config = componente['config']['pivot']
+        if 'index' in pivot_config:
+            tabla = (
+                df
+                .pivot_table(
+                    index=pivot_config['index'],
+                    columns=pivot_config['columns'],
+                    values=pivot_config['values'],
+                    aggfunc=pivot_config['aggfunc']
+                )
+                .reset_index()
+            )
+            # Borrar el contenido del column_header de la columna índice
+            tabla.columns = tabla.columns.where(tabla.columns != pivot_config['index'], '')
+            col_str = tabla.columns.tolist()
+            col_str = col_str[1:] if col_str else []
+        else:
+            tabla = df.pivot_table(
                 columns=pivot_config['columns'],
                 values=pivot_config['values'],
                 aggfunc=pivot_config['aggfunc']
             )
-            .reset_index()
-        )
-        # Borrar el contenido del column_header de la columna índice
-        tabla.columns = tabla.columns.where(tabla.columns != pivot_config['index'], '')
-        col_str = tabla.columns.tolist()
-        col_str = col_str[1:] if col_str else []
-    else:
-        tabla = df.pivot_table(
-            columns=pivot_config['columns'],
-            values=pivot_config['values'],
-            aggfunc=pivot_config['aggfunc']
-        )
-        col_str = tabla.columns.tolist()
+            col_str = tabla.columns.tolist()
 
-    # 3. Construcción del objeto GT con el formato deseado
-    if render_gt:
-        try:
-            gt = (
-                GT(tabla)
-                .tab_header(title=componente['titulo'])
-                .tab_stubhead(label='')
-                .opt_table_font(
-                    font=google_font(name="Poppins"),
-                )
-                # 1. Formato para el cuerpo de la primera columna (el índice)
-                .tab_style(
-                    style.css("padding-top: 25px; padding-bottom: 25px;"),  # El primer valor es el padding vertical (top/bottom)
-                    locations=loc.body()
-                )
-                .tab_style(style=[
-                    style.css("padding-top: 15px; padding-bottom: 15px;"),
-                    style.text(font=google_font(name="Poppins"), align="center")
-                ],  # El primer valor es el padding vertical (top/bottom)
-                    locations=[loc.header(), loc.column_header()]
-                )
-                # 2. Formato para el encabezado de la primera columna
-                .tab_style([
-                    style.fill(color="#4D7AAE"),
-                    style.text(font=google_font(name="Poppins"), weight="bold", color="white", align="center"),
-                ],
-                    locations=loc.body(columns='')
-                )
-                # 3. Formato para el encabezado de las otras columnas
-                .tab_style(
-                    style.text(font=google_font(name="Poppins"), weight="bold", color="white", align="center"),
-                    locations=loc.column_labels()
-                )
-                .tab_style(
-                    style=style.text(font=google_font(name="Poppins"), align="center", color="gray", weight="lighter"),
-                    locations=loc.body(columns=col_str)
-                )
-                .data_color(
-                    na_color="white",
-                    palette=[
-                        "#FDF8E7", "#FBF5E0", "#F9F2DA", "#F7EFD4", "#F5EDCE", "#F3EAC8",
-                        "#F1E7C2", "#EFE4BC", "#EFE1B6", "#ECE4B1", "#EAE2AC", "#E8DFAB",
-                        "#E6DC9F", "#E4D999", "#E2D693", "#E0D38D", "#DED087", "#DCCDA1"
+        # 3. Construcción del objeto GT con el formato deseado
+        if render_gt:
+            try:
+                gt = (
+                    GT(tabla)
+                    .tab_header(title=componente['titulo'])
+                    .tab_stubhead(label='')
+                    .opt_table_font(
+                        font=google_font(name="Poppins"),
+                    )
+                    # 1. Formato para el cuerpo de la primera columna (el índice)
+                    .tab_style(
+                        style.css("padding-top: 25px; padding-bottom: 25px;"),  # El primer valor es el padding vertical (top/bottom)
+                        locations=loc.body()
+                    )
+                    .tab_style(style=[
+                        style.css("padding-top: 15px; padding-bottom: 15px;"),
+                        style.text(font=google_font(name="Poppins"), align="center")
+                    ],  # El primer valor es el padding vertical (top/bottom)
+                        locations=[loc.header(), loc.column_header()]
+                    )
+                    # 2. Formato para el encabezado de la primera columna
+                    .tab_style([
+                        style.fill(color="#4D7AAE"),
+                        style.text(font=google_font(name="Poppins"), weight="bold", color="white", align="center"),
                     ],
-                    domain=[df[pivot_config['values']].min(), df[pivot_config['values']].max()],
+                        locations=loc.body(columns='')
+                    )
+                    # 3. Formato para el encabezado de las otras columnas
+                    .tab_style(
+                        style.text(font=google_font(name="Poppins"), weight="bold", color="white", align="center"),
+                        locations=loc.column_labels()
+                    )
+                    .tab_style(
+                        style=style.text(font=google_font(name="Poppins"), align="center", color="gray", weight="lighter"),
+                        locations=loc.body(columns=col_str)
+                    )
+                    .data_color(
+                        na_color="white",
+                        palette=[
+                            "#FDF8E7", "#FBF5E0", "#F9F2DA", "#F7EFD4", "#F5EDCE", "#F3EAC8",
+                            "#F1E7C2", "#EFE4BC", "#EFE1B6", "#ECE4B1", "#EAE2AC", "#E8DFAB",
+                            "#E6DC9F", "#E4D999", "#E2D693", "#E0D38D", "#DED087", "#DCCDA1"
+                        ],
+                        domain=[df[pivot_config['values']].min(), df[pivot_config['values']].max()],
+                    )
+                    .fmt_integer(
+                        columns=col_str,
+                        use_seps=True,
+                        sep_mark="."
+                    )
+                    .tab_options(
+                        heading_background_color="#54698B",
+                        column_labels_background_color="#54698B",  # Nuevo: Color de fondo para encabezados
+                        table_border_top_color="#54698B",
+                        table_border_bottom_color="#54698B",
+                        row_striping_include_stub=True,
+                    )
                 )
-                .fmt_integer(
-                    columns=col_str,
-                    use_seps=True,
-                    sep_mark="."
-                )
-                .tab_options(
-                    heading_background_color="#54698B",
-                    column_labels_background_color="#54698B",  # Nuevo: Color de fondo para encabezados
-                    table_border_top_color="#54698B",
-                    table_border_bottom_color="#54698B",
-                    row_striping_include_stub=True,
-                )
-            )
-            return gt
-        except Exception:
-            return None
-    else:
-        return tabla
+                logger.debug("Tabla GT generada exitosamente")
+                return gt
+            except Exception as e:
+                logger.error(f"Error al generar GT table: {e}")
+                return None
+        else:
+            return tabla
+            
+    except Exception as e:
+        logger.error(f"Error en tabla_pivot: {e}")
+        return None
 
 
 # --- TO IMG ---
 
+@log_execution(log_args=False)
 def preparar_data_pdf(data: dict):
-    for nombre, componente in data["componentes"].items():
-        if nombre.startswith("kpi"):
-            continue
-        elif nombre.startswith("tabla"):
-            data["componentes"][nombre]["df"] = tabla_pivot(componente)
-        elif nombre.startswith("grafico"):
-            width, height = (1080, None)
-            if nombre == "grafico_percepcion_calidad_vida":
-                width, height = (None, 700)
-            if nombre == "grafico_percepcion_temas_prioritarios":
-                width, height = (1080, 600)
-                data["componentes"][nombre]["img"] = componente.get("figura").to_image(
-                    format="png", width=width, height=height, scale=1, validate=True
-                )
+    """Prepara los datos para generación de PDF."""
+    logger.info("Iniciando preparación de datos para PDF")
+    start_time = time.time()
+    
+    try:
+        for nombre, componente in data["componentes"].items():
+            if nombre.startswith("kpi"):
                 continue
-            if componente.get("figura") is not None:
-                # Convertir la figura a imagen
-                data["componentes"][nombre]["img"] = componente.get("figura").to_image(
-                    format="png", width=width, height=height, scale=2, validate=True
-                )
+            elif nombre.startswith("tabla"):
+                logger.debug(f"Procesando tabla: {nombre}")
+                data["componentes"][nombre]["df"] = tabla_pivot(componente)
+            elif nombre.startswith("grafico"):
+                width, height = (1080, None)
+                if nombre == "grafico_percepcion_calidad_vida":
+                    width, height = (None, 700)
+                if nombre == "grafico_percepcion_temas_prioritarios":
+                    width, height = (1080, 600)
+                    data["componentes"][nombre]["img"] = componente.get("figura").to_image(
+                        format="png", width=width, height=height, scale=1, validate=True
+                    )
+                    continue
+                if componente.get("figura") is not None:
+                    logger.debug(f"Convirtiendo gráfico a imagen: {nombre}")
+                    # Convertir la figura a imagen
+                    data["componentes"][nombre]["img"] = componente.get("figura").to_image(
+                        format="png", width=width, height=height, scale=2, validate=True
+                    )
 
-    # Delete 'figura' and 'resultado_sql' from every 'componente'
-    for nombre, componente in data["componentes"].items():
-        componente.pop("figura", None)
-        componente.pop("resultado_sql", None)
+        # Delete 'figura' and 'resultado_sql' from every 'componente'
+        for nombre, componente in data["componentes"].items():
+            componente.pop("figura", None)
+            componente.pop("resultado_sql", None)
 
-    print('Generación del diccionario de la ficha provincial completada.')
-    return data
+        elapsed_time = time.time() - start_time
+        logger.info(f'Generación del diccionario de la ficha provincial completada en {elapsed_time:.2f}s')
+        return data
+        
+    except Exception as e:
+        logger.error(f"Error en preparar_data_pdf: {e}")
+        raise
 
 
 # --- FICHA PROVINCIAL --- #
 
+@log_execution(log_args=True, log_result=False)
 def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
-
     """Genera las figuras para la ficha provincial."""
-
+    
+    logger.info(f"Generando figuras para provincia: {provincia} (ID: {provincia_id}, Año: {anio})")
+    start_time = time.time()
+    
     try:
+        # Obtener datos del informe
         DFs = get_informe("ficha_provincial", {
             "provincia_id": provincia_id,
             "provincia": provincia,
             "anio": anio
         })
+        
+        logger.debug(f"Datos obtenidos, procesando {len(DFs.get('componentes', {}))} componentes")
 
         # COMPONENTES #
 
         # KPI
-
+        kpi_count = 0
         for key, k in DFs["componentes"].items():
             if k["tipo_componente"] == "KPI":
                 k["valor"] = procesar_kpi(k["resultado_sql"], k["config"])
+                kpi_count += 1
+        
+        logger.debug(f"Procesados {kpi_count} KPIs")
 
         # FIGURAS
-
-        DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1] = DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1].apply(insertar_saltos)
+        logger.debug("Generando figuras...")
+        
+        # Proceso de generación de figuras (código existente)
+        try:
+            DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1] = DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1].apply(insertar_saltos)
+        except IndexError as e:
+            logger.warning(f"Error al insertar saltos en 'grafico_expo_top5': {e}")
 
         top5_exportaciones_fig = build_bar(
             comp=DFs["componentes"]["grafico_expo_top5"],
@@ -252,8 +303,6 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             tabla_pfi_cruce_fig = None
 
         # ---
-
-        # DFs["componentes"]["grafico_unidades_por_inst"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_unidades_por_inst"]['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
 
         unidadesIDxinstitucion_fig = build_bar(
             comp=DFs["componentes"]["grafico_unidades_por_inst"],
@@ -467,6 +516,8 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
         )
 
         # --- FIN FIGURAS --- #
+        
+        logger.debug("Asignando figuras a componentes...")
 
         DFs["componentes"]["grafico_expo_top5"]["figura"] = top5_exportaciones_fig
         DFs["componentes"]["grafico_evolucion_regional"]["figura"] = inversionID_fig
@@ -490,7 +541,11 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
         DFs["componentes"]["grafico_percepcion_temas_prioritarios"]["figura"] = percepcionTemasPrioritarios_fig
         DFs["componentes"]["grafico_percepcion_calidad_vida"]["figura"] = percepcionPublica_fig
 
+        elapsed_time = time.time() - start_time
+        logger.info(f"Figuras generadas exitosamente para {provincia} en {elapsed_time:.2f}s")
+        
         return DFs
+        
     except Exception as e:
-        print(f"Error al generar las figuras de la ficha provincial: {e}")
+        logger.critical(f"Error inesperado al generar las figuras de la ficha provincial para {provincia}: {e}", exc_info=True)
         return {}
