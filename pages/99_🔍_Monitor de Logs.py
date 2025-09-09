@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 import plotly.express as px
 from logging_config import get_logger, get_audit_logger
 from auth_manager import get_auth_manager
-import time
 from typing import Dict, List
 
 logger = get_logger(__name__)
@@ -306,7 +305,6 @@ def render_log_charts(df: pd.DataFrame):
             if 'user' in df.columns:
                 df_time['day'] = pd.to_datetime(df_time['timestamp']).dt.date
                 activity_matrix = df_time.groupby(['day', 'hour', 'user']).size().reset_index(name='events')
-                st.write(activity_matrix)
                 fig_heatmap = px.density_heatmap(
                     activity_matrix,
                     x='hour',
@@ -609,11 +607,12 @@ def main():
         st.markdown('<h3 style="text-align:center;">⚙️ Configuración</h3>', unsafe_allow_html=True)
 
         # Selector de tipo de log
-        log_types = ["Aplicación", "Auditoría", "Errores", "Rendimiento", "Seguridad", "Todos"]
+        log_types = ["Todos", "Aplicación", "Auditoría", "Errores", "Rendimiento", "Seguridad"]
         log_type = st.selectbox(
             "Tipo de Log",
             log_types,
-            key="log_type"
+            key="log_type",
+            index=0
         )
         
         # Selector de archivo específico
@@ -667,17 +666,8 @@ def main():
             key="log_levels"
         )
         
-        # Auto-actualización
-        st.markdown('<h3 style="text-align:center;">🔄 Actualización</h3>', unsafe_allow_html=True)
-        auto_refresh = st.checkbox("Activar (cada 30s)", key="auto_refresh")
-        
-        if auto_refresh:
-            st.info("Actualización automática activa.")
-            time.sleep(30)
-            st.rerun()
-        
         # Botón de actualización manual
-        if st.button("Actualizar Ahora 🔄", use_container_width=True):
+        if st.button("Actualizar registros 🔄", use_container_width=True):
             st.rerun()
         
         st.markdown("---")

@@ -277,13 +277,6 @@ def show_home_page():
             
             if st.button("Ir a Administración", use_container_width=True):
                 st.switch_page("pages/98_👤_Admin Usuarios.py")
-        else:
-            st.markdown("""
-            <div class="feature-card" style="opacity: 0.5;">
-                <h3>🔒 Administración</h3>
-                <p>Requiere permisos de administrador.</p>
-            </div>
-            """, unsafe_allow_html=True)
     
     # Novedades y actualizaciones
     st.markdown("---")

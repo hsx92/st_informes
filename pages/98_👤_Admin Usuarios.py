@@ -233,13 +233,10 @@ with tabs[2]:
                     st.markdown(f"**Estado:** {'Activo' if user_info.get('logged_in', False) else 'Inactivo'}")
             
                 # Widget para actualizar detalles del usuario
-                if st.button(f"Editar detalles de {selected_user}", icon="✏️", use_container_width=True):
-                    with st.container():
-                        result = auth_manager.update_user_details(selected_user)
-                        if result:
-                            st.success("✅ Información actualizada exitosamente")
-                            time.sleep(2)
-                            st.rerun()
+                # if st.button(f"Editar detalles de {selected_user}", icon="✏️", use_container_width=True):
+                #     result = auth_manager.update_user_details(username=selected_user)
+                #     if result:
+                #         st.success("✅ Información actualizada exitosamente")
             
             # Sección para eliminar usuario
             st.markdown("---")
