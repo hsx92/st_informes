@@ -81,7 +81,7 @@ class CustomJSONFormatter(logging.Formatter):
             "function": record.funcName,
             "line": record.lineno,
             "message": record.getMessage(),
-            "user": context.get('user') or getattr(st.session_state, 'username', 'sistema'),
+            "user": context.get('user') or st.session_state.get('username') or 'invitado',
             "session_id": context.get('session_id') or getattr(st.session_state, 'session_id', None),
             "request_id": context.get('request_id'),
             "ip_address": context.get('ip_address'),
@@ -133,7 +133,11 @@ class CustomTextFormatter(logging.Formatter):
             
         # Usuario actual
         context = getattr(_log_context, 'context', {})
-        user = context.get('user') or getattr(st.session_state, 'username', 'sistema')
+        user = context.get('user')
+        if not user:
+            user = st.session_state.get('username')
+        if not user:
+            user = 'invitado'
         
         # Construir mensaje
         timestamp = datetime.fromtimestamp(record.created).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]

@@ -106,37 +106,47 @@ class AuthManager:
             logger.error(f"Error al inicializar authenticator: {e}")
             raise
 
-    def login(self, location: str = 'main') -> None:
+    def login(self, location: str = 'main') -> (Tuple[str | None, bool | None, str | None] | None):
         """
         Renderiza el widget de login.
         
         Args:
             location: Ubicación del widget ('main', 'sidebar', 'unrendered')
         """
+        if 'name' not in st.session_state:
+            st.session_state['name'] = None
+        if 'username' not in st.session_state:
+            st.session_state['username'] = None
+        if 'authentication_status' not in st.session_state:
+            st.session_state['authentication_status'] = None
+        if 'logout' not in st.session_state:
+            st.session_state['logout'] = None
+
+        result = self.authenticator.login(location='unrendered', key='login check')
+        logger.debug(f"Login no renderizado, resultado devuelto: {result}")
+
         try:
-            logger.debug(f"Renderizando widget de login en ubicación: {location}")
-            
-            # Capturar estado antes del login
-            prev_status = st.session_state.get('authentication_status')
-            
-            self.authenticator.login(
-                location=location,
-                fields={
-                    'Username': 'Usuario',
-                    'Password': 'Contraseña',
-                    'Login': 'Iniciar Sesión'
-                },
-            )
-            
-            # Verificar cambios en el estado de autenticación
-            current_status = st.session_state.get('authentication_status')
-            username = st.session_state.get('username')
-            
-            if prev_status != current_status and current_status is not None:
-                if current_status:
-                    audit_logger.log_login(username, success=True)
-                else:
+            if location == 'unrendered':
+                return result
+            else:
+                logger.debug(f"Renderizando widget de login en ubicación: {location}")
+                
+                self.authenticator.login(
+                    location=location,
+                    fields={
+                        'Username': 'Usuario',
+                        'Password': 'Contraseña',
+                        'Login': 'Iniciar Sesión'
+                    },
+                )
+                
+                if st.session_state.get('authentication_status') is True:
+                    audit_logger.log_login(st.session_state['username'], success=True)
+                elif st.session_state.get('authentication_status') is False:
+                    st.error("Usuario o contraseña incorrectos.")
                     audit_logger.log_login(username='unknown', success=False)
+                elif st.session_state.get('authentication_status') is None:
+                    st.warning("Por favor, ingrese sus credenciales.")
                     
         except stauth.LoginError as e:
             logger.error(f"Error de login: {e}")

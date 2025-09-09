@@ -104,7 +104,10 @@ except Exception as e:
 
 @log_execution(log_args=False)
 def show_login_page():
-    """Muestra la página de login."""
+
+    """
+    Muestra la página de login.
+    """
     ip = st.context.ip_address
     if ip:
         logger.info(f"Página principal accedida por IP: {ip}")
@@ -136,7 +139,6 @@ def show_login_page():
                 st.error("Error en el login. Contacte al administrador.")
                 logger.critical(f"Error crítico en el widget de login: {e}")
                 st.stop()
-            
             # Información adicional
             with st.expander("ℹ️ ¿Problemas para acceder?"):
                 st.markdown("""
@@ -209,14 +211,9 @@ def show_login_page():
 @log_execution(log_args=False)
 def show_home_page():
     """Muestra la página principal para usuarios autenticados."""
-    
-    # Acciones rápidas en el sidebar
-    with st.sidebar:
-        # Botón de logout
-        auth_manager.logout(location='sidebar', key='logout_main')
 
     # Obtener información del usuario
-    username = st.session_state.get('username', 'Usuario')
+    username = st.session_state.get('username')
     name = st.session_state.get('name', username)
     roles = st.session_state.get('roles', [])
     email = st.session_state.get('email', '')
@@ -329,13 +326,18 @@ def show_home_page():
         - [Reportar un Problema](/)
         """)
 
+    # Acciones rápidas en el sidebar
+    with st.sidebar:
+        # Botón de logout
+        auth_manager.logout(location='sidebar', key='logout_main')
+
 
 # MAIN APP LOGIC
 @log_streamlit_interaction('main_page_load')
 def main():
     """Función principal de la aplicación."""
-    
     try:
+        auth_manager.login(location='unrendered')
         # Verificar estado de autenticación
         if not st.session_state.get('authentication_status'):
             # Intentar autenticación con cookie

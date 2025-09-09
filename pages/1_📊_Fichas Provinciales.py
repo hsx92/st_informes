@@ -595,15 +595,3 @@ if provincia:
 else:
     # Mensaje cuando no hay provincia seleccionada
     st.info("👆 Por favor, seleccione una provincia del menú desplegable para visualizar sus datos.")
-    
-    # Mostrar algunas estadísticas generales
-    if not provinciasDF.empty:
-        st.markdown("### 📊 Estadísticas Generales")
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            st.metric("Total de Provincias", len(provinciasDF))
-        with col2:
-            regions = provinciasDF['region'].nunique()
-            st.metric("Regiones", regions)
-        with col3:
-            st.metric("Año de Datos", "2023")
