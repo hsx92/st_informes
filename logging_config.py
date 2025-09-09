@@ -177,7 +177,7 @@ class AuditLogger:
     
     def log_logout(self, username: str):
         """Registra logout de usuarios."""
-        self.logger.info(f"Logout exitoso: {username.get('username')}", extra={'audit_type': 'logout', 'user': username})
+        self.logger.info(f"Logout exitoso: {username}", extra={'audit_type': 'logout', 'user': username})
     
     def log_data_access(self, user: str, resource: str, action: str = "read", details: Dict = None):
         """Registra acceso a datos."""

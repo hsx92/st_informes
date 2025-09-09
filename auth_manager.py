@@ -173,7 +173,7 @@ class AuthManager:
                     location=location,
                     key=key,
                     button_name='Cerrar Sesión',
-                    callback=lambda username=username: audit_logger.log_logout(username)
+                    callback=lambda username=username: audit_logger.log_logout(username.get('username', 'unknown'))
                 )
                     
             except Exception as e:
