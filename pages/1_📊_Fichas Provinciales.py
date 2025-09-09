@@ -579,18 +579,18 @@ if provincia:
     style_metric_cards()
     st.markdown("---")
 
-    # --- SECCIÓN DE EXPORTACIÓN ---
-    st.markdown("### 📄 Exportar Reporte")
+    # --- SECCIÓN DE EXPORTACIÓN PDF ---
+    # st.markdown("### 📄 Exportar Reporte")
     
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button(
-            "🎯 Generar Reporte PDF",
-            use_container_width=True,
-            help="Generar un reporte PDF completo con todos los datos de la provincia",
-            type="primary"
-        ):
-            generate_pdf_report(st.session_state.provincia, DFs)
+    # col1, col2, col3 = st.columns([1, 2, 1])
+    # with col2:
+    #     if st.button(
+    #         "🎯 Generar Reporte PDF",
+    #         use_container_width=True,
+    #         help="Generar un reporte PDF completo con todos los datos de la provincia",
+    #         type="primary"
+    #     ):
+    #         generate_pdf_report(st.session_state.provincia, DFs)
 
 else:
     # Mensaje cuando no hay provincia seleccionada
