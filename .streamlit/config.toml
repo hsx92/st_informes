@@ -1,23 +1,75 @@
 [server]
-# maxMessageSize = 500
+# Configuración del servidor
+port = 8501
+baseUrlPath = ""
+enableCORS = true
+enableXsrfProtection = true
+
+# Configuración de archivos y uploads
+maxUploadSize = 200  # MB - Permitir archivos más grandes para datos provinciales
+maxMessageSize = 200  # MB - Aumentado para gráficos complejos
+
+# Configuración de rendimiento
+enableStaticServing = true
+runOnSave = false  # Desactivar en producción
+allowRunOnSave = false  # Seguridad adicional
+
+# Configuración de headers de seguridad
+enableWebsocketCompression = true
 
 [client]
+# Configuración de la interfaz de cliente
 showSidebarNavigation = false
+showErrorDetails = false  # En producción, no mostrar detalles de errores
+toolbarMode = "viewer"  # minimal, developer, viewer
 
 [theme]
+# Tema oficial del Portal SICyT
 base = "dark"
-primaryColor = "#7589A3"
-backgroundColor = "#2C3C5F"  # Background color of the main app area
-secondaryBackgroundColor = "#354B6E"  # Background color for sidebars, input fields, etc.
-textColor = "#E3E7ED"  # Color of the text
-font = "Poppins, sans-serif"
-baseFontSize = 18
+
+# Colores oficiales de la identidad visual argentina
+primaryColor = "#7589A3"          # Azul SICyT
+backgroundColor = "#2C3C5F"       # Fondo principal oscuro
+secondaryBackgroundColor = "#354B6E"  # Fondo de barras laterales
+textColor = "#E3E7ED"            # Color de texto principal
+
+# Tipografía
+font = "Poppins, 'Helvetica Neue', Arial, sans-serif"
+baseFontSize = 18  # Tamaño base para accesibilidad
 
 [logger]
+# Configuración de logging para aplicaciones gubernamentales
+level = "info"  # En desarrollo usar "debug", en producción "info" o "warning"
+messageFormat = "%(asctime)s | %(levelname)s | %(name)s | %(funcName)s:%(lineno)d | %(message)s"
 
-# Level of logging for Streamlit's internal logger: "error", "warning",
-# "info", or "debug".
-#
-# Default: "info"
-level = "info"
-messageFormat = "%(asctime)s %(message)s"
+
+[browser]
+# Configuración del navegador
+gatherUsageStats = false
+serverAddress = "localhost"
+serverPort = 8501
+
+[global]
+# Configuraciones globales para mejor rendimiento
+developmentMode = false  # Cambiar a true solo en desarrollo
+maxCachedMessageAge = 3600  # 1 hora en segundos
+minCachedMessageSize = 1024  # 1KB mínimo para cachear
+
+# Configuración de widgets
+unitTest = false
+
+[runner]
+# Configuración del runner de Streamlit
+magicEnabled = true
+postScriptGC = true  # Garbage collection después de scripts
+fastReruns = true  # Optimización de re-ejecuciones
+
+[mapbox]
+# Si se usan mapas (para datos geográficos provinciales)
+# token = "tu_token_de_mapbox_aqui"
+
+# Para personalización avanzada si es necesario
+[experimental]
+# Características experimentales (usar con cuidado en producción)
+# allowWidgetMutability = false
+# suppressDeprecationWarnings = true
