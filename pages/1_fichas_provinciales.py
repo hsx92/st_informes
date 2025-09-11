@@ -241,7 +241,8 @@ def generate_pdf_report(provincia: str, data: Dict) -> bool:
             with open(output_path, "rb") as pdf_file:
                 pdf_bytes = pdf_file.read()
                 st.download_button(
-                    label="📥 Descargar PDF",
+                    label="Descargar PDF",
+                    icon=":material/download:",
                     data=pdf_bytes,
                     file_name=f"Ficha_Provincial_{provincia}.pdf",
                     mime="application/pdf",
@@ -386,7 +387,7 @@ if provincia:
         # KPIs de proyectos
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.subheader("📍 Provincial")
+            st.subheader("Provincial :material/location_on:")
             for key in ['kpi_pfi_provincial', 'kpi_porc_privada_provincial']:
                 comp = DFs['componentes'][key]
                 st.metric(
@@ -395,7 +396,7 @@ if provincia:
                     delta=None,
                 )
         with col2:
-            st.subheader("🗺️ Regional")
+            st.subheader("Regional :material/explore_nearby:")
             for key in ['kpi_pfi_regional', 'kpi_porc_privada_regional']:
                 comp = DFs['componentes'][key]
                 st.metric(
@@ -404,7 +405,7 @@ if provincia:
                     delta=None,
                 )
         with col3:
-            st.subheader("🇦🇷 Nacional")
+            st.subheader("Nacional :material/flag:")
             for key in ['kpi_pfi_nacional', 'kpi_porc_privada_nacional']:
                 comp = DFs['componentes'][key]
                 st.metric(

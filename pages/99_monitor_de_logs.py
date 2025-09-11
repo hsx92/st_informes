@@ -205,27 +205,27 @@ class LogAnalyzer:
         if 'audit_type' in df.columns:
             login_fails = df[(df['audit_type'] == 'login') & (df.get('success') is False)]
             if len(login_fails) > 5:
-                patterns.append(f"⚠️ {len(login_fails)} intentos de login fallidos detectados")
+                patterns.append(f"{len(login_fails)} intentos de login fallidos detectados")
         
         # Muchos errores del mismo tipo
         if 'level' in df.columns and 'error_type' in df.columns:
             error_types = df[df['level'] == 'ERROR']['error_type'].value_counts()
             for error_type, count in error_types.head(3).items():
                 if count > 10:
-                    patterns.append(f"⚠️ {count} errores de tipo '{error_type}'")
+                    patterns.append(f"{count} errores de tipo '{error_type}'")
         
         # Accesos no autorizados
         if 'audit_type' in df.columns:
             denied = df[df['audit_type'] == 'permission_denied']
             if len(denied) > 0:
-                patterns.append(f"🔒 {len(denied)} intentos de acceso denegado")
+                patterns.append(f"{len(denied)} intentos de acceso denegado")
         
         # Queries muy lentas
         if 'performance_type' in df.columns:
             slow_queries = df[df['performance_type'] == 'slow_query']
             if len(slow_queries) > 0:
                 avg_duration = slow_queries['duration'].mean() if 'duration' in slow_queries.columns else 0
-                patterns.append(f"🐌 {len(slow_queries)} queries lentas (promedio: {avg_duration:.2f}s)")
+                patterns.append(f"{len(slow_queries)} queries lentas (promedio: {avg_duration:.2f}s)")
         
         return patterns
 
@@ -376,18 +376,18 @@ def render_log_charts(df: pd.DataFrame):
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("#### 🎯 Métricas Clave")
+            st.markdown("#### :material/monitoring: Errores y Advertencias")
             st.metric("Tasa de Error", f"{analysis.get('error_rate', 0):.2f}%")
             st.metric("Tasa de Advertencia", f"{analysis.get('warning_rate', 0):.2f}%")
             
             if analysis.get('peak_hours'):
-                with st.expander("⏰ Horas Pico"):
+                with st.expander("Horas Pico", icon=":material/pace:"):
                     for hour in analysis['peak_hours']:
                         st.write(f"• {hour}:00 - {hour+1}:00")
         
         with col2:
             if analysis.get('suspicious_patterns'):
-                st.markdown("#### 🚨 Patrones Detectados")
+                st.markdown("#### :material/mystery: Patrones Detectados")
                 for pattern in analysis['suspicious_patterns']:
                     st.warning(pattern, icon=":material/warning:")
             else:

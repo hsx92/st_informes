@@ -14,8 +14,49 @@ logger = get_logger(__name__)
 
 pio.templates.default = 'seaborn'
 BASE_FONT = dict(family="Poppins", size=16)
-BASE_COLORS = {"default": "#5A7290", "hl1": "#232D4F", "hl2": "#E1CD4A"}
-COLOR_DISCRETE_SEQUENCE = ["#4D7AAE", "#9D584C", "#EBDBCF", "#198769", "#5C3C7D", "#F2C94C", "#C65B0E", "#9B51E0", "#56CCF2", "#F493DD", "#A93226", "#6A829A", "#AF7700", "#C0C0C0", "#16A085"]
+COLOR_DISCRETE_SEQUENCE = [
+    "#0695D6",  # Azul primario oficial del gobierno argentino
+    "#2E7D32",  # Verde institucional (ciencia y tecnología)
+    "#D32F2F",  # Rojo de alerta/importante
+    "#FA8612",  # Naranja/ámbar para destacados
+    "#8030B2",  # Violeta para innovación
+    "#00695C",  # Verde azulado (datos ambientales)
+    "#37474F",  # Gris azulado (datos neutros)
+    "#5D4037",  # Marrón (datos socioeconómicos)
+    "#1565C0",  # Azul más intenso (variación del primario)
+    "#AD1433",  # Rosa/magenta (datos específicos)
+    "#558B2F",  # Verde oliva
+    "#F9A825",  # Amarillo dorado
+    "#E65100",  # Naranja profundo
+    "#4527A0",  # Violeta profundo
+    "#00838F"   # Cian
+]
+
+# Colores adicionales para casos específicos
+COLORES_PONCHO = {
+    # Colores primarios del sistema
+    "primario": "#232D4F",           # Azul oficial
+    "secundario": "#2E7D32",         # Verde institucional
+    
+    # Estados y alertas
+    "exito": "#2E7D32",             # Verde
+    "advertencia": "#F57C00",        # Naranja
+    "error": "#D32F2F",             # Rojo
+    "info": "#0695D6",              # Azul primario
+    
+    # Grises institucionales
+    "gris_oscuro": "#37474F",       # Para textos principales
+    "gris_medio": "#78909C",        # Para textos secundarios
+    "gris_claro": "#ECEFF1",        # Para fondos suaves
+    
+    # Colores específicos para ciencia y tecnología
+    "innovacion": "#6A1B9A",        # Violeta
+    "datos": "#1565C0",             # Azul datos
+    "tecnologia": "#00695C",        # Verde azulado
+    "investigacion": "#AD1457",       # Rosa/magenta
+
+    "resaltado": "#E1CD4A",         # Amarillo dorado para destacar
+}
 
 
 # --- HELPERS --- #
@@ -25,7 +66,7 @@ def has_data(comp):
     return df is not None and not df.empty
 
 
-def highlight_map(series, highlight, default=BASE_COLORS["default"], hl=BASE_COLORS["hl1"]):
+def highlight_map(series, highlight, default=COLORES_PONCHO["gris_medio"], hl=COLORES_PONCHO["primario"]):
     keys = pd.unique(series.dropna())
     return {k: (hl if k == highlight else default) for k in keys}
 
@@ -442,7 +483,7 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             x=other_provinces_df['variable'],
             y=other_provinces_df['valor'],
             mode='markers',
-            marker=dict(color=BASE_COLORS["default"], size=10),
+            marker=dict(color=COLORES_PONCHO["gris_medio"], size=10),
             name='Otras Provincias',
             showlegend=False,
             hovertext=other_provinces_df['unidad_territorial'],
@@ -454,7 +495,7 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             x=highlight_percepcion_df['variable'],
             y=highlight_percepcion_df['valor'],
             mode='markers',
-            marker=dict(color=BASE_COLORS["hl2"], size=12, symbol='circle'),
+            marker=dict(color=COLORES_PONCHO["resaltado"], size=12, symbol='circle'),
             name=provincia,
             hovertext=highlight_percepcion_df['unidad_territorial'],
             hovertemplate='<b>%{hovertext}</b><br>%{y}' + DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['config']['layout']['yaxis']['ticksuffix'] + '<extra></extra>'
@@ -472,20 +513,20 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
                 x1=-0.5 if i < 1 else i - 0.5,
                 y0=0,
                 y1=y_max,
-                line=dict(color=BASE_COLORS["default"], width=1, dash='solid')
+                line=dict(color=COLORES_PONCHO["gris_medio"], width=1, dash='solid')
             ))
 
         # Añadimos las líneas de la mediana
         for i, row in medianas.iterrows():
             all_shapes.append(dict(
                 type='line', x0=i - 0.5, x1=i + 0.5, y0=row['valor'], y1=row['valor'],
-                line=dict(color=BASE_COLORS["hl2"], width=3, dash='dash')
+                line=dict(color=COLORES_PONCHO["resaltado"], width=3, dash='dash')
             ))
 
         percepcionTemasPrioritarios_fig.add_trace(go.Scatter(
             x=[None], y=[None],
             mode='lines',
-            line=dict(color=BASE_COLORS["hl2"], width=3, dash='dash'),
+            line=dict(color=COLORES_PONCHO["resaltado"], width=3, dash='dash'),
             name='Mediana'
         ))
 
