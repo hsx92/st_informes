@@ -10,8 +10,9 @@ from pathlib import Path
 from datetime import datetime, timedelta
 import plotly.express as px
 from logging_config import get_logger, get_audit_logger
-from auth_manager import get_auth_manager
+from auth_manager import get_auth_manager, menu_with_redirect
 from typing import Dict, List
+from css_utils import load_css
 
 logger = get_logger(__name__)
 audit_logger = get_audit_logger()
@@ -25,9 +26,20 @@ st.set_page_config(
 
 st.logo(image=st.secrets['LOGO_LARGO'], size="large")
 
+# Cargar CSS
+icon_css = load_css("static/iconos/dist/css/icono-arg.css") if st.secrets.get("USE_ICONS", False) else ""
+combined_css = f"""
+<style>
+{icon_css}
+</style>
+"""
+st.markdown(combined_css, unsafe_allow_html=True)
+
 # Inicializar AuthManager y verificar permisos
 auth_manager = get_auth_manager()
 auth_manager.require_role('admin')
+
+menu_with_redirect()
 
 # Registrar acceso a la página de logs
 audit_logger.log_data_access(
@@ -220,7 +232,7 @@ class LogAnalyzer:
 
 def render_log_statistics(df: pd.DataFrame):
     """Renderiza estadísticas de logs."""
-    st.markdown("### 📊 Estadísticas Generales")
+    st.markdown("### :material/finance: Estadísticas Generales")
     
     col1, col2, col3, col4, col5 = st.columns(5)
     
@@ -273,9 +285,14 @@ def render_log_charts(df: pd.DataFrame):
     if df.empty:
         st.info("No hay datos para mostrar gráficos")
         return
-    
-    tabs = st.tabs(["📈 Tendencias", "📊 Distribución", "🔍 Análisis", "⚡ Rendimiento"])
-    
+
+    tabs = st.tabs([
+        ":material/stacked_line_chart: Tendencias",
+        ":material/clock_loader_40: Distribución",
+        ":material/search_insights: Análisis",
+        ":material/electric_bolt: Rendimiento"
+    ])
+
     # Tab 1: Tendencias temporales
     with tabs[0]:
         if 'timestamp' in df.columns and 'level' in df.columns:
@@ -372,10 +389,10 @@ def render_log_charts(df: pd.DataFrame):
             if analysis.get('suspicious_patterns'):
                 st.markdown("#### 🚨 Patrones Detectados")
                 for pattern in analysis['suspicious_patterns']:
-                    st.warning(pattern)
+                    st.warning(pattern, icon=":material/warning:")
             else:
-                st.success("✅ No se detectaron patrones sospechosos")
-        
+                st.success("No se detectaron patrones sospechosos", icon=":material/check_circle:")
+
         # Top errores
         if analysis.get('top_errors'):
             st.markdown("#### ❌ Errores Más Frecuentes")
@@ -443,7 +460,7 @@ def render_log_charts(df: pd.DataFrame):
 
 def render_detailed_logs(df: pd.DataFrame):
     """Renderiza vista detallada de logs."""
-    st.markdown("### 📝 Logs Detallados")
+    st.markdown("### :material/overview: Logs Detallados")
     
     # Filtros adicionales
     col1, col2, col3, col4 = st.columns(4)
@@ -600,11 +617,24 @@ def render_detailed_logs(df: pd.DataFrame):
 def main():
     """Función principal del monitor de logs."""
     
-    st.title("🔍 Monitor de Logs del Sistema")
+    # Header
+    col1, col2 = st.columns([1, 9], vertical_alignment='center')
+    with col1:
+        if st.secrets.get("USE_ICONS", False):
+            st.markdown("""
+                <div class="icon-container">
+                    <i class="icono-arg-lupa-engranaje" style="font-size: 76px; color: #FFFFFF;"></i>
+                </div>
+                """, unsafe_allow_html=True)
+    with col2:
+        st.header("Monitor de Logs del Sistema")
+        st.write("Herramientas de monitoreo del sistema. Visualiza, filtra y analiza logs en tiempo real.")
+
+    st.markdown("---")
     
     # Sidebar con controles principales
     with st.sidebar:
-        st.markdown('<h3 style="text-align:center;">⚙️ Configuración</h3>', unsafe_allow_html=True)
+        st.markdown('### :material/page_info: Filtros:', unsafe_allow_html=True)
 
         # Selector de tipo de log
         log_types = ["Todos", "Aplicación", "Auditoría", "Errores", "Rendimiento", "Seguridad"]
@@ -635,7 +665,7 @@ def main():
                     key="log_file"
                 )
             else:
-                st.warning(f"No hay archivos de log en {log_dir}/")
+                st.warning(f"No hay archivos de log en {log_dir}/", icon=":material/warning:")
                 selected_file = None
         else:
             selected_file = None
@@ -667,13 +697,13 @@ def main():
         )
         
         # Botón de actualización manual
-        if st.button("Actualizar registros 🔄", use_container_width=True):
+        if st.button("Actualizar registros", icon=':material/autorenew:', use_container_width=True):
             st.rerun()
         
         st.markdown("---")
         
         # Exportar logs centrado en la barra lateral
-        st.markdown('<h3 style="text-align:center;">💾 Exportar</h3>', unsafe_allow_html=True)
+        st.markdown('### :material/download: Descargar:', unsafe_allow_html=True)
 
     # Cargar logs según configuración
     all_logs = pd.DataFrame()
@@ -705,7 +735,7 @@ def main():
     
     # Verificar si hay datos
     if all_logs.empty:
-        st.warning("No hay logs disponibles para el período y filtros seleccionados")
+        st.warning("No hay logs disponibles para el período y filtros seleccionados", icon=":material/warning:")
         
         # Mostrar información de debug
         with st.expander("🔧 Información de Debug"):
@@ -749,7 +779,8 @@ def main():
             # CSV
             csv = export_df.to_csv(index=False)
             st.download_button(
-                label="📥 Descargar CSV",
+                label="Descargar CSV",
+                icon=":material/download:",
                 data=csv,
                 file_name=f"logs_{datetime.now():%Y%m%d_%H%M%S}.csv",
                 mime="text/csv",
@@ -765,7 +796,8 @@ def main():
             # JSON
             json_data = export_df.to_json(orient='records', date_format='iso')
             st.download_button(
-                label="📥 Descargar JSON",
+                label="Descargar JSON",
+                icon=":material/download:",
                 data=json_data,
                 file_name=f"logs_{datetime.now():%Y%m%d_%H%M%S}.json",
                 mime="application/json",
@@ -782,7 +814,8 @@ def main():
             analysis = LogAnalyzer.analyze_patterns(all_logs)
             report = generate_analysis_report(all_logs, analysis)
             st.download_button(
-                label="📥 Descargar Reporte",
+                label="Descargar Reporte",
+                icon=":material/download:",
                 data=report,
                 file_name=f"log_report_{datetime.now():%Y%m%d_%H%M%S}.txt",
                 mime="text/plain",
@@ -939,7 +972,7 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         logger.error(f"Error crítico en Monitor de Logs: {e}", exc_info=True)
-        st.error("Error crítico. Por favor contacte al administrador.")
+        st.error("Error crítico. Por favor contacte al administrador.", icon=":material/close:")
         
         # Mostrar detalles del error solo a administradores
         if st.session_state.get('roles') and 'admin' in st.session_state.get('roles'):

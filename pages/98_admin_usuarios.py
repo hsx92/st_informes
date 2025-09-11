@@ -5,7 +5,7 @@ Página de administración de usuarios utilizando streamlit-authenticator correc
 import streamlit as st
 import pandas as pd
 import time
-from auth_manager import get_auth_manager
+from auth_manager import get_auth_manager, menu_with_redirect
 from css_utils import load_css
 from logging_config import get_logger, get_audit_logger
 
@@ -49,6 +49,8 @@ st.markdown(combined_css, unsafe_allow_html=True)
 auth_manager = get_auth_manager()
 auth_manager.require_role('admin')
 
+menu_with_redirect()
+
 # Registrar acceso a la página de usuarios
 audit_logger.log_data_access(
     user=st.session_state.get('username', 'unknown'),
@@ -62,7 +64,7 @@ with col1:
     if st.secrets.get("USE_ICONS", False):
         st.markdown("""
             <div class="icon-container">
-                <i class="icono-arg-usuarios" style="font-size: 60px;"></i>
+                <i class="icono-arg-usuarios" style="font-size: 76px; color: #FFFFFF;"></i>
             </div>
             """, unsafe_allow_html=True)
 with col2:
@@ -73,12 +75,12 @@ st.markdown("---")
 
 # Tabs para diferentes funcionalidades
 tabs = st.tabs([
-    "👥 Lista de Usuarios",
-    "➕ Nuevo Usuario",
-    "✏️ Editar Usuario",
-    "🔑 Gestión de Contraseñas",
-    "🎭 Gestión de Roles",
-    "📊 Estadísticas"
+    ":material/group: Lista de Usuarios",
+    ":material/person_add: Nuevo Usuario",
+    ":material/edit: Editar Usuario",
+    ":material/key_vertical: Contraseñas",
+    ":material/security: Gestión de Roles",
+    ":material/analytics: Estadísticas"
 ])
 
 # Tab 1: Lista de Usuarios
@@ -104,9 +106,9 @@ with tabs[0]:
         df_users = pd.DataFrame(user_data)
         
         # Filtros
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3 = st.columns(3, vertical_alignment='bottom')
         with col1:
-            search_user = st.text_input("🔍 Buscar usuario", placeholder="Nombre o email...")
+            search_user = st.text_input("Buscar usuario:", icon=":material/search:", placeholder="Nombre o email...")
         with col2:
             filter_role = st.selectbox("Filtrar por rol", ["Todos"] + list(set(
                 role for user in users.values()
@@ -186,12 +188,12 @@ with tabs[1]:
         )
         
         if email:
-            st.success(f"✅ Usuario '{username}' registrado exitosamente")
+            st.success(f"Usuario '{username}' registrado exitosamente", icon=":material/check_circle:")
             st.balloons()
     
     with col2:
         with st.container(border=True):
-            st.markdown("### 📋 Instrucciones")
+            st.markdown("### :material/quick_reference: Instrucciones")
             st.markdown("""
             1. Complete todos los campos requeridos
             2. La contraseña debe cumplir con:
@@ -236,27 +238,27 @@ with tabs[2]:
                 # if st.button(f"Editar detalles de {selected_user}", icon="✏️", use_container_width=True):
                 #     result = auth_manager.update_user_details(username=selected_user)
                 #     if result:
-                #         st.success("✅ Información actualizada exitosamente")
-            
+                #         st.success("Información actualizada exitosamente", icon=":material/check_circle:")
+
             # Sección para eliminar usuario
             st.markdown("---")
-            st.markdown("### Eliminación de Usuario ⚠️")
+            st.markdown("### Eliminación de Usuario  :material/warning:")
             st.warning(f"Eliminar permanentemente al usuario: **{selected_user}**")
             
             col1, col2, col3 = st.columns([1, 3, 1])
             with col2:
-                if st.button("🗑️ Eliminar Usuario", type="secondary", use_container_width=True):
+                if st.button("Eliminar Usuario", icon=":material/delete:", type="secondary", use_container_width=True):
                     if st.session_state.get('confirm_delete') != selected_user:
                         st.session_state['confirm_delete'] = selected_user
-                        st.error("Presione nuevamente para confirmar, esta acción es irreversible.")
+                        st.error("Presione nuevamente para confirmar, esta acción es irreversible.", icon=":material/warning:")
                     else:
                         if auth_manager.delete_user(selected_user):
-                            st.success(f"Usuario {selected_user} eliminado")
+                            st.success(f"Usuario {selected_user} eliminado", icon=":material/check_circle:")
                             del st.session_state['confirm_delete']
                             time.sleep(2)
                             st.rerun()
                         else:
-                            st.error("Error al eliminar usuario")
+                            st.error("Error al eliminar usuario", icon=":material/close:")
     else:
         st.info("No hay usuarios para editar")
 
@@ -273,7 +275,7 @@ with tabs[3]:
         if st.session_state.get('username'):
             result = auth_manager.reset_password(st.session_state['username'])
             if result:
-                st.success(" ✅ Contraseña actualizada exitosamente")
+                st.success("Contraseña actualizada exitosamente", icon=":material/check_circle:")
         else:
             st.warning("Debe estar logueado para actualizar su contraseña.")
     
@@ -283,7 +285,7 @@ with tabs[3]:
         username, email, new_password = auth_manager.forgot_password(send_email=True)
         
         if username:
-            st.success(f"✅ Nueva contraseña generada para {username}, enviada a: {email}")
+            st.success(f"Nueva contraseña generada para {username}, enviada a: {email}", icon=":material/check_circle:")
             with st.expander("Ver detalles"):
                 st.code(f"""
                 Usuario: {username}
@@ -292,7 +294,7 @@ with tabs[3]:
                 """)
                 st.warning("⚠️ Comunique esta contraseña al usuario de forma segura")
         elif username is False:
-            st.error("Usuario no encontrado")
+            st.error("Usuario no encontrado", icon=":material/close:")
 
     elif password_option == "Recuperar Usuario":
         st.info("Ingrese el email para recuperar el nombre de usuario")
@@ -300,14 +302,14 @@ with tabs[3]:
         username, email = auth_manager.forgot_username(send_email=True)
 
         if username:
-            st.success(f"✅ Nombre de usuario enviado a {email}")
+            st.success(f"Nombre de usuario enviado a {email}", icon=":material/check_circle:")
             with st.expander("Ver detalles"):
                 st.code(f"""
                 Usuario: {username}
                 Email: {email}
                 """)
         elif username is False:
-            st.error(f"No existe usuario con email: {email}")
+            st.error(f"No existe usuario con email: {email}", icon=":material/close:")
 
 # Tab 5: Gestión de Roles
 with tabs[4]:
@@ -345,20 +347,26 @@ with tabs[4]:
             default=current_roles
         )
         
-        if st.button("🔄 Actualizar Roles"):
+        if st.button("Actualizar Roles", icon=":material/autorenew:"):
             if auth_manager.update_user_roles(selected_user, new_roles):
-                st.success(" ✅ Roles actualizados exitosamente")
+                st.success("Roles actualizados exitosamente", icon=":material/check_circle:")
                 time.sleep(2)
                 st.rerun()
             else:
-                st.error("Error al actualizar roles")
+                st.error("Error al actualizar roles", icon=":material/close:")
     else:
         st.info("No hay usuarios disponibles")
 
 # Tab 6: Estadísticas
 with tabs[5]:
-    st.subheader("Estadísticas del Sistema")
-    
+    col1, col2 = st.columns([9.5, .5], vertical_alignment='center')
+
+    with col1:
+        st.subheader("Estadísticas del Sistema")
+    with col2:
+        if st.button("", icon=":material/autorenew:", key="refresh_stats", help="Actualizar estadísticas"):
+            st.rerun()
+
     users = auth_manager.get_all_users()
     
     if users:
@@ -472,12 +480,13 @@ with tabs[5]:
         st.markdown("---")
         st.markdown("### Exportar Datos")
         
-        col1, col2, col3 = st.columns(3)
+        col1, col2, col3, col4 = st.columns(4)
         
         with col1:
             csv = df_activity.to_csv(index=False).encode('utf-8')
             st.download_button(
-                label="📥 Descargar Lista de Usuarios (CSV)",
+                label="Descargar Usuarios (CSV)",
+                icon=":material/download:",
                 data=csv,
                 file_name='usuarios_sistema.csv',
                 mime='text/csv',
@@ -504,21 +513,18 @@ USUARIOS CON MÁS INTENTOS FALLIDOS:
             """
             
             st.download_button(
-                label="📄 Descargar Resumen (TXT)",
+                label="Descargar Resumen (TXT)",
+                icon=":material/download:",
                 data=resumen,
                 file_name='resumen_usuarios.txt',
                 mime='text/plain',
             )
-        
-        with col3:
-            if st.button("🔄 Actualizar Estadísticas"):
-                st.rerun()
     else:
         st.info("No hay datos de usuarios para mostrar estadísticas")
 
 # Footer con información adicional
 st.markdown("---")
-with st.expander("ℹ️ Información del Sistema"):
+with st.expander("ℹInformación del Sistema", icon=":material/info:"):
     st.markdown("""
     ### Roles y Permisos
     
@@ -543,4 +549,6 @@ with st.expander("ℹ️ Información del Sistema"):
 if st.session_state.get('username'):
     st.sidebar.markdown(f"**Usuario actual:** {st.session_state['username']}")
     st.sidebar.markdown(f"**Rol:** {', '.join(st.session_state.get('roles', ['Sin rol']))}")
+    st.sidebar.markdown("---")
+
     auth_manager.logout(location='sidebar', key='logout_admin')

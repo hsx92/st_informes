@@ -178,7 +178,7 @@ class AuthManager:
                     
             except Exception as e:
                 logger.critical(f"Error inesperado en logout: {e}")
-    
+
     @log_execution(log_result=False, sensitive_args=['password'])
     def register_user(
         self,
@@ -720,6 +720,42 @@ class AuthManager:
         
         logger.debug(f"Acceso concedido a {username} con roles permitidos")
         return True
+
+
+# Utilidades menu
+def authenticated_menu():
+    # Show a navigation menu for authenticated users
+    st.sidebar.markdown("###")
+    st.sidebar.page_link("Inicio.py")
+    st.sidebar.page_link("pages/1_fichas_provinciales.py", label="Fichas Provinciales", icon=":material/analytics:")
+    if 'admin' in st.session_state['roles']:
+        st.sidebar.page_link("pages/98_admin_usuarios.py", label="Administar Usuarios", icon=":material/manage_accounts:")
+        st.sidebar.page_link("pages/99_monitor_de_logs.py", label="Monitor de Logs", icon=":material/monitor_heart:")
+    st.sidebar.markdown("---")
+
+
+def unauthenticated_menu():
+    # Show a navigation menu for unauthenticated users
+    st.sidebar.markdown("###")
+    st.sidebar.page_link("Inicio.py", label="Log in")
+    st.sidebar.markdown("---")
+
+
+def menu():
+    # Determine if a user is logged in or not, then show the correct
+    # navigation menu
+    if st.session_state.get("authentication_status") is not True:
+        unauthenticated_menu()
+        return
+    authenticated_menu()
+
+
+def menu_with_redirect():
+    # Redirect users to the main page if not logged in, otherwise continue to
+    # render the navigation menu
+    if st.session_state.get("authentication_status") is not True:
+        st.switch_page("Inicio.py")
+    menu()
 
 
 # Singleton para mantener una única instancia del AuthManager

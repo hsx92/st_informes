@@ -12,7 +12,7 @@ from sources import get_provincias
 from pdf_builder import ficha_provincial_pdf
 from ficha_builder import ficha_provincial_figs, preparar_data_pdf
 from css_utils import load_css, get_metric_css
-from auth_manager import get_auth_manager
+from auth_manager import get_auth_manager, menu_with_redirect
 from logging_config import get_logger
 from functools import wraps
 from typing import Optional, Dict
@@ -168,6 +168,8 @@ st.markdown(combined_css, unsafe_allow_html=True)
 auth_manager = get_auth_manager()
 auth_manager.require_any_role(['admin', 'director'])
 
+menu_with_redirect()
+
 
 # ---- FUNCIONES AUXILIARES ----
 
@@ -186,7 +188,7 @@ def load_provincial_data(provincia_id: int, provincia: str, anio: str) -> Option
         return DFs
     except Exception as e:
         logger.error(f"Failed to load data for {provincia}: {str(e)}")
-        st.error(f"Error al cargar los datos de {provincia}. Por favor, intente nuevamente.")
+        st.error(f"Error al cargar los datos de {provincia}. Por favor, intente nuevamente.", icon=":material/close:")
         return None
 
 
@@ -231,7 +233,7 @@ def generate_pdf_report(provincia: str, data: Dict) -> bool:
             ficha_provincial_pdf(provincia, processed_data, output_path)
             
         log_export_action("PDF")
-        st.success(f"✅ Reporte PDF generado exitosamente: {output_path}")
+        st.success(f"Reporte PDF generado exitosamente: {output_path}", icon=":material/check_circle:")
         logger.info(f"PDF report generated successfully for {provincia}")
         
         # Mostrar botón de descarga si el archivo existe
@@ -252,7 +254,7 @@ def generate_pdf_report(provincia: str, data: Dict) -> bool:
         
     except Exception as e:
         logger.error(f"Error generating PDF for {provincia}: {str(e)}")
-        st.error(f"❌ Error al generar el reporte PDF: {str(e)}")
+        st.error(f"Error al generar el reporte PDF: {str(e)}", icon=":material/close:")
         return False
 
 
@@ -269,7 +271,7 @@ try:
     logger.info(f"Loaded {len(provinciasDF)} provinces")
 except Exception as e:
     logger.error(f"Failed to load provinces: {str(e)}")
-    st.error("Error al cargar la lista de provincias. Por favor, contacte al administrador.")
+    st.error("Error al cargar la lista de provincias. Por favor, contacte al administrador.", icon=":material/close:")
     st.stop()
 # Header con ícono
 col1, col2 = st.columns([1, 9], vertical_alignment='center')
@@ -292,7 +294,7 @@ provincia = st.selectbox(
     options=provinciasDF['nombre_iso'].sort_values(),
     label_visibility="collapsed",
     index=None,
-    placeholder="🔍 Seleccione una provincia para visualizar los datos",
+    placeholder="Seleccione una provincia para visualizar los datos",
     help="Seleccione una provincia para ver sus indicadores de ciencia y tecnología"
 )
 
@@ -321,9 +323,9 @@ if provincia:
     with col1:
         st.markdown(f"## {provincia}")
     with col2:
-        st.info(f"📍 Región: {st.session_state.region}")
+        st.info(f"Región: {st.session_state.region}", icon=":material/location_on:")
     with col3:
-        st.info(f"📅 Año: {st.session_state.anio}")
+        st.info(f"Año: {st.session_state.anio}", icon=":material/calendar_today:")
 
     # Tabs para las diferentes secciones
     tabs = st.tabs([
@@ -334,7 +336,9 @@ if provincia:
         "Capital Humano",
         "Resultados",
         "Ciencia y Sociedad"
-    ])
+    ],
+        width='stretch'
+    )
 
     # Tab 1: Indicadores de contexto
     with tabs[0]:
@@ -343,7 +347,7 @@ if provincia:
         # Métricas principales
         col1, col2, col3, col4, col5 = st.columns([1, 3.75, .5, 3.75, 1])
         with col2:
-            st.subheader("📍 Provincial")
+            st.subheader("Provincial :material/location_on:")
             for key in ['kpi_poblacion_prov', 'kpi_tasa_actividad_prov', 'kpi_tasa_desempleo_prov']:
                 comp = DFs['componentes'][key]
                 st.metric(
@@ -352,7 +356,7 @@ if provincia:
                     delta=None,
                 )
         with col4:
-            st.subheader("🇦🇷 Nacional")
+            st.subheader("Nacional :material/flag:")
             for key in ['kpi_densidad_prov', 'kpi_tasa_actividad_nac', 'kpi_tasa_desempleo_nac']:
                 comp = DFs['componentes'][key]
                 st.metric(
@@ -594,4 +598,4 @@ if provincia:
 
 else:
     # Mensaje cuando no hay provincia seleccionada
-    st.info("👆 Por favor, seleccione una provincia del menú desplegable para visualizar sus datos.")
+    st.info("Por favor, seleccione una provincia del menú desplegable para visualizar sus datos.", icon=":material/info:")

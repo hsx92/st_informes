@@ -1,6 +1,9 @@
 [server]
 # maxMessageSize = 500
 
+[client]
+showSidebarNavigation = false
+
 [theme]
 base = "dark"
 primaryColor = "#7589A3"
