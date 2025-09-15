@@ -138,6 +138,10 @@ class Cursor:
                     query_text = str(query)
                     
                 is_read_only = query_text.strip().lower().startswith("select")
+                # Log for slow queries
+                if elapsed_time > 1.0:
+                    logger.warning(f"Slow query detected ({elapsed_time:.2f}s): {query_text[:200]}...")
+
             if not self._conn.autocommit and not is_read_only:
                 self._conn.commit()
                 logger.debug(f"Database transaction committed after {elapsed_time:.2f}s")
