@@ -6,7 +6,7 @@ from typing import Union
 from great_tables import GT, style, loc, google_font
 from sources import get_informe
 from fig_builders import build_line, build_bar, build_pie, build_treemap
-from logging_config import get_logger, log_execution
+from logging_config import get_logger, log_execution, performance_tracking
 import time
 
 # Inicializar logger
@@ -79,6 +79,7 @@ def insertar_saltos(cadena: str, width: int = 35) -> str:
     return textwrap.fill(cadena, width=width).replace('\n', '<br>')
 
 
+@log_execution(log_args=False, log_result=True)
 def procesar_kpi(df: pd.DataFrame, config: dict) -> str:
     """Procesa un KPI según su configuración."""
     try:
@@ -269,324 +270,343 @@ def preparar_data_pdf(data: dict):
 @log_execution(log_args=True, log_result=False)
 def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
     """Genera las figuras para la ficha provincial."""
-    
-    logger.info(f"Generando figuras para provincia: {provincia} (ID: {provincia_id}, Año: {anio})")
-    start_time = time.time()
-    
-    try:
-        # Obtener datos del informe
-        DFs = get_informe("ficha_provincial", {
-            "provincia_id": provincia_id,
-            "provincia": provincia,
-            "anio": anio
-        })
+    with performance_tracking("ficha_provincial_figs"):
+        logger.info(f"Generando figuras para provincia: {provincia} (ID: {provincia_id}, Año: {anio})")
+        start_time = time.time()
         
-        logger.debug(f"Datos obtenidos, procesando {len(DFs.get('componentes', {}))} componentes")
-
-        # COMPONENTES #
-
-        # KPI
-        kpi_count = 0
-        for key, k in DFs["componentes"].items():
-            if k["tipo_componente"] == "KPI":
-                k["valor"] = procesar_kpi(k["resultado_sql"], k["config"])
-                kpi_count += 1
-        
-        logger.debug(f"Procesados {kpi_count} KPIs")
-
-        # FIGURAS
-        logger.debug("Generando figuras...")
-        
-        # Proceso de generación de figuras (código existente)
         try:
-            DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1] = DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1].apply(insertar_saltos)
-        except IndexError as e:
-            logger.warning(f"Error al insertar saltos en 'grafico_expo_top5': {e}")
+            # Obtener datos del informe
+            DFs = get_informe("ficha_provincial", {
+                "provincia_id": provincia_id,
+                "provincia": provincia,
+                "anio": anio
+            })
+            
+            logger.debug(f"Datos obtenidos, procesando {len(DFs.get('componentes', {}))} componentes")
 
-        top5_exportaciones_fig = build_bar(
-            comp=DFs["componentes"]["grafico_expo_top5"],
-            orientation='h',
-            color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-            showlegend=False
-        )
+            # COMPONENTES #
 
-        # ---
+            # KPI
+            kpi_count = 0
+            for key, k in DFs["componentes"].items():
+                if k["tipo_componente"] == "KPI":
+                    k["valor"] = procesar_kpi(k["resultado_sql"], k["config"])
+                    kpi_count += 1
+            
+            logger.debug(f"Procesados {kpi_count} KPIs")
 
-        inversionID_fig = build_line(
-            comp=DFs["componentes"]["grafico_evolucion_regional"],
-            markers=True,)
+            # FIGURAS
+            logger.debug("Generando figuras...")
+            
+            # Proceso de generación de figuras (código existente)
+            try:
+                DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1] = DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1].apply(insertar_saltos)
+            except IndexError as e:
+                logger.warning(f"Error al insertar saltos en 'grafico_expo_top5': {e}")
 
-        # ---
+            top5_exportaciones_fig = build_bar(
+                comp=DFs["componentes"]["grafico_expo_top5"],
+                orientation='h',
+                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
+                showlegend=False
+            )
 
-        inversionInvestigador_fig = build_bar(
-            comp=DFs["componentes"]["grafico_inv_por_investigador"],
-            orientation='h',
-            color_discrete_map=highlight_map(DFs["componentes"]["grafico_inv_por_investigador"]['resultado_sql']['unidad_territorial'], provincia),
-            showlegend=False
-        )
+            # ---
 
-        # ---
+            # Crear columna text_auto con formato personalizado y 'M' al final
+            DFs["componentes"]["grafico_evolucion_presupuesto_apn"]['resultado_sql']['text'] = DFs["componentes"]["grafico_evolucion_presupuesto_apn"]['resultado_sql']['credito_devengado'].apply(lambda x: f'{x:,.0f}'.replace(",", ".") + ' M' if pd.notnull(x) else '')
 
-        DFs["componentes"]["grafico_inv_empresaria_sector"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_inv_empresaria_sector"]['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
+            evolucion_presupuesto_apn_fig = build_bar(
+                comp=DFs["componentes"]["grafico_evolucion_presupuesto_apn"],
+                orientation='v',
+                showlegend=False,
+                text=True,
+                hovertemplate='<b>%{x}</b><br>Crédito Devengado: %{y:,.0f} M<extra></extra>',
+            )
 
-        inversionEmpresas_fig = build_bar(
-            comp=DFs["componentes"]["grafico_inv_empresaria_sector"],
-            orientation='h',
-            color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-            showlegend=False
-        )
+            # ---
 
-        # ---
+            # tabla_apn_jurisdiccion_entidad_programa_prov_fig = tabla_pivot(DFs["componentes"]["tabla_apn_jurisdiccion_entidad_programa_prov"], render_gt=True)
 
-        if has_data(DFs["componentes"]["tabla_pfi_cruce"]):
-            tabla_pfi_cruce_fig = tabla_pivot(DFs["componentes"]["tabla_pfi_cruce"], render_gt=True)
-        else:
-            tabla_pfi_cruce_fig = None
+            # ---
 
-        # ---
+            inversionID_fig = build_line(
+                comp=DFs["componentes"]["grafico_evolucion_regional"],
+                markers=True,)
 
-        unidadesIDxinstitucion_fig = build_bar(
-            comp=DFs["componentes"]["grafico_unidades_por_inst"],
-            orientation='h',
-            color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-            showlegend=False,
-            dynamic_height=True
-        )
+            # ---
 
-        # ---
+            inversionInvestigador_fig = build_bar(
+                comp=DFs["componentes"]["grafico_inv_por_investigador"],
+                orientation='h',
+                color_discrete_map=highlight_map(DFs["componentes"]["grafico_inv_por_investigador"]['resultado_sql']['unidad_territorial'], provincia),
+                showlegend=False
+            )
 
-        equiposIDxTipo_fig = build_bar(
-            comp=DFs["componentes"]["grafico_equipos_por_tipo"],
-            orientation='h',
-            color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-            showlegend=False
-        )
+            # ---
 
-        # ---
+            DFs["componentes"]["grafico_inv_empresaria_sector"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_inv_empresaria_sector"]['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
 
-        investigadoresxArea_fig = build_treemap(
-            comp=DFs["componentes"]["grafico_distribucion_investigadores"],
-            color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-            margin=dict(l=20, r=20, t=50, b=20)
-        )
+            inversionEmpresas_fig = build_bar(
+                comp=DFs["componentes"]["grafico_inv_empresaria_sector"],
+                orientation='h',
+                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
+                showlegend=False
+            )
 
-        # ---
+            # ---
 
-        if has_data(DFs["componentes"]["tabla_personas_por_funcion"]):
-            tabla_personas_por_funcion_fig = tabla_pivot(DFs["componentes"]["tabla_personas_por_funcion"], render_gt=True)
-        else:
-            tabla_personas_por_funcion_fig = None
+            if has_data(DFs["componentes"]["tabla_pfi_cruce"]):
+                tabla_pfi_cruce_fig = tabla_pivot(DFs["componentes"]["tabla_pfi_cruce"], render_gt=True)
+            else:
+                tabla_pfi_cruce_fig = None
 
-        # ---
+            # ---
 
-        evolucionInvestigadores_fig = build_line(
-            comp=DFs["componentes"]["grafico_evolucion_investigadores"],
-            margin=dict(l=20, r=20, t=90, b=20)
-        )
+            unidadesIDxinstitucion_fig = build_bar(
+                comp=DFs["componentes"]["grafico_unidades_por_inst"],
+                orientation='h',
+                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
+                showlegend=False,
+                dynamic_height=True
+            )
 
-        # ---
+            # ---
 
-        exportacionesIntensidad_fig = build_pie(
-            comp=DFs["componentes"]["grafico_expo_intensidad"],
-            margin=dict(l=20, r=20, t=90, b=20)
-        )
+            equiposIDxTipo_fig = build_bar(
+                comp=DFs["componentes"]["grafico_equipos_por_tipo"],
+                orientation='h',
+                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
+                showlegend=False
+            )
 
-        # ---
+            # ---
 
-        evolucionExportaciones_fig = build_line(
-            comp=DFs["componentes"]["grafico_expo_evolucion"],
-            margin=dict(l=20, r=20, t=90, b=20)
-        )
+            investigadoresxArea_fig = build_treemap(
+                comp=DFs["componentes"]["grafico_distribucion_investigadores"],
+                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
+                margin=dict(l=20, r=20, t=50, b=20)
+            )
 
-        # ---
+            # ---
 
-        DFs["componentes"]["grafico_expo_destino"]['resultado_sql'] = DFs["componentes"]["grafico_expo_destino"]['resultado_sql'].head(15)
+            if has_data(DFs["componentes"]["tabla_personas_por_funcion"]):
+                tabla_personas_por_funcion_fig = tabla_pivot(DFs["componentes"]["tabla_personas_por_funcion"], render_gt=True)
+            else:
+                tabla_personas_por_funcion_fig = None
 
-        exportacionesxPais_fig = build_treemap(
-            comp=DFs["componentes"]["grafico_expo_destino"],
-            color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-            margin=dict(l=20, r=20, t=50, b=0)
-        )
+            # ---
 
-        # ---
-
-        if has_data(DFs["componentes"]["grafico_patentes_evolucion"]):
-
-            evolucionPatentes_fig = build_line(
-                comp=DFs["componentes"]["grafico_patentes_evolucion"],
+            evolucionInvestigadores_fig = build_line(
+                comp=DFs["componentes"]["grafico_evolucion_investigadores"],
                 margin=dict(l=20, r=20, t=90, b=20)
             )
-        else:
-            evolucionPatentes_fig = None
 
-        # ---
+            # ---
 
-        if has_data(DFs["componentes"]["tabla_patentes_sector"]):
-            tabla_patentes_sector_fig = tabla_pivot(DFs["componentes"]["tabla_patentes_sector"], render_gt=True)
-        else:
-            tabla_patentes_sector_fig = None
+            exportacionesIntensidad_fig = build_pie(
+                comp=DFs["componentes"]["grafico_expo_intensidad"],
+                margin=dict(l=20, r=20, t=90, b=20)
+            )
 
-        # ---
+            # ---
 
-        produccionProvincial_fig = build_line(
-            comp=DFs["componentes"]["grafico_produccion_evolucion"],
-            margin=dict(l=20, r=20, t=90, b=20)
-        )
+            evolucionExportaciones_fig = build_line(
+                comp=DFs["componentes"]["grafico_expo_evolucion"],
+                margin=dict(l=20, r=20, t=90, b=20)
+            )
 
-        # ---
+            # ---
 
-        distribucionPublicaciones_fig = build_treemap(
-            comp=DFs["componentes"]["grafico_produccion_tipo"],
-            margin=dict(l=20, r=20, t=50, b=20),
-            color_discrete_sequence=COLOR_DISCRETE_SEQUENCE
-        )
+            DFs["componentes"]["grafico_expo_destino"]['resultado_sql'] = DFs["componentes"]["grafico_expo_destino"]['resultado_sql'].head(15)
 
-        # --- HDP
+            exportacionesxPais_fig = build_treemap(
+                comp=DFs["componentes"]["grafico_expo_destino"],
+                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
+                margin=dict(l=20, r=20, t=50, b=0)
+            )
 
-        DFs["componentes"]["grafico_publicaciones_area"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_publicaciones_area"]['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
+            # ---
 
-        publicacionesArea_fig = build_bar(
-            comp=DFs["componentes"]["grafico_publicaciones_area"],
-            orientation='h',
-            color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-            showlegend=False,
-        )
+            if has_data(DFs["componentes"]["grafico_patentes_evolucion"]):
 
-        # ---
+                evolucionPatentes_fig = build_line(
+                    comp=DFs["componentes"]["grafico_patentes_evolucion"],
+                    margin=dict(l=20, r=20, t=90, b=20)
+                )
+            else:
+                evolucionPatentes_fig = None
 
-        if has_data(DFs["componentes"]["tabla_articulos_q1_q2"]):
-            tabla_articulos_q1_q2_fig = tabla_pivot(DFs["componentes"]["tabla_articulos_q1_q2"], render_gt=True)
-        else:
-            tabla_articulos_q1_q2_fig = None
+            # ---
 
-        # ---
+            if has_data(DFs["componentes"]["tabla_patentes_sector"]):
+                tabla_patentes_sector_fig = tabla_pivot(DFs["componentes"]["tabla_patentes_sector"], render_gt=True)
+            else:
+                tabla_patentes_sector_fig = None
 
-        nBarras = 24
-        altura = 20 * nBarras + 300
+            # ---
 
-        DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['resultado_sql'].iloc[:, 1] = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['resultado_sql'].iloc[:, 1].apply(insertar_saltos, width=20)
-        percepcion_df = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['resultado_sql'].copy()
-        percepcion_df['valor'] = percepcion_df['valor'].round(2)
-        percepcion_df = percepcion_df.sort_values(by='variable')
+            produccionProvincial_fig = build_line(
+                comp=DFs["componentes"]["grafico_produccion_evolucion"],
+                margin=dict(l=20, r=20, t=90, b=20)
+            )
 
-        medianas = percepcion_df.groupby('variable')['valor'].median().reset_index()
-        medianas = medianas.sort_values(by='variable').reset_index(drop=True)
+            # ---
 
-        highlight_percepcion_df = percepcion_df[percepcion_df['unidad_territorial'] == provincia]
-        other_provinces_df = percepcion_df[percepcion_df['unidad_territorial'] != provincia]
+            distribucionPublicaciones_fig = build_treemap(
+                comp=DFs["componentes"]["grafico_produccion_tipo"],
+                margin=dict(l=20, r=20, t=50, b=20),
+                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE
+            )
 
-        # Empezamos con una figura vacía
-        percepcionTemasPrioritarios_fig = go.Figure()
+            # --- HDP
 
-        # Añadimos la traza para el resto de las provincias
-        percepcionTemasPrioritarios_fig.add_trace(go.Scatter(
-            x=other_provinces_df['variable'],
-            y=other_provinces_df['valor'],
-            mode='markers',
-            marker=dict(color=COLORES_PONCHO["gris_medio"], size=10),
-            name='Otras Provincias',
-            showlegend=False,
-            hovertext=other_provinces_df['unidad_territorial'],
-            hovertemplate='<b>%{hovertext}</b><br>%{y}' + DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['config']['layout']['yaxis']['ticksuffix'] + '<extra></extra>'
-        ))
+            DFs["componentes"]["grafico_publicaciones_area"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_publicaciones_area"]['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
 
-        # Añadimos la traza para la provincia resaltada
-        percepcionTemasPrioritarios_fig.add_trace(go.Scatter(
-            x=highlight_percepcion_df['variable'],
-            y=highlight_percepcion_df['valor'],
-            mode='markers',
-            marker=dict(color=COLORES_PONCHO["resaltado"], size=12, symbol='circle'),
-            name=provincia,
-            hovertext=highlight_percepcion_df['unidad_territorial'],
-            hovertemplate='<b>%{hovertext}</b><br>%{y}' + DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['config']['layout']['yaxis']['ticksuffix'] + '<extra></extra>'
-        ))
+            publicacionesArea_fig = build_bar(
+                comp=DFs["componentes"]["grafico_publicaciones_area"],
+                orientation='h',
+                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
+                showlegend=False,
+            )
 
-        all_shapes = []
-        num_categories = len(medianas)
-        y_max = percepcion_df['valor'].max() * 1.1
+            # ---
 
-        # Añadimos los separadores verticales
-        for i in range(num_categories + 1):
-            all_shapes.append(dict(
-                type='line',
-                x0=-0.5 if i < 1 else i - 0.5,
-                x1=-0.5 if i < 1 else i - 0.5,
-                y0=0,
-                y1=y_max,
-                line=dict(color=COLORES_PONCHO["gris_medio"], width=1, dash='solid')
+            if has_data(DFs["componentes"]["tabla_articulos_q1_q2"]):
+                tabla_articulos_q1_q2_fig = tabla_pivot(DFs["componentes"]["tabla_articulos_q1_q2"], render_gt=True)
+            else:
+                tabla_articulos_q1_q2_fig = None
+
+            # ---
+
+            nBarras = 24
+            altura = 20 * nBarras + 300
+
+            DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['resultado_sql'].iloc[:, 1] = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['resultado_sql'].iloc[:, 1].apply(insertar_saltos, width=20)
+            percepcion_df = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['resultado_sql'].copy()
+            percepcion_df['valor'] = percepcion_df['valor'].round(2)
+            percepcion_df = percepcion_df.sort_values(by='variable')
+
+            medianas = percepcion_df.groupby('variable')['valor'].median().reset_index()
+            medianas = medianas.sort_values(by='variable').reset_index(drop=True)
+
+            highlight_percepcion_df = percepcion_df[percepcion_df['unidad_territorial'] == provincia]
+            other_provinces_df = percepcion_df[percepcion_df['unidad_territorial'] != provincia]
+
+            # Empezamos con una figura vacía
+            percepcionTemasPrioritarios_fig = go.Figure()
+
+            # Añadimos la traza para el resto de las provincias
+            percepcionTemasPrioritarios_fig.add_trace(go.Scatter(
+                x=other_provinces_df['variable'],
+                y=other_provinces_df['valor'],
+                mode='markers',
+                marker=dict(color=COLORES_PONCHO["gris_medio"], size=10),
+                name='Otras Provincias',
+                showlegend=False,
+                hovertext=other_provinces_df['unidad_territorial'],
+                hovertemplate='<b>%{hovertext}</b><br>%{y}' + DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['config']['layout']['yaxis']['ticksuffix'] + '<extra></extra>'
             ))
 
-        # Añadimos las líneas de la mediana
-        for i, row in medianas.iterrows():
-            all_shapes.append(dict(
-                type='line', x0=i - 0.5, x1=i + 0.5, y0=row['valor'], y1=row['valor'],
-                line=dict(color=COLORES_PONCHO["resaltado"], width=3, dash='dash')
+            # Añadimos la traza para la provincia resaltada
+            percepcionTemasPrioritarios_fig.add_trace(go.Scatter(
+                x=highlight_percepcion_df['variable'],
+                y=highlight_percepcion_df['valor'],
+                mode='markers',
+                marker=dict(color=COLORES_PONCHO["resaltado"], size=12, symbol='circle'),
+                name=provincia,
+                hovertext=highlight_percepcion_df['unidad_territorial'],
+                hovertemplate='<b>%{hovertext}</b><br>%{y}' + DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['config']['layout']['yaxis']['ticksuffix'] + '<extra></extra>'
             ))
 
-        percepcionTemasPrioritarios_fig.add_trace(go.Scatter(
-            x=[None], y=[None],
-            mode='lines',
-            line=dict(color=COLORES_PONCHO["resaltado"], width=3, dash='dash'),
-            name='Mediana'
-        ))
+            all_shapes = []
+            num_categories = len(medianas)
+            y_max = percepcion_df['valor'].max() * 1.1
 
-        main_title = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['titulo']
-        subtitle = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['subtitulo']
+            # Añadimos los separadores verticales
+            for i in range(num_categories + 1):
+                all_shapes.append(dict(
+                    type='line',
+                    x0=-0.5 if i < 1 else i - 0.5,
+                    x1=-0.5 if i < 1 else i - 0.5,
+                    y0=0,
+                    y1=y_max,
+                    line=dict(color=COLORES_PONCHO["gris_medio"], width=1, dash='solid')
+                ))
 
-        full_title = f"{main_title}<br><span style='font-size: 16px; font-weight: normal;'>{subtitle}</span>"
+            # Añadimos las líneas de la mediana
+            for i, row in medianas.iterrows():
+                all_shapes.append(dict(
+                    type='line', x0=i - 0.5, x1=i + 0.5, y0=row['valor'], y1=row['valor'],
+                    line=dict(color=COLORES_PONCHO["resaltado"], width=3, dash='dash')
+                ))
 
-        percepcionTemasPrioritarios_fig.update_layout(
-            title=full_title,
-            height=altura,
-            margin=dict(l=20, r=40, t=175, b=150),
-            legend_title_text="",
-            shapes=all_shapes
-        )
-        percepcionTemasPrioritarios_fig.update_layout(
-            DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['config']['layout']
-        )
+            percepcionTemasPrioritarios_fig.add_trace(go.Scatter(
+                x=[None], y=[None],
+                mode='lines',
+                line=dict(color=COLORES_PONCHO["resaltado"], width=3, dash='dash'),
+                name='Mediana'
+            ))
 
-        # ---
+            main_title = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['titulo']
+            subtitle = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['subtitulo']
 
-        percepcionPublica_fig = build_bar(
-            comp=DFs["componentes"]["grafico_percepcion_calidad_vida"],
-            color_discrete_map=highlight_map(DFs["componentes"]["grafico_percepcion_calidad_vida"]['resultado_sql']['unidad_territorial'], provincia),
-            dynamic_height=True,
-            showlegend=False,
-            margin=dict(l=20, r=40, t=150, b=20)
-        )
+            full_title = f"{main_title}<br><span style='font-size: 16px; font-weight: normal;'>{subtitle}</span>"
 
-        # --- FIN FIGURAS --- #
-        
-        logger.debug("Asignando figuras a componentes...")
+            percepcionTemasPrioritarios_fig.update_layout(
+                title=full_title,
+                height=altura,
+                margin=dict(l=20, r=40, t=175, b=150),
+                legend_title_text="",
+                shapes=all_shapes
+            )
+            percepcionTemasPrioritarios_fig.update_layout(
+                DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['config']['layout']
+            )
 
-        DFs["componentes"]["grafico_expo_top5"]["figura"] = top5_exportaciones_fig
-        DFs["componentes"]["grafico_evolucion_regional"]["figura"] = inversionID_fig
-        DFs["componentes"]["grafico_inv_por_investigador"]["figura"] = inversionInvestigador_fig
-        DFs["componentes"]["grafico_inv_empresaria_sector"]["figura"] = inversionEmpresas_fig
-        DFs["componentes"]["tabla_pfi_cruce"]["figura"] = tabla_pfi_cruce_fig
-        DFs["componentes"]["grafico_unidades_por_inst"]["figura"] = unidadesIDxinstitucion_fig
-        DFs["componentes"]["grafico_equipos_por_tipo"]["figura"] = equiposIDxTipo_fig
-        DFs["componentes"]["grafico_distribucion_investigadores"]["figura"] = investigadoresxArea_fig
-        DFs["componentes"]["tabla_personas_por_funcion"]["figura"] = tabla_personas_por_funcion_fig
-        DFs["componentes"]["grafico_evolucion_investigadores"]["figura"] = evolucionInvestigadores_fig
-        DFs["componentes"]["grafico_expo_intensidad"]["figura"] = exportacionesIntensidad_fig
-        DFs["componentes"]["grafico_expo_evolucion"]["figura"] = evolucionExportaciones_fig
-        DFs["componentes"]["grafico_expo_destino"]["figura"] = exportacionesxPais_fig
-        DFs["componentes"]["grafico_patentes_evolucion"]["figura"] = evolucionPatentes_fig
-        DFs["componentes"]["tabla_patentes_sector"]["figura"] = tabla_patentes_sector_fig
-        DFs["componentes"]["grafico_produccion_evolucion"]["figura"] = produccionProvincial_fig
-        DFs["componentes"]["grafico_produccion_tipo"]["figura"] = distribucionPublicaciones_fig
-        DFs["componentes"]["grafico_publicaciones_area"]["figura"] = publicacionesArea_fig
-        DFs["componentes"]["tabla_articulos_q1_q2"]["figura"] = tabla_articulos_q1_q2_fig
-        DFs["componentes"]["grafico_percepcion_temas_prioritarios"]["figura"] = percepcionTemasPrioritarios_fig
-        DFs["componentes"]["grafico_percepcion_calidad_vida"]["figura"] = percepcionPublica_fig
+            # ---
 
-        elapsed_time = time.time() - start_time
-        logger.info(f"Figuras generadas exitosamente para {provincia} en {elapsed_time:.2f}s")
-        
-        return DFs
-        
-    except Exception as e:
-        logger.critical(f"Error inesperado al generar las figuras de la ficha provincial para {provincia}: {e}", exc_info=True)
-        return {}
+            percepcionPublica_fig = build_bar(
+                comp=DFs["componentes"]["grafico_percepcion_calidad_vida"],
+                color_discrete_map=highlight_map(DFs["componentes"]["grafico_percepcion_calidad_vida"]['resultado_sql']['unidad_territorial'], provincia),
+                dynamic_height=True,
+                showlegend=False,
+                margin=dict(l=20, r=40, t=150, b=20)
+            )
+
+            # --- FIN FIGURAS --- #
+            
+            logger.debug("Asignando figuras a componentes...")
+
+            DFs["componentes"]["grafico_expo_top5"]["figura"] = top5_exportaciones_fig
+            DFs["componentes"]["grafico_evolucion_presupuesto_apn"]["figura"] = evolucion_presupuesto_apn_fig
+            # DFs["componentes"]["tabla_apn_jurisdiccion_entidad_programa_prov"]["figura"] = tabla_apn_jurisdiccion_entidad_programa_prov_fig
+            DFs["componentes"]["grafico_evolucion_regional"]["figura"] = inversionID_fig
+            DFs["componentes"]["grafico_inv_por_investigador"]["figura"] = inversionInvestigador_fig
+            DFs["componentes"]["grafico_inv_empresaria_sector"]["figura"] = inversionEmpresas_fig
+            DFs["componentes"]["tabla_pfi_cruce"]["figura"] = tabla_pfi_cruce_fig
+            DFs["componentes"]["grafico_unidades_por_inst"]["figura"] = unidadesIDxinstitucion_fig
+            DFs["componentes"]["grafico_equipos_por_tipo"]["figura"] = equiposIDxTipo_fig
+            DFs["componentes"]["grafico_distribucion_investigadores"]["figura"] = investigadoresxArea_fig
+            DFs["componentes"]["tabla_personas_por_funcion"]["figura"] = tabla_personas_por_funcion_fig
+            DFs["componentes"]["grafico_evolucion_investigadores"]["figura"] = evolucionInvestigadores_fig
+            DFs["componentes"]["grafico_expo_intensidad"]["figura"] = exportacionesIntensidad_fig
+            DFs["componentes"]["grafico_expo_evolucion"]["figura"] = evolucionExportaciones_fig
+            DFs["componentes"]["grafico_expo_destino"]["figura"] = exportacionesxPais_fig
+            DFs["componentes"]["grafico_patentes_evolucion"]["figura"] = evolucionPatentes_fig
+            DFs["componentes"]["tabla_patentes_sector"]["figura"] = tabla_patentes_sector_fig
+            DFs["componentes"]["grafico_produccion_evolucion"]["figura"] = produccionProvincial_fig
+            DFs["componentes"]["grafico_produccion_tipo"]["figura"] = distribucionPublicaciones_fig
+            DFs["componentes"]["grafico_publicaciones_area"]["figura"] = publicacionesArea_fig
+            DFs["componentes"]["tabla_articulos_q1_q2"]["figura"] = tabla_articulos_q1_q2_fig
+            DFs["componentes"]["grafico_percepcion_temas_prioritarios"]["figura"] = percepcionTemasPrioritarios_fig
+            DFs["componentes"]["grafico_percepcion_calidad_vida"]["figura"] = percepcionPublica_fig
+
+            elapsed_time = time.time() - start_time
+            logger.info(f"Figuras generadas exitosamente para {provincia} en {elapsed_time:.2f}s")
+            
+            return DFs
+            
+        except Exception as e:
+            logger.critical(f"Error inesperado al generar las figuras de la ficha provincial para {provincia}: {e}", exc_info=True)
+            return {}

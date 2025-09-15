@@ -9,12 +9,12 @@ import json
 from pathlib import Path
 from datetime import datetime, timedelta
 import plotly.express as px
-from logging_config import get_logger, get_audit_logger
+from logging_config import get_logger, get_audit_logger, log_streamlit_component
 from auth_manager import get_auth_manager, menu_with_redirect
 from typing import Dict, List
 from css_utils import load_css
 
-logger = get_logger(__name__)
+logger = get_logger('log_monitor')
 audit_logger = get_audit_logger()
 
 # Configuración de la página
@@ -613,7 +613,145 @@ def render_detailed_logs(df: pd.DataFrame):
         )
 
 
+def generate_analysis_report(df: pd.DataFrame, analysis: Dict) -> str:
+    """
+    Genera un reporte de análisis de logs.
+    
+    Args:
+        df: DataFrame con logs
+        analysis: Diccionario con análisis
+    
+    Returns:
+        String con el reporte
+    """
+    report = []
+    report.append("=" * 80)
+    report.append("REPORTE DE ANÁLISIS DE LOGS - SISTEMA SICyT")
+    report.append("=" * 80)
+    report.append(f"Fecha de generación: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    report.append(f"Usuario: {st.session_state.get('username', 'unknown')}")
+    report.append("")
+    
+    # Resumen ejecutivo
+    report.append("RESUMEN EJECUTIVO")
+    report.append("-" * 40)
+    report.append(f"Total de eventos analizados: {analysis.get('total_events', 0):,}")
+    report.append(f"Usuarios únicos: {analysis.get('unique_users', 0)}")
+    report.append(f"Tasa de error: {analysis.get('error_rate', 0):.2f}%")
+    report.append(f"Tasa de advertencia: {analysis.get('warning_rate', 0):.2f}%")
+    report.append("")
+    
+    # Distribución por nivel
+    if 'level' in df.columns:
+        report.append("DISTRIBUCIÓN POR NIVEL DE LOG")
+        report.append("-" * 40)
+        level_counts = df['level'].value_counts()
+        for level, count in level_counts.items():
+            percentage = (count / len(df) * 100) if len(df) > 0 else 0
+            report.append(f"{level:10s}: {count:6,} ({percentage:5.2f}%)")
+        report.append("")
+    
+    # Top errores
+    if analysis.get('top_errors'):
+        report.append("TOP 5 ERRORES MÁS FRECUENTES")
+        report.append("-" * 40)
+        for i, (error, count) in enumerate(analysis['top_errors'], 1):
+            report.append(f"{i}. [{count:3}] {error}")
+        report.append("")
+    
+    # Top módulos
+    if analysis.get('top_modules'):
+        report.append("TOP 10 MÓDULOS CON MÁS ACTIVIDAD")
+        report.append("-" * 40)
+        for i, (module, count) in enumerate(analysis['top_modules'], 1):
+            report.append(f"{i:2}. {module:30s}: {count:,}")
+        report.append("")
+    
+    # Patrones sospechosos
+    if analysis.get('suspicious_patterns'):
+        report.append("PATRONES SOSPECHOSOS DETECTADOS")
+        report.append("-" * 40)
+        for pattern in analysis['suspicious_patterns']:
+            report.append(f"• {pattern}")
+        report.append("")
+    
+    # Estadísticas temporales
+    if 'timestamp' in df.columns:
+        report.append("ESTADÍSTICAS TEMPORALES")
+        report.append("-" * 40)
+        
+        timestamps = pd.to_datetime(df['timestamp'])
+        report.append(f"Primer evento: {timestamps.min()}")
+        report.append(f"Último evento: {timestamps.max()}")
+        report.append(f"Duración total: {timestamps.max() - timestamps.min()}")
+        
+        if analysis.get('peak_hours'):
+            report.append(f"Horas pico: {', '.join([f'{h}:00' for h in analysis['peak_hours']])}")
+        report.append("")
+    
+    # Estadísticas de rendimiento
+    if 'duration_seconds' in df.columns:
+        perf_df = df[df['duration_seconds'].notna()]
+        if not perf_df.empty:
+            report.append("ESTADÍSTICAS DE RENDIMIENTO")
+            report.append("-" * 40)
+            report.append(f"Operaciones analizadas: {len(perf_df):,}")
+            report.append(f"Tiempo promedio: {perf_df['duration_seconds'].mean():.3f}s")
+            report.append(f"Tiempo mediano: {perf_df['duration_seconds'].median():.3f}s")
+            report.append(f"Tiempo mínimo: {perf_df['duration_seconds'].min():.3f}s")
+            report.append(f"Tiempo máximo: {perf_df['duration_seconds'].max():.3f}s")
+            report.append(f"Desviación estándar: {perf_df['duration_seconds'].std():.3f}s")
+            
+            slow_ops = len(perf_df[perf_df['duration_seconds'] > 1.0])
+            report.append(f"Operaciones > 1s: {slow_ops:,} ({slow_ops/len(perf_df)*100:.2f}%)")
+            report.append("")
+    
+    # Usuarios más activos
+    if 'user' in df.columns:
+        report.append("TOP 10 USUARIOS MÁS ACTIVOS")
+        report.append("-" * 40)
+        top_users = df['user'].value_counts().head(10)
+        for i, (user, count) in enumerate(top_users.items(), 1):
+            percentage = (count / len(df) * 100) if len(df) > 0 else 0
+            report.append(f"{i:2}. {user:20s}: {count:6,} eventos ({percentage:5.2f}%)")
+        report.append("")
+    
+    # Recomendaciones
+    report.append("RECOMENDACIONES")
+    report.append("-" * 40)
+    
+    recommendations = []
+    
+    if analysis.get('error_rate', 0) > 5:
+        recommendations.append("⚠️ Alta tasa de errores detectada. Revisar logs de ERROR para identificar problemas.")
+    
+    if analysis.get('warning_rate', 0) > 20:
+        recommendations.append("⚠️ Muchas advertencias. Revisar configuración y validaciones.")
+    
+    if 'duration_seconds' in df.columns:
+        slow_count = len(df[df['duration_seconds'] > 2.0]) if 'duration_seconds' in df.columns else 0
+        if slow_count > 10:
+            recommendations.append("🐌 Múltiples operaciones lentas detectadas. Considerar optimización.")
+    
+    if analysis.get('suspicious_patterns'):
+        recommendations.append("🔒 Patrones sospechosos detectados. Revisar seguridad del sistema.")
+    
+    if not recommendations:
+        recommendations.append("✅ No se detectaron problemas significativos.")
+    
+    for rec in recommendations:
+        report.append(f"• {rec}")
+    
+    report.append("")
+    report.append("=" * 80)
+    report.append("FIN DEL REPORTE")
+    report.append("=" * 80)
+    
+    return "\n".join(report)
+
+
 # PÁGINA PRINCIPAL
+@log_streamlit_component('log_monitor_main')
 def main():
     """Función principal del monitor de logs."""
     
@@ -827,143 +965,6 @@ def main():
                     records_count=len(all_logs)
                 )
             )
-
-
-def generate_analysis_report(df: pd.DataFrame, analysis: Dict) -> str:
-    """
-    Genera un reporte de análisis de logs.
-    
-    Args:
-        df: DataFrame con logs
-        analysis: Diccionario con análisis
-    
-    Returns:
-        String con el reporte
-    """
-    report = []
-    report.append("=" * 80)
-    report.append("REPORTE DE ANÁLISIS DE LOGS - SISTEMA SICyT")
-    report.append("=" * 80)
-    report.append(f"Fecha de generación: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    report.append(f"Usuario: {st.session_state.get('username', 'unknown')}")
-    report.append("")
-    
-    # Resumen ejecutivo
-    report.append("RESUMEN EJECUTIVO")
-    report.append("-" * 40)
-    report.append(f"Total de eventos analizados: {analysis.get('total_events', 0):,}")
-    report.append(f"Usuarios únicos: {analysis.get('unique_users', 0)}")
-    report.append(f"Tasa de error: {analysis.get('error_rate', 0):.2f}%")
-    report.append(f"Tasa de advertencia: {analysis.get('warning_rate', 0):.2f}%")
-    report.append("")
-    
-    # Distribución por nivel
-    if 'level' in df.columns:
-        report.append("DISTRIBUCIÓN POR NIVEL DE LOG")
-        report.append("-" * 40)
-        level_counts = df['level'].value_counts()
-        for level, count in level_counts.items():
-            percentage = (count / len(df) * 100) if len(df) > 0 else 0
-            report.append(f"{level:10s}: {count:6,} ({percentage:5.2f}%)")
-        report.append("")
-    
-    # Top errores
-    if analysis.get('top_errors'):
-        report.append("TOP 5 ERRORES MÁS FRECUENTES")
-        report.append("-" * 40)
-        for i, (error, count) in enumerate(analysis['top_errors'], 1):
-            report.append(f"{i}. [{count:3}] {error}")
-        report.append("")
-    
-    # Top módulos
-    if analysis.get('top_modules'):
-        report.append("TOP 10 MÓDULOS CON MÁS ACTIVIDAD")
-        report.append("-" * 40)
-        for i, (module, count) in enumerate(analysis['top_modules'], 1):
-            report.append(f"{i:2}. {module:30s}: {count:,}")
-        report.append("")
-    
-    # Patrones sospechosos
-    if analysis.get('suspicious_patterns'):
-        report.append("PATRONES SOSPECHOSOS DETECTADOS")
-        report.append("-" * 40)
-        for pattern in analysis['suspicious_patterns']:
-            report.append(f"• {pattern}")
-        report.append("")
-    
-    # Estadísticas temporales
-    if 'timestamp' in df.columns:
-        report.append("ESTADÍSTICAS TEMPORALES")
-        report.append("-" * 40)
-        
-        timestamps = pd.to_datetime(df['timestamp'])
-        report.append(f"Primer evento: {timestamps.min()}")
-        report.append(f"Último evento: {timestamps.max()}")
-        report.append(f"Duración total: {timestamps.max() - timestamps.min()}")
-        
-        if analysis.get('peak_hours'):
-            report.append(f"Horas pico: {', '.join([f'{h}:00' for h in analysis['peak_hours']])}")
-        report.append("")
-    
-    # Estadísticas de rendimiento
-    if 'duration_seconds' in df.columns:
-        perf_df = df[df['duration_seconds'].notna()]
-        if not perf_df.empty:
-            report.append("ESTADÍSTICAS DE RENDIMIENTO")
-            report.append("-" * 40)
-            report.append(f"Operaciones analizadas: {len(perf_df):,}")
-            report.append(f"Tiempo promedio: {perf_df['duration_seconds'].mean():.3f}s")
-            report.append(f"Tiempo mediano: {perf_df['duration_seconds'].median():.3f}s")
-            report.append(f"Tiempo mínimo: {perf_df['duration_seconds'].min():.3f}s")
-            report.append(f"Tiempo máximo: {perf_df['duration_seconds'].max():.3f}s")
-            report.append(f"Desviación estándar: {perf_df['duration_seconds'].std():.3f}s")
-            
-            slow_ops = len(perf_df[perf_df['duration_seconds'] > 1.0])
-            report.append(f"Operaciones > 1s: {slow_ops:,} ({slow_ops/len(perf_df)*100:.2f}%)")
-            report.append("")
-    
-    # Usuarios más activos
-    if 'user' in df.columns:
-        report.append("TOP 10 USUARIOS MÁS ACTIVOS")
-        report.append("-" * 40)
-        top_users = df['user'].value_counts().head(10)
-        for i, (user, count) in enumerate(top_users.items(), 1):
-            percentage = (count / len(df) * 100) if len(df) > 0 else 0
-            report.append(f"{i:2}. {user:20s}: {count:6,} eventos ({percentage:5.2f}%)")
-        report.append("")
-    
-    # Recomendaciones
-    report.append("RECOMENDACIONES")
-    report.append("-" * 40)
-    
-    recommendations = []
-    
-    if analysis.get('error_rate', 0) > 5:
-        recommendations.append("⚠️ Alta tasa de errores detectada. Revisar logs de ERROR para identificar problemas.")
-    
-    if analysis.get('warning_rate', 0) > 20:
-        recommendations.append("⚠️ Muchas advertencias. Revisar configuración y validaciones.")
-    
-    if 'duration_seconds' in df.columns:
-        slow_count = len(df[df['duration_seconds'] > 2.0]) if 'duration_seconds' in df.columns else 0
-        if slow_count > 10:
-            recommendations.append("🐌 Múltiples operaciones lentas detectadas. Considerar optimización.")
-    
-    if analysis.get('suspicious_patterns'):
-        recommendations.append("🔒 Patrones sospechosos detectados. Revisar seguridad del sistema.")
-    
-    if not recommendations:
-        recommendations.append("✅ No se detectaron problemas significativos.")
-    
-    for rec in recommendations:
-        report.append(f"• {rec}")
-    
-    report.append("")
-    report.append("=" * 80)
-    report.append("FIN DEL REPORTE")
-    report.append("=" * 80)
-    
-    return "\n".join(report)
 
 
 # Ejecutar aplicación

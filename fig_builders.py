@@ -104,6 +104,7 @@ def build_bar(
     hovertemplate: Optional[str] = None,
     showlegend: Optional[bool] = None,
     margin: Optional[dict] = None,
+    text: bool = False,
 ):
     df = comp["resultado_sql"]
     pm = comp["config"]["plot_mapping"]
@@ -119,6 +120,7 @@ def build_bar(
         orientation=orientation,
         color_discrete_sequence=color_discrete_sequence,
         color_discrete_map=color_discrete_map,
+        text=pm.get("text") if text else None,
     )
     if height is None and dynamic_height:
         n_cats = df[pm["y"]].nunique(dropna=True)
@@ -128,6 +130,8 @@ def build_bar(
         fig.update_layout(height=height)
     if hovertemplate:
         fig.update_traces(hovertemplate=hovertemplate)
+    if text:
+        fig.update_traces(textposition='outside', cliponaxis=False)
     if showlegend is not None:
         fig.update_layout(showlegend=showlegend)
     if orientation == 'h':

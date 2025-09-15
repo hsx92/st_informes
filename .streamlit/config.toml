@@ -21,7 +21,7 @@ enableWebsocketCompression = true
 # Configuración de la interfaz de cliente
 showSidebarNavigation = false
 showErrorDetails = false  # En producción, no mostrar detalles de errores
-toolbarMode = "viewer"  # minimal, developer, viewer
+toolbarMode = "developer"  # minimal, developer, viewer
 
 [theme]
 # Tema oficial del Portal SICyT

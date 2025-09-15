@@ -8,8 +8,6 @@ from copy import deepcopy
 from typing import Dict
 from functools import wraps
 import time
-
-# Import centralized logging
 from logging_config import get_logger, log_database_operation, log_execution
 
 # Initialize logger for this module
@@ -140,13 +138,6 @@ class Cursor:
                     query_text = str(query)
                     
                 is_read_only = query_text.strip().lower().startswith("select")
-                
-                # Log query performance
-                if elapsed_time > 1.0:
-                    logger.warning(
-                        f"Slow query detected ({elapsed_time:.2f}s): {query_text[:100]}..."
-                    )
-                
             if not self._conn.autocommit and not is_read_only:
                 self._conn.commit()
                 logger.debug(f"Database transaction committed after {elapsed_time:.2f}s")
@@ -184,7 +175,7 @@ def render_obj(obj, params):
 
 
 @st.cache_data(ttl=600)
-@monitor_performance(threshold=0.5)
+@log_execution()
 def _load_informes() -> Dict[str, object]:
     """Load report configurations from YAML file."""
     try:
@@ -203,7 +194,7 @@ def _load_informes() -> Dict[str, object]:
         raise
 
 
-@monitor_performance(threshold=2.0)
+@log_execution()
 def get_informe(nombre_informe: str, params: Dict[str, object]) -> Dict[str, object]:
     """Get and process a report with the given parameters."""
     logger.info(f"Generating report: {nombre_informe} with params: {params}")
@@ -261,7 +252,6 @@ def get_informe(nombre_informe: str, params: Dict[str, object]) -> Dict[str, obj
 
 @st.cache_data(ttl=600)
 @log_database_operation("SELECT")
-@monitor_performance(threshold=1.0)
 def get_provincias() -> pd.DataFrame:
     """
     Obtiene un df de provincias desde la base de datos.
@@ -291,7 +281,6 @@ def get_provincias() -> pd.DataFrame:
 
 
 @log_database_operation("SELECT")
-@monitor_performance(threshold=2.0)
 def ejecutar_consulta_parametrizada(plantilla_sql: str, params: dict) -> pd.DataFrame:
     """
     Toma una plantilla SQL y un diccionario de parámetros, la renderiza

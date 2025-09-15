@@ -17,6 +17,9 @@ import streamlit as st
 from contextlib import contextmanager
 import threading
 import re
+import time
+import psutil
+from contextlib import contextmanager
 
 # Configuración de directorios
 BASE_DIR = Path(__file__).parent
@@ -158,7 +161,11 @@ class AuditLogger:
     """Logger especializado para auditoría de seguridad."""
     
     def __init__(self, logger_name: str = "audit"):
+        # Usar el nombre correcto para routing
         self.logger = logging.getLogger(f"InformesApp.{logger_name}")
+        # Asegurar que el logger esté configurado
+        if not self.logger.handlers:
+            setup_logger(f"InformesApp.{logger_name}", log_file="audit")
         
     def log_login(self, username: str, success: bool, ip_address: str = None, details: Dict = None):
         """Registra intentos de login."""
@@ -298,6 +305,24 @@ class PerformanceLogger:
     
     def __init__(self, logger_name: str = "performance"):
         self.logger = logging.getLogger(f"InformesApp.{logger_name}")
+        if not self.logger.handlers:
+            setup_logger(f"InformesApp.{logger_name}", log_file="performance")
+    
+    def log_operation(self, operation: str, duration: float, details: Dict = None):
+        """Registra una operación con su duración."""
+        extra = {
+            'performance_type': 'operation',
+            'operation': operation,
+            'duration_seconds': duration,
+            'duration_ms': duration * 1000,
+            'user': st.session_state.get('username', 'anonymous'),
+            'details': details or {}
+        }
+        
+        if duration > 3.0:
+            self.logger.warning(f"Slow operation: {operation} ({duration:.2f}s)", extra=extra)
+        else:
+            self.logger.info(f"Operation completed: {operation} ({duration:.2f}s)", extra=extra)
     
     def log_slow_query(self, query: str, duration: float, threshold: float = 1.0):
         """Registra queries lentas."""
@@ -306,19 +331,31 @@ class PerformanceLogger:
                 'performance_type': 'slow_query',
                 'query': query[:500],  # Limitar longitud
                 'duration': duration,
+                'duration_seconds': duration,
                 'threshold': threshold
             }
             self.logger.warning(f"Query lenta detectada ({duration:.2f}s)", extra=extra)
+        else:
+            # También registrar queries normales para estadísticas
+            extra = {
+                'performance_type': 'query',
+                'duration_seconds': duration,
+                'query_preview': query[:100]
+            }
+            self.logger.info(f"Query ejecutada ({duration:.2f}s)", extra=extra)
     
     def log_memory_usage(self, usage_mb: float, threshold_mb: float = 500):
-        """Registra uso excesivo de memoria."""
+        """Registra uso de memoria."""
+        extra = {
+            'performance_type': 'memory',
+            'usage_mb': usage_mb,
+            'threshold_mb': threshold_mb
+        }
+        
         if usage_mb > threshold_mb:
-            extra = {
-                'performance_type': 'high_memory',
-                'usage_mb': usage_mb,
-                'threshold_mb': threshold_mb
-            }
             self.logger.warning(f"Alto uso de memoria: {usage_mb:.2f} MB", extra=extra)
+        else:
+            self.logger.debug(f"Memoria actual: {usage_mb:.2f} MB", extra=extra)
     
     def log_response_time(self, endpoint: str, duration: float, status_code: int = 200):
         """Registra tiempos de respuesta."""
@@ -326,6 +363,7 @@ class PerformanceLogger:
             'performance_type': 'response_time',
             'endpoint': endpoint,
             'duration': duration,
+            'duration_seconds': duration,
             'status_code': status_code
         }
         
@@ -333,6 +371,83 @@ class PerformanceLogger:
             self.logger.warning(f"Respuesta lenta en {endpoint}: {duration:.2f}s", extra=extra)
         else:
             self.logger.info(f"Respuesta en {endpoint}: {duration:.2f}s", extra=extra)
+    
+    def log_cache_hit(self, cache_key: str, hit: bool):
+        """Registra aciertos/fallos de cache."""
+        extra = {
+            'performance_type': 'cache',
+            'cache_key': cache_key,
+            'cache_hit': hit
+        }
+        
+        level = logging.DEBUG if hit else logging.INFO
+        message = f"Cache {'HIT' if hit else 'MISS'}: {cache_key}"
+        self.logger.log(level, message, extra=extra)
+    
+    def log_component_render(self, component: str, duration: float, size: Dict = None):
+        """Registra renderizado de componentes Streamlit."""
+        extra = {
+            'performance_type': 'component_render',
+            'component': component,
+            'duration_seconds': duration,
+            'size': size or {}
+        }
+        
+        if duration > 1.0:
+            self.logger.warning(f"Renderizado lento: {component} ({duration:.2f}s)", extra=extra)
+        else:
+            self.logger.info(f"Componente renderizado: {component} ({duration:.2f}s)", extra=extra)
+
+
+class SecurityLogger:
+    """Logger especializado para eventos de seguridad."""
+    
+    def __init__(self):
+        self.logger = logging.getLogger("InformesApp.security.main")
+        if not self.logger.handlers:
+            setup_logger("InformesApp.security.main", log_file="security")
+    
+    def log_security_event(self, event_type: str, details: Dict):
+        """Registra eventos de seguridad."""
+        self.logger.warning(
+            f"Security event: {event_type}",
+            extra={
+                'security_type': event_type,
+                'details': details,
+                'timestamp': datetime.now().isoformat()
+            }
+        )
+
+
+class ErrorLogger:
+    """Logger especializado para errores del sistema."""
+    
+    def __init__(self):
+        self.logger = logging.getLogger("InformesApp.errors.main")
+        if not self.logger.handlers:
+            setup_logger("InformesApp.errors.main", log_file="errors")
+    
+    def log_error(self, error: Exception, context: Dict = None):
+        """Registra errores con contexto completo."""
+        self.logger.error(
+            f"System error: {type(error).__name__}",
+            exc_info=True,
+            extra={
+                'error_type': type(error).__name__,
+                'error_message': str(error),
+                'context': context or {},
+                'timestamp': datetime.now().isoformat()
+            }
+        )
+
+
+# Funciones auxiliares
+
+# Instancias globales de loggers especializados
+_audit_logger = None
+_perf_logger = None
+_security_logger = None
+_error_logger = None
 
 
 def setup_logger(
@@ -344,16 +459,6 @@ def setup_logger(
 ) -> logging.Logger:
     """
     Configura y retorna un logger personalizado.
-    
-    Args:
-        name: Nombre del logger
-        log_file: Nombre del archivo de log (sin extensión)
-        console_output: Si mostrar logs en consola
-        json_format: Si usar formato JSON (True) o texto (False)
-        include_security_filter: Si incluir filtro de seguridad
-    
-    Returns:
-        Logger configurado
     """
     logger = logging.getLogger(name)
     
@@ -369,55 +474,69 @@ def setup_logger(
         security_filter = SecurityFilter()
         logger.addFilter(security_filter)
     
-    # Handler para archivo principal (JSON)
-    if log_file:
-        # Determinar subdirectorio basado en el tipo de log
-        if 'audit' in name.lower():
-            subdir = 'audit'
-        elif 'error' in name.lower():
-            subdir = 'errors'
-        elif 'performance' in name.lower():
-            subdir = 'performance'
-        elif 'security' in name.lower():
-            subdir = 'security'
-        else:
-            subdir = 'app'
-            
-        json_file = LOGS_DIR / subdir / f"{log_file}_{datetime.now():%Y%m}.json"
-        json_handler = logging.handlers.RotatingFileHandler(
-            json_file,
-            maxBytes=10 * 1024 * 1024,  # 10MB
-            backupCount=5,
+    # Determinar subdirectorio basado en el nombre completo del logger
+    # y el tipo de operación real.
+    if 'audit' in name.lower() or name.endswith('.audit'):
+        subdir = 'audit'
+        base_name = 'audit'
+    elif 'performance' in name.lower() or name.endswith('.performance'):
+        subdir = 'performance'
+        base_name = 'performance'
+    elif 'security' in name.lower() or name.endswith('.security'):
+        subdir = 'security'
+        base_name = 'security'
+    elif 'error' in name.lower() or name.endswith('.errors'):
+        subdir = 'errors'
+        base_name = 'errors'
+    elif 'database' in name.lower() or name.endswith('.database'):
+        subdir = 'performance'  # Las operaciones de DB van a performance
+        base_name = 'database'
+    else:
+        subdir = 'app'
+        base_name = log_file or name.replace("InformesApp.", "").replace(".", "_") or "app"
+    
+    # Usar el nombre base correcto para el archivo
+    if not log_file:
+        log_file = base_name
+    
+    # Archivos de log con timestamp mensual
+    json_file = LOGS_DIR / subdir / f"{log_file}_{datetime.now():%Y%m}.json"
+    text_file = LOGS_DIR / subdir / f"{log_file}_{datetime.now():%Y%m}.log"
+    
+    # Handler para archivo JSON
+    json_handler = logging.handlers.RotatingFileHandler(
+        json_file,
+        maxBytes=10 * 1024 * 1024,  # 10MB
+        backupCount=5,
+        encoding='utf-8'
+    )
+    json_handler.setFormatter(CustomJSONFormatter())
+    json_handler.setLevel(LOG_LEVEL)
+    logger.addHandler(json_handler)
+    
+    # Handler para archivo de texto legible
+    text_handler = logging.handlers.RotatingFileHandler(
+        text_file,
+        maxBytes=5 * 1024 * 1024,  # 5MB
+        backupCount=3,
+        encoding='utf-8'
+    )
+    text_handler.setFormatter(CustomTextFormatter())
+    text_handler.setLevel(LOG_LEVEL)
+    logger.addHandler(text_handler)
+    
+    # Handler específico para errores críticos - SIEMPRE va a errors/
+    if LOG_LEVEL <= logging.ERROR:
+        error_file = LOGS_DIR / 'errors' / f"critical_{datetime.now():%Y%m}.log"
+        error_handler = logging.handlers.RotatingFileHandler(
+            error_file,
+            maxBytes=5 * 1024 * 1024,
+            backupCount=10,
             encoding='utf-8'
         )
-        json_handler.setFormatter(CustomJSONFormatter())
-        json_handler.setLevel(LOG_LEVEL)
-        logger.addHandler(json_handler)
-        
-        # Handler para archivo de texto legible
-        text_file = LOGS_DIR / subdir / f"{log_file}_{datetime.now():%Y%m}.log"
-        text_handler = logging.handlers.RotatingFileHandler(
-            text_file,
-            maxBytes=5 * 1024 * 1024,  # 5MB
-            backupCount=3,
-            encoding='utf-8'
-        )
-        text_handler.setFormatter(CustomTextFormatter())
-        text_handler.setLevel(LOG_LEVEL)
-        logger.addHandler(text_handler)
-        
-        # Handler para errores críticos
-        if LOG_LEVEL <= logging.ERROR:
-            error_file = LOGS_DIR / 'errors' / f"critical_{datetime.now():%Y%m}.log"
-            error_handler = logging.handlers.RotatingFileHandler(
-                error_file,
-                maxBytes=5 * 1024 * 1024,
-                backupCount=10,
-                encoding='utf-8'
-            )
-            error_handler.setLevel(logging.ERROR)
-            error_handler.setFormatter(CustomTextFormatter())
-            logger.addHandler(error_handler)
+        error_handler.setLevel(logging.ERROR)
+        error_handler.setFormatter(CustomTextFormatter())
+        logger.addHandler(error_handler)
     
     # Handler para consola
     if console_output:
@@ -430,6 +549,116 @@ def setup_logger(
         logger.addHandler(console_handler)
     
     return logger
+
+
+def get_logger(name: str = None) -> logging.Logger:
+    """
+    Obtiene un logger configurado con routing correcto.
+    
+    IMPORTANTE: El nombre determina dónde se guardan los logs.
+    """
+    if name is None:
+        name = "InformesApp"
+    
+    # Mapeo de nombres de módulos a tipos de logger
+    logger_type_map = {
+        'auth_manager': 'audit',
+        'sources': 'performance',
+        'database': 'performance',
+        'ficha_builder': 'app',
+        'pdf_builder': 'app',
+        'fig_builders': 'app',
+        'css_utils': 'app'
+    }
+    
+    # Determinar el tipo de logger basado en el módulo
+    logger_type = logger_type_map.get(name, 'app')
+    
+    # Si es un módulo específico, crear logger hijo con tipo correcto
+    if name != "InformesApp" and not name.startswith("InformesApp."):
+        if logger_type != 'app':
+            name = f"InformesApp.{logger_type}.{name}"
+        else:
+            name = f"InformesApp.{name}"
+    
+    # El archivo de log será basado en el tipo
+    log_file = logger_type if logger_type != 'app' else name.split('.')[-1]
+    
+    return setup_logger(name, log_file=log_file)
+
+
+def get_audit_logger() -> AuditLogger:
+    """Obtiene una instancia única del logger de auditoría."""
+    global _audit_logger
+    if _audit_logger is None:
+        _audit_logger = AuditLogger()
+    return _audit_logger
+
+
+def get_performance_logger() -> PerformanceLogger:
+    """Obtiene una instancia única del logger de rendimiento."""
+    global _perf_logger
+    if _perf_logger is None:
+        _perf_logger = PerformanceLogger()
+    return _perf_logger
+
+
+def get_security_logger() -> SecurityLogger:
+    """Obtiene una instancia única del logger de seguridad."""
+    global _security_logger
+    if _security_logger is None:
+        _security_logger = SecurityLogger()
+    return _security_logger
+
+
+def get_error_logger() -> ErrorLogger:
+    """Obtiene una instancia única del logger de errores."""
+    global _error_logger
+    if _error_logger is None:
+        _error_logger = ErrorLogger()
+    return _error_logger
+
+
+@contextmanager
+def performance_tracking(operation_name: str):
+    """
+    Context manager simple para tracking de performance.
+    
+    Uso:
+        with performance_tracking('cargar_datos'):
+            # código a medir
+            datos = cargar_datos()
+    """
+    perf_logger = get_performance_logger()
+    start_time = time.time()
+    
+    # Memoria inicial
+    process = psutil.Process()
+    mem_before = process.memory_info().rss / 1024 / 1024
+    
+    try:
+        yield
+    finally:
+        # Calcular métricas
+        duration = time.time() - start_time
+        mem_after = process.memory_info().rss / 1024 / 1024
+        mem_delta = mem_after - mem_before
+        
+        # Registrar
+        perf_logger.log_operation(
+            operation_name,
+            duration,
+            details={
+                'memory_before_mb': mem_before,
+                'memory_after_mb': mem_after,
+                'memory_delta_mb': mem_delta,
+                'user': st.session_state.get('username', 'anonymous')
+            }
+        )
+        
+        # Si hubo mucho consumo de memoria, registrarlo aparte
+        if abs(mem_delta) > 50:
+            perf_logger.log_memory_usage(mem_after)
 
 
 @contextmanager
@@ -541,67 +770,54 @@ def log_execution(
 
 def log_database_operation(operation_type: str = "query"):
     """
-    Decorador específico para operaciones de base de datos.
-    
-    Args:
-        operation_type: Tipo de operación (query, insert, update, delete)
+    Decorador mejorado para operaciones de base de datos.
+    IMPORTANTE: Ahora realmente loguea en performance/
     """
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
-            logger = get_logger("database")
-            perf_logger = PerformanceLogger()
+            perf_logger = get_performance_logger()
             
             # Extraer información SQL si está disponible
             sql = None
             if len(args) > 1 and isinstance(args[1], str):
-                sql = args[1][:500]  # Limitar longitud del SQL
+                sql = args[1][:500]
             elif 'plantilla_sql' in kwargs:
                 sql = str(kwargs.get('plantilla_sql', ''))[:500]
-                
-            logger.info(
-                f"Operación DB: {operation_type}",
-                extra={
-                    "operation": operation_type,
-                    "function": func.__name__,
-                    "sql_preview": sql
-                }
-            )
+            
+            start_time = time.time()
             
             try:
-                start_time = datetime.now()
                 result = func(*args, **kwargs)
-                duration = (datetime.now() - start_time).total_seconds()
+                duration = time.time() - start_time
                 
-                # Log de rendimiento para queries lentas
-                if sql and duration > 1.0:
+                # Log de la query
+                if sql:
                     perf_logger.log_slow_query(sql, duration)
+                else:
+                    perf_logger.log_operation(f"db_{operation_type}", duration)
                 
-                # Log resultado
-                rows_affected = 0
-                if hasattr(result, '__len__'):
-                    rows_affected = len(result)
-                    
-                logger.info(
-                    f"Operación DB completada: {operation_type}",
-                    extra={
-                        "operation": operation_type,
-                        "duration_seconds": duration,
-                        "rows_affected": rows_affected,
-                        "success": True
-                    }
-                )
+                # Si el resultado es un DataFrame, registrar tamaño
+                if hasattr(result, 'shape'):
+                    perf_logger.logger.debug(
+                        f"Query result size: {result.shape}",
+                        extra={
+                            'rows': result.shape[0],
+                            'columns': result.shape[1]
+                        }
+                    )
+                
                 return result
                 
             except Exception as e:
-                logger.error(
-                    f"Error en operación DB: {operation_type}",
-                    exc_info=True,
-                    extra={
-                        "operation": operation_type,
-                        "error_type": type(e).__name__,
-                        "sql_preview": sql,
-                        "success": False
+                duration = time.time() - start_time
+                error_logger = get_error_logger()
+                error_logger.log_error(
+                    e,
+                    context={
+                        'operation': operation_type,
+                        'duration': duration,
+                        'sql_preview': sql[:100] if sql else None
                     }
                 )
                 raise
@@ -714,29 +930,34 @@ def log_streamlit_interaction(interaction_type: str = "click"):
     return decorator
 
 
-# Funciones auxiliares mejoradas
-
-def get_logger(name: str = None) -> logging.Logger:
+def log_streamlit_component(component_name: str):
     """
-    Obtiene un logger configurado.
-    
-    Args:
-        name: Nombre del logger (si None, usa el nombre por defecto)
-    
-    Returns:
-        Logger configurado
+    Decorador para componentes de Streamlit.
+    Registra en performance/ el tiempo de renderizado.
     """
-    if name is None:
-        name = "InformesApp"
-    
-    # Si es un módulo específico, crear logger hijo
-    if name != "InformesApp" and not name.startswith("InformesApp."):
-        name = f"InformesApp.{name}"
-    
-    # Determinar archivo de log basado en el nombre
-    log_file = name.replace("InformesApp.", "").replace(".", "_") or "app"
-    
-    return setup_logger(name, log_file=log_file)
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            perf_logger = get_performance_logger()
+            start_time = time.time()
+            
+            try:
+                result = func(*args, **kwargs)
+                duration = time.time() - start_time
+                
+                perf_logger.log_component_render(component_name, duration)
+                return result
+                
+            except Exception as e:
+                error_logger = get_error_logger()
+                error_logger.log_error(
+                    e,
+                    context={'component': component_name}
+                )
+                raise
+                
+        return wrapper
+    return decorator
 
 
 def log_error(message: str, error: Exception = None, **extra):
@@ -794,20 +1015,8 @@ def log_debug(message: str, **extra):
         logger.debug(message)
 
 
-def get_audit_logger() -> AuditLogger:
-    """Obtiene una instancia del logger de auditoría."""
-    return AuditLogger()
-
-
-def get_performance_logger() -> PerformanceLogger:
-    """Obtiene una instancia del logger de rendimiento."""
-    return PerformanceLogger()
-
-
 # Inicializar loggers principales al importar el módulo
 main_logger = setup_logger("InformesApp", log_file="app")
-audit_logger = AuditLogger()
-performance_logger = PerformanceLogger()
 
 # Log de inicialización
 log_info("Sistema de logging inicializado", version="2.0.0",
@@ -815,19 +1024,24 @@ log_info("Sistema de logging inicializado", version="2.0.0",
 
 # Exportar funciones y clases principales
 __all__ = [
-    'setup_logger',
-    'get_logger',
-    'get_audit_logger',
-    'get_performance_logger',
-    'AuditLogger',
-    'PerformanceLogger',
-    'log_context',
-    'log_execution',
-    'log_database_operation',
-    'log_user_activity',
-    'log_streamlit_interaction',
-    'log_error',
-    'log_info',
-    'log_warning',
-    'log_debug',
+    "get_logger",
+    "get_audit_logger",
+    "get_performance_logger",
+    "get_security_logger",
+    "get_error_logger",
+    "log_execution",
+    "log_database_operation",
+    "log_user_activity",
+    "log_streamlit_interaction",
+    "log_streamlit_component",
+    "log_context",
+    "performance_tracking",
+    "log_error",
+    "log_info",
+    "log_warning",
+    "log_debug",
+    "AuditLogger",
+    "PerformanceLogger",
+    "SecurityLogger",
+    "ErrorLogger"
 ]

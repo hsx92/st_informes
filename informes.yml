@@ -1,6 +1,7 @@
 informe:
   nombre: ficha_provincial
   componentes:
+    # --- SECCIÓN 1: Indicadores de Contexto ---
     # --- Componentes 1.1: KPIs que usan provincia_id para 'Provincia' ---
     kpi_poblacion_prov: &kpi_poblacion_prov
       orden: 1001
@@ -140,6 +141,127 @@ informe:
         ORDER BY "{{ anio }}" DESC LIMIT 5;
 
     # --- SECCIÓN 2: Inversión en I+D en la Prov ---
+    grafico_evolucion_presupuesto_apn: &grafico_evolucion_presupuesto_apn
+      orden: 2001
+      titulo: "Evolución del presupuesto APN asignado a I+D a nivel provincial"
+      subtitulo: " crédito devengado en millones de pesos a valores corrientes (2020 - 2025)"
+      tipo_componente: "GRAFICO"
+      tipo_grafico: "bar"
+      estado: true
+      fuente: "DNIYES"
+      parametros: ["provincia_id", "provincia"]
+      config:
+        plot_mapping:
+          x: "impacto_presupuestario_anio"
+          y: "credito_devengado"
+          labels: {"credito_devengado": "Crédito Devengado (millones de pesos)", "impacto_presupuestario_anio": "Año"}
+          text: "text"
+        layout:
+          font_size: 16
+          legend_font:
+            size: 16
+          title_font:
+            size: 22
+          hoverlabel:
+            font_size: 16
+          yaxis:
+            title:
+              font_size: 18
+              text: ""
+            showticklabels: false
+            ticklabelstandoff: 10
+            tickfont_size: 16
+          xaxis:
+            tickfont_size: 16
+            ticklabelstandoff: 10
+            title:
+              font_size: 18
+              text: ""
+      plantilla_sql: |
+        SELECT
+            impacto_presupuestario_anio, SUM(credito_devengado) as credito_devengado
+        FROM apn_2020_2025
+        WHERE ubicacion_geografica_desc4 = (
+            SELECT region_iso FROM ref_provincia
+            WHERE provincia_id = {{ provincia_id }}
+        )
+        GROUP BY impacto_presupuestario_anio
+        ORDER BY impacto_presupuestario_anio ASC;
+
+    kpi_apn_devengado_prov: &kpi_apn_devengado_prov
+      orden: 2002
+      titulo: "APN devengado Provincial (2025)"
+      tipo_componente: "KPI"
+      estado: true
+      fuente: "DNIYES"
+      parametros: ['provincia_id']
+      config:
+        format: "int"
+        suffix: " M"
+      plantilla_sql: |
+        SELECT SUM(credito_devengado) as credito_devengado
+        FROM apn_2020_2025
+        WHERE ubicacion_geografica_desc4 = (
+            SELECT region_iso FROM ref_provincia
+            WHERE provincia_id = {{ provincia_id }}
+        ) AND impacto_presupuestario_anio = 2025;
+
+    kpi_apn_devengado_region: &kpi_apn_devengado_region
+      orden: 2003
+      titulo: "APN devengado Regional (2025)"
+      tipo_componente: "KPI"
+      estado: true
+      fuente: "DNIYES"
+      parametros: ['provincia_id']
+      config:
+        format: "int"
+        suffix: " M"
+      plantilla_sql: |
+        SELECT SUM(credito_devengado) as credito_devengado
+        FROM apn_2020_2025
+        WHERE region_cofecyt = (
+            SELECT region_cofecyt FROM ref_provincia
+            WHERE provincia_id = {{ provincia_id }}
+        ) AND impacto_presupuestario_anio = 2025;
+
+    kpi_apn_devengado_nac: &kpi_apn_devengado_nac
+      orden: 2004
+      titulo: "APN devengado Nacional (2025)"
+      tipo_componente: "KPI"
+      estado: true
+      fuente: "DNIYES "
+      parametros: []
+      config:
+        format: "int"
+        suffix: " M"
+      plantilla_sql: |
+        SELECT SUM(credito_devengado) as credito_devengado
+        FROM apn_2020_2025
+        WHERE impacto_presupuestario_anio = 2025;
+
+    tabla_apn_jurisdiccion_entidad_programa_prov: &tabla_apn_jurisdiccion_entidad_programa_prov
+      orden: 2005
+      titulo: "Presupuesto APN por jurisdicción, entidad y programa ejecutado en {{provincia}} (2025)"
+      subtitulo: " crédito devengado en millones de pesos a valores corrientes"
+      tipo_componente: "TABLA"
+      estado: true
+      fuente: "DNIYES"
+      parametros: ["provincia_id"]
+      config:
+        pivot:
+          index: ["jurisdiccion_desc", "entidad_desc", "programa_desc"]
+          columns:
+          values:
+          aggfunc: "sum"
+      plantilla_sql: |
+        SELECT jurisdiccion_desc, entidad_desc, programa_desc, SUM(credito_devengado) as credito_devengado
+        FROM apn_2020_2025
+        WHERE ubicacion_geografica_desc4 = (
+            SELECT region_iso FROM ref_provincia
+            WHERE provincia_id = {{ provincia_id }}
+        )
+        GROUP BY jurisdiccion_desc, entidad_desc, programa_desc;
+
     grafico_evolucion_regional: &grafico_evolucion_regional
       orden: 2006
       titulo: "Evolución de la inversión en I+D regional y provincial"

@@ -13,44 +13,12 @@ from pdf_builder import ficha_provincial_pdf
 from ficha_builder import ficha_provincial_figs, preparar_data_pdf
 from css_utils import load_css, get_metric_css
 from auth_manager import get_auth_manager, menu_with_redirect
-from logging_config import get_logger
-from functools import wraps
+from logging_config import get_logger, get_audit_logger, log_streamlit_component
 from typing import Optional, Dict
-import time
 
 
-logger = get_logger(__name__)
-
-
-def log_performance(func):
-    """Decorator to log function performance metrics."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        end_time = time.time()
-        logger.info(f"Function '{func.__name__}' took {end_time - start_time:.2f} seconds")
-        return result
-    return wrapper
-
-
-def log_data_access(data_source: str):
-    """Decorator to log data access operations."""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            user = st.session_state.get("username", "unknown")
-            provincia = kwargs.get('provincia') or st.session_state.get('provincia', 'unknown')
-            logger.info(f"User '{user}' accessing {data_source} for provincia '{provincia}'")
-            try:
-                result = func(*args, **kwargs)
-                logger.info(f"Data access successful: {data_source}")
-                return result
-            except Exception as e:
-                logger.error(f"Data access failed for {data_source}: {str(e)}")
-                raise
-        return wrapper
-    return decorator
+logger = get_logger('fichas_provinciales')
+audit_logger = get_audit_logger()
 
 
 def log_export_action(format_type: str):
@@ -172,9 +140,6 @@ menu_with_redirect()
 
 
 # ---- FUNCIONES AUXILIARES ----
-
-@log_performance
-@log_data_access("provincial_data")
 def load_provincial_data(provincia_id: int, provincia: str, anio: str) -> Optional[Dict]:
     """Load and process provincial data with error handling and logging."""
     try:
@@ -223,7 +188,6 @@ def render_table_with_source(component: Dict):
             st.caption(f"Fuente: {component['fuente']}")
 
 
-@log_performance
 def generate_pdf_report(provincia: str, data: Dict) -> bool:
     """Generate PDF report with error handling and logging."""
     try:
@@ -260,343 +224,391 @@ def generate_pdf_report(provincia: str, data: Dict) -> bool:
 
 
 # ---- PÁGINA PRINCIPAL ----
-logger.info(f"Provincial dashboard accessed by user: {st.session_state.get('username', 'unknown')}")
-
-# Cargar datos de provincias
-try:
-    provinciasDF = get_provincias()
-    # Eliminar entrada where 'provincia' is 'C.A.B.A.' or 'Tierra del Fuego, Antártida e Islas del Atlántico Sur'
-    provinciasDF = provinciasDF[provinciasDF['provincia'] != 'C.A.B.A.']
-    provinciasDF = provinciasDF[provinciasDF['provincia'] != 'Tierra del Fuego, Antártida e Islas del Atlántico Sur']
-
-    logger.info(f"Loaded {len(provinciasDF)} provinces")
-except Exception as e:
-    logger.error(f"Failed to load provinces: {str(e)}")
-    st.error("Error al cargar la lista de provincias. Por favor, contacte al administrador.", icon=":material/close:")
-    st.stop()
-# Header con ícono
-col1, col2 = st.columns([1, 9], vertical_alignment='center')
-with col1:
-    st.markdown("""
-        <div class="icon-container">
-            <i class="icono-arg-ciencia-publicacion" style="font-size: 76px; color: #FFFFFF;"></i>
-        </div>
-        """, unsafe_allow_html=True)
-with col2:
-    st.header("Ficha Provincial")
-    st.markdown("")
-    st.write("Secretaría de Innovación, Ciencia y Tecnología")
-
-st.markdown("""---""")
-
-# Selector de provincia con placeholder mejorado
-provincia = st.selectbox(
-    "Seleccione una provincia:",
-    options=provinciasDF['nombre_iso'].sort_values(),
-    label_visibility="collapsed",
-    index=None,
-    placeholder="Seleccione una provincia para visualizar los datos",
-    help="Seleccione una provincia para ver sus indicadores de ciencia y tecnología"
-)
-
-if provincia:
-    # Guardar selección en session state
-    st.session_state.provincia = provincia
-    st.session_state.provincia_id = provinciasDF[provinciasDF['nombre_iso'] == provincia]['id'].values[0]
-    st.session_state.region = provinciasDF[provinciasDF['nombre_iso'] == provincia]['region'].values[0]
-    st.session_state.pais = 'Argentina'
-    st.session_state.anio = '2023'
-    
-    logger.info(f"Province selected: {st.session_state.provincia} (ID: {st.session_state.provincia_id})")
-
-    # Cargar datos de la provincia
-    DFs = load_provincial_data(
-        provincia_id=st.session_state.provincia_id,
-        provincia=st.session_state.provincia,
-        anio=st.session_state.anio
+@log_streamlit_component('fichas_provinciales_main')
+def main():
+    audit_logger.log_data_access(
+        user=st.session_state.get("username", "unknown"),
+        resource="ficha_provincial",
+        action="view"
     )
 
-    if DFs is None:
+    # Cargar datos de provincias
+    try:
+        provinciasDF = get_provincias()
+        # Eliminar entrada where 'provincia' is 'C.A.B.A.' or 'Tierra del Fuego, Antártida e Islas del Atlántico Sur'
+        provinciasDF = provinciasDF[provinciasDF['provincia'] != 'C.A.B.A.']
+        provinciasDF = provinciasDF[provinciasDF['provincia'] != 'Tierra del Fuego, Antártida e Islas del Atlántico Sur']
+
+        logger.info(f"Loaded {len(provinciasDF)} provinces")
+    except Exception as e:
+        logger.error(f"Failed to load provinces: {str(e)}")
+        st.error("Error al cargar la lista de provincias. Por favor, contacte al administrador.", icon=":material/close:")
         st.stop()
-
-    # Título de la provincia con información adicional
-    col1, col2, col3 = st.columns([3, 1, 1])
+    # Header con ícono
+    col1, col2 = st.columns([1, 9], vertical_alignment='center')
     with col1:
-        st.markdown(f"## {provincia}")
+        st.markdown("""
+            <div class="icon-container">
+                <i class="icono-arg-ciencia-publicacion" style="font-size: 76px; color: #FFFFFF;"></i>
+            </div>
+            """, unsafe_allow_html=True)
     with col2:
-        st.info(f"Región: {st.session_state.region}", icon=":material/location_on:")
-    with col3:
-        st.info(f"Año: {st.session_state.anio}", icon=":material/calendar_today:")
+        st.header("Ficha Provincial")
+        st.markdown("")
+        st.write("Secretaría de Innovación, Ciencia y Tecnología")
 
-    # Tabs para las diferentes secciones
-    tabs = st.tabs([
-        "Indicadores de contexto",
-        "Inversión en I+D",
-        "Proyectos",
-        "Infraestructura",
-        "Capital Humano",
-        "Resultados",
-        "Ciencia y Sociedad"
-    ],
-        width='stretch'
+    st.markdown("""---""")
+
+    # Selector de provincia con placeholder mejorado
+    provincia = st.selectbox(
+        "Seleccione una provincia:",
+        options=provinciasDF['nombre_iso'].sort_values(),
+        label_visibility="collapsed",
+        index=None,
+        placeholder="Seleccione una provincia para visualizar los datos",
+        help="Seleccione una provincia para ver sus indicadores de ciencia y tecnología"
     )
 
-    # Tab 1: Indicadores de contexto
-    with tabs[0]:
-        st.markdown("")
+    if provincia:
+        # Guardar selección en session state
+        st.session_state.provincia = provincia
+        st.session_state.provincia_id = provinciasDF[provinciasDF['nombre_iso'] == provincia]['id'].values[0]
+        st.session_state.region = provinciasDF[provinciasDF['nombre_iso'] == provincia]['region'].values[0]
+        st.session_state.pais = 'Argentina'
+        st.session_state.anio = '2023'
         
-        # Métricas principales
-        col1, col2, col3, col4, col5 = st.columns([1, 3.75, .5, 3.75, 1])
-        with col2:
-            st.subheader("Provincial :material/location_on:")
-            for key in ['kpi_poblacion_prov', 'kpi_tasa_actividad_prov', 'kpi_tasa_desempleo_prov']:
-                comp = DFs['componentes'][key]
-                st.metric(
-                    label=f":primary[{comp['titulo']}]",
-                    value=comp['valor'],
-                    delta=None,
-                )
-        with col4:
-            st.subheader("Nacional :material/flag:")
-            for key in ['kpi_densidad_prov', 'kpi_tasa_actividad_nac', 'kpi_tasa_desempleo_nac']:
-                comp = DFs['componentes'][key]
-                st.metric(
-                    label=f":primary[{comp['titulo']}]",
-                    value=comp['valor'],
-                    delta=None,
-                )
-        
-        st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_actividad_nac']['fuente']}")
-        st.markdown("")
-        
-        # Gráfico de exportaciones
-        render_chart_with_source(DFs['componentes']['grafico_expo_top5'])
+        logger.info(f"Province selected: {st.session_state.provincia} (ID: {st.session_state.provincia_id})")
 
-    # Tab 2: Inversión en I+D
-    with tabs[1]:
-        render_chart_with_source(DFs['componentes']['grafico_evolucion_regional'])
-        st.markdown("")
-        render_chart_with_source(DFs['componentes']['grafico_inv_por_investigador'])
-        st.markdown("")
-        render_chart_with_source(DFs['componentes']['grafico_inv_empresaria_sector'])
+        # Cargar datos de la provincia
+        DFs = load_provincial_data(
+            provincia_id=st.session_state.provincia_id,
+            provincia=st.session_state.provincia,
+            anio=st.session_state.anio
+        )
 
-    # Tab 3: Proyectos
-    with tabs[2]:
-        st.markdown("")
-        
-        # KPIs de proyectos
-        col1, col2, col3 = st.columns(3)
+        if DFs is None:
+            st.stop()
+
+        # Título de la provincia con información adicional
+        col1, col2, col3 = st.columns([3, 1, 1])
         with col1:
-            st.subheader("Provincial :material/location_on:")
-            for key in ['kpi_pfi_provincial', 'kpi_porc_privada_provincial']:
-                comp = DFs['componentes'][key]
-                st.metric(
-                    label=f":primary[{comp['titulo']}]",
-                    value=comp['valor'],
-                    delta=None,
-                )
+            st.markdown(f"## {provincia}")
         with col2:
-            st.subheader("Regional :material/explore_nearby:")
-            for key in ['kpi_pfi_regional', 'kpi_porc_privada_regional']:
-                comp = DFs['componentes'][key]
-                st.metric(
-                    label=f":primary[{comp['titulo']}]",
-                    value=comp['valor'],
-                    delta=None,
-                )
+            st.info(f"Región: {st.session_state.region}", icon=":material/location_on:")
         with col3:
-            st.subheader("Nacional :material/flag:")
-            for key in ['kpi_pfi_nacional', 'kpi_porc_privada_nacional']:
-                comp = DFs['componentes'][key]
+            st.info(f"Año: {st.session_state.anio}", icon=":material/calendar_today:")
+
+        # Tabs para las diferentes secciones
+        tabs = st.tabs([
+            "Indicadores de contexto",
+            "Inversión en I+D",
+            "Proyectos",
+            "Infraestructura",
+            "Capital Humano",
+            "Resultados",
+            "Ciencia y Sociedad"
+        ],
+            width='stretch'
+        )
+
+        # Tab 1: Indicadores de contexto
+        with tabs[0]:
+            st.markdown("")
+            
+            # Métricas principales
+            col1, col2, col3, col4, col5 = st.columns([1, 3.75, .5, 3.75, 1])
+            with col2:
+                st.subheader("Provincial :material/location_on:")
+                for key in ['kpi_poblacion_prov', 'kpi_tasa_actividad_prov', 'kpi_tasa_desempleo_prov']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            with col4:
+                st.subheader("Nacional :material/flag:")
+                for key in ['kpi_densidad_prov', 'kpi_tasa_actividad_nac', 'kpi_tasa_desempleo_nac']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            
+            st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_actividad_nac']['fuente']}")
+            st.markdown("")
+            
+            # Gráfico de exportaciones
+            render_chart_with_source(DFs['componentes']['grafico_expo_top5'])
+
+        # Tab 2: Inversión en I+D
+        with tabs[1]:
+            render_chart_with_source(DFs['componentes']['grafico_evolucion_presupuesto_apn'])
+            st.markdown("---")
+            st.markdown("##### Ejecución del gasto en I+D del Presupuesto de la Administración Pública Nacional (APN)")
+            st.text(" crédito devengado en millones de pesos a valores corrientes")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                comp = DFs['componentes']['kpi_apn_devengado_prov']
                 st.metric(
                     label=f":primary[{comp['titulo']}]",
                     value=comp['valor'],
                     delta=None,
                 )
-        
-        st.caption("*PFI: Proyectos Federales de Innovación")
-        st.caption(f"Fuente: {DFs['componentes']['kpi_pfi_provincial']['fuente']}")
-        st.markdown("")
-        
-        # Tabla de proyectos
-        if DFs['componentes']['tabla_pfi_cruce']['figura'] is not None:
-            render_table_with_source(DFs['componentes']['tabla_pfi_cruce'])
+            with col2:
+                comp = DFs['componentes']['kpi_apn_devengado_region']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            with col3:
+                comp = DFs['componentes']['kpi_apn_devengado_nac']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            st.caption(f"Fuente: {DFs['componentes']['kpi_apn_devengado_nac']['fuente']} - Actualizado al 21/05/2025")
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_evolucion_regional'])
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_inv_por_investigador'])
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_inv_empresaria_sector'])
 
-    # Tab 4: Infraestructura
-    with tabs[3]:
-        st.markdown("")
-        
-        # KPI central
-        colA, colB, colC = st.columns(3)
-        with colB:
-            comp = DFs['componentes']['kpi_unidades_id_prov']
-            st.metric(
-                label=f":primary[{comp['titulo']}]",
-                value=comp['valor'],
-                delta=None,
-            )
-        
-        render_chart_with_source(DFs['componentes']['grafico_unidades_por_inst'])
-        st.markdown("---")
-        
-        # KPIs de equipos
-        col1, col2, col3 = st.columns(3)
-        with col1:
-            comp = DFs['componentes']['kpi_equipos_provincial']
-            st.metric(
-                label=f":primary[{comp['titulo']}]",
-                value=comp['valor'],
-                delta=None,
-            )
-        with col2:
-            comp = DFs['componentes']['kpi_equipos_regional']
-            st.metric(
-                label=f":primary[{comp['titulo']}]",
-                value=comp['valor'],
-                delta=None,
-            )
-        with col3:
-            comp = DFs['componentes']['kpi_equipos_nacional']
-            st.metric(
-                label=f":primary[{comp['titulo']}]",
-                value=comp['valor'],
-                delta=None,
-            )
-        
-        st.caption(f"Fuente: {DFs['componentes']['kpi_equipos_nacional']['fuente']}")
-        st.markdown("")
-        
-        render_chart_with_source(DFs['componentes']['grafico_equipos_por_tipo'])
+        # Tab 3: Proyectos
+        with tabs[2]:
+            st.markdown("")
+            
+            # KPIs de proyectos
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.subheader("Provincial :material/location_on:")
+                for key in ['kpi_pfi_provincial', 'kpi_porc_privada_provincial']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            with col2:
+                st.subheader("Regional :material/explore_nearby:")
+                for key in ['kpi_pfi_regional', 'kpi_porc_privada_regional']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            with col3:
+                st.subheader("Nacional :material/flag:")
+                for key in ['kpi_pfi_nacional', 'kpi_porc_privada_nacional']:
+                    comp = DFs['componentes'][key]
+                    st.metric(
+                        label=f":primary[{comp['titulo']}]",
+                        value=comp['valor'],
+                        delta=None,
+                    )
+            
+            st.caption("*PFI: Proyectos Federales de Innovación")
+            st.caption(f"Fuente: {DFs['componentes']['kpi_pfi_provincial']['fuente']}")
+            st.markdown("")
+            
+            # Tabla de proyectos
+            if DFs['componentes']['tabla_pfi_cruce']['figura'] is not None:
+                render_table_with_source(DFs['componentes']['tabla_pfi_cruce'])
 
-    # Tab 5: Capital Humano
-    with tabs[4]:
-        st.markdown("")
-        
-        render_chart_with_source(DFs['componentes']['grafico_distribucion_investigadores'])
-        st.markdown("")
-        
-        # KPIs comparativos
-        col1, col2, col3 = st.columns(3, border=True)
-        with col1:
-            st.markdown(f"#### {st.session_state.provincia}")
-            comp = DFs['componentes']['kpi_tasa_pea_provincial']
-            st.metric(
-                label=":primary[Investigadores cada 1000 habs.]",
-                value=comp['valor'],
-                delta=None,
-            )
-        with col2:
-            st.markdown(f"#### {st.session_state.region}")
-            comp = DFs['componentes']['kpi_tasa_pea_regional']
-            st.metric(
-                label=":primary[Investigadores cada 1000 habs.]",
-                value=comp['valor'],
-                delta=None,
-            )
-        with col3:
-            st.markdown(f"#### {st.session_state.pais}")
-            comp = DFs['componentes']['kpi_tasa_pea_nacional']
-            st.metric(
-                label=":primary[Investigadores cada 1000 habs.]",
-                value=comp['valor'],
-                delta=None
-            )
-        
-        st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_pea_nacional']['fuente']}")
-        st.markdown("")
-        
-        if DFs['componentes']['tabla_personas_por_funcion']['figura'] is not None:
-            render_table_with_source(DFs['componentes']['tabla_personas_por_funcion'])
+        # Tab 4: Infraestructura
+        with tabs[3]:
+            st.markdown("")
+            
+            # KPI central
+            colA, colB, colC = st.columns(3)
+            with colB:
+                comp = DFs['componentes']['kpi_unidades_id_prov']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            
+            render_chart_with_source(DFs['componentes']['grafico_unidades_por_inst'])
             st.markdown("---")
-        
-        render_chart_with_source(DFs['componentes']['grafico_evolucion_investigadores'])
+            
+            # KPIs de equipos
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                comp = DFs['componentes']['kpi_equipos_provincial']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            with col2:
+                comp = DFs['componentes']['kpi_equipos_regional']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            with col3:
+                comp = DFs['componentes']['kpi_equipos_nacional']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            
+            st.caption(f"Fuente: {DFs['componentes']['kpi_equipos_nacional']['fuente']}")
+            st.markdown("")
+            
+            render_chart_with_source(DFs['componentes']['grafico_equipos_por_tipo'])
 
-    # Tab 6: Resultados
-    with tabs[5]:
-        st.markdown("")
-        
-        render_chart_with_source(DFs['componentes']['grafico_expo_intensidad'])
-        st.markdown("")
-        render_chart_with_source(DFs['componentes']['grafico_expo_evolucion'])
-        st.markdown("")
-        render_chart_with_source(DFs['componentes']['grafico_expo_destino'])
-        st.markdown("---")
-        
-        # KPIs de patentes
-        col1, col2, col3 = st.columns([6, 1, 3], vertical_alignment="center")
-        with col1:
-            comp = DFs['componentes']['kpi_patentes_cyt_prov']
-            st.metric(
-                label=f":primary[{comp['titulo']}]",
-                value=comp['valor'],
-                delta=None,
-            )
-        
-        col1b, col2b, col3b = st.columns([2, 6, 2])
-        with col2b:
-            comp = DFs['componentes']['kpi_patentes_cyt_arg']
-            st.metric(
-                label=f":primary[{comp['titulo']}]",
-                value=comp['valor'],
-                delta=None
-            )
-        
-        col1c, col2c, col3c = st.columns([2, 2, 6])
-        with col3c:
-            comp = DFs['componentes']['kpi_patentes_arg']
-            st.metric(
-                label=f":primary[{comp['titulo']}]",
-                value=comp['valor'],
-                delta=None
-            )
-        
-        st.caption(f"Fuente: {DFs['componentes']['kpi_patentes_arg']['fuente']}")
-        st.markdown("---")
-        
-        # Gráficos y tablas de resultados
-        if DFs['componentes']['grafico_patentes_evolucion']['figura'] is not None:
-            render_chart_with_source(DFs['componentes']['grafico_patentes_evolucion'])
+        # Tab 5: Capital Humano
+        with tabs[4]:
+            st.markdown("")
+            
+            render_chart_with_source(DFs['componentes']['grafico_distribucion_investigadores'])
+            st.markdown("")
+            
+            # KPIs comparativos
+            col1, col2, col3 = st.columns(3, border=True)
+            with col1:
+                st.markdown(f"#### {st.session_state.provincia}")
+                comp = DFs['componentes']['kpi_tasa_pea_provincial']
+                st.metric(
+                    label=":primary[Investigadores cada 1000 habs.]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            with col2:
+                st.markdown(f"#### {st.session_state.region}")
+                comp = DFs['componentes']['kpi_tasa_pea_regional']
+                st.metric(
+                    label=":primary[Investigadores cada 1000 habs.]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            with col3:
+                st.markdown(f"#### {st.session_state.pais}")
+                comp = DFs['componentes']['kpi_tasa_pea_nacional']
+                st.metric(
+                    label=":primary[Investigadores cada 1000 habs.]",
+                    value=comp['valor'],
+                    delta=None
+                )
+            
+            st.caption(f"Fuente: {DFs['componentes']['kpi_tasa_pea_nacional']['fuente']}")
+            st.markdown("")
+            
+            if DFs['componentes']['tabla_personas_por_funcion']['figura'] is not None:
+                render_table_with_source(DFs['componentes']['tabla_personas_por_funcion'])
+                st.markdown("---")
+            
+            render_chart_with_source(DFs['componentes']['grafico_evolucion_investigadores'])
+
+        # Tab 6: Resultados
+        with tabs[5]:
+            st.markdown("")
+            
+            render_chart_with_source(DFs['componentes']['grafico_expo_intensidad'])
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_expo_evolucion'])
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_expo_destino'])
             st.markdown("---")
-        
-        if DFs['componentes']['tabla_patentes_sector']['figura'] is not None:
-            render_table_with_source(DFs['componentes']['tabla_patentes_sector'])
+            
+            # KPIs de patentes
+            col1, col2, col3 = st.columns([6, 1, 3], vertical_alignment="center")
+            with col1:
+                comp = DFs['componentes']['kpi_patentes_cyt_prov']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None,
+                )
+            
+            col1b, col2b, col3b = st.columns([2, 6, 2])
+            with col2b:
+                comp = DFs['componentes']['kpi_patentes_cyt_arg']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None
+                )
+            
+            col1c, col2c, col3c = st.columns([2, 2, 6])
+            with col3c:
+                comp = DFs['componentes']['kpi_patentes_arg']
+                st.metric(
+                    label=f":primary[{comp['titulo']}]",
+                    value=comp['valor'],
+                    delta=None
+                )
+            
+            st.caption(f"Fuente: {DFs['componentes']['kpi_patentes_arg']['fuente']}")
             st.markdown("---")
+            
+            # Gráficos y tablas de resultados
+            if DFs['componentes']['grafico_patentes_evolucion']['figura'] is not None:
+                render_chart_with_source(DFs['componentes']['grafico_patentes_evolucion'])
+                st.markdown("---")
+            
+            if DFs['componentes']['tabla_patentes_sector']['figura'] is not None:
+                render_table_with_source(DFs['componentes']['tabla_patentes_sector'])
+                st.markdown("---")
+            
+            render_chart_with_source(DFs['componentes']['grafico_produccion_evolucion'])
+            st.markdown("---")
+            render_chart_with_source(DFs['componentes']['grafico_produccion_tipo'])
+            st.markdown("---")
+            render_chart_with_source(DFs['componentes']['grafico_publicaciones_area'])
+            st.markdown("---")
+            
+            if DFs['componentes']['tabla_articulos_q1_q2']['figura'] is not None:
+                render_table_with_source(DFs['componentes']['tabla_articulos_q1_q2'])
+
+        # Tab 7: Ciencia y Sociedad
+        with tabs[6]:
+            st.markdown("")
+            render_chart_with_source(DFs['componentes']['grafico_percepcion_temas_prioritarios'])
+            st.markdown("---")
+            render_chart_with_source(DFs['componentes']['grafico_percepcion_calidad_vida'])
+            st.markdown("")
+
+        # Aplicar estilos a las metric cards
+        style_metric_cards()
+        st.markdown("---")
+
+        # --- SECCIÓN DE EXPORTACIÓN PDF ---
+        # st.markdown("### 📄 Exportar Reporte")
         
-        render_chart_with_source(DFs['componentes']['grafico_produccion_evolucion'])
-        st.markdown("---")
-        render_chart_with_source(DFs['componentes']['grafico_produccion_tipo'])
-        st.markdown("---")
-        render_chart_with_source(DFs['componentes']['grafico_publicaciones_area'])
-        st.markdown("---")
+        # col1, col2, col3 = st.columns([1, 2, 1])
+        # with col2:
+        #     if st.button(
+        #         "🎯 Generar Reporte PDF",
+        #         use_container_width=True,
+        #         help="Generar un reporte PDF completo con todos los datos de la provincia",
+        #         type="primary"
+        #     ):
+        #         generate_pdf_report(st.session_state.provincia, DFs)
+
+    else:
+        # Mensaje cuando no hay provincia seleccionada
+        st.info("Por favor, seleccione una provincia del menú desplegable para visualizar sus datos.", icon=":material/info:")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        logger.error(f"Error crítico en Fichas Provinciales: {e}", exc_info=True)
+        st.error("Error crítico. Por favor contacte al administrador.", icon=":material/close:")
         
-        if DFs['componentes']['tabla_articulos_q1_q2']['figura'] is not None:
-            render_table_with_source(DFs['componentes']['tabla_articulos_q1_q2'])
-
-    # Tab 7: Ciencia y Sociedad
-    with tabs[6]:
-        st.markdown("")
-        render_chart_with_source(DFs['componentes']['grafico_percepcion_temas_prioritarios'])
-        st.markdown("---")
-        render_chart_with_source(DFs['componentes']['grafico_percepcion_calidad_vida'])
-        st.markdown("")
-
-    # Aplicar estilos a las metric cards
-    style_metric_cards()
-    st.markdown("---")
-
-    # --- SECCIÓN DE EXPORTACIÓN PDF ---
-    # st.markdown("### 📄 Exportar Reporte")
-    
-    # col1, col2, col3 = st.columns([1, 2, 1])
-    # with col2:
-    #     if st.button(
-    #         "🎯 Generar Reporte PDF",
-    #         use_container_width=True,
-    #         help="Generar un reporte PDF completo con todos los datos de la provincia",
-    #         type="primary"
-    #     ):
-    #         generate_pdf_report(st.session_state.provincia, DFs)
-
-else:
-    # Mensaje cuando no hay provincia seleccionada
-    st.info("Por favor, seleccione una provincia del menú desplegable para visualizar sus datos.", icon=":material/info:")
+        if st.session_state.get('roles') and 'admin' in st.session_state.get('roles'):
+            with st.expander("Detalles del Error"):
+                st.code(str(e))
+                import traceback
+                st.code(traceback.format_exc())

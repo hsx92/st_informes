@@ -6,10 +6,9 @@ Utiliza streamlit-authenticator de forma correcta y completa.
 import streamlit as st
 from auth_manager import get_auth_manager, authenticated_menu, unauthenticated_menu
 from css_utils import load_css
-from logging_config import get_logger, get_audit_logger, log_execution, log_streamlit_interaction
-
+from logging_config import get_logger, get_audit_logger, log_execution, log_streamlit_component
 # Inicializar loggers
-logger = get_logger(__name__)
+logger = get_logger('inicio')
 audit_logger = get_audit_logger()
 
 # Configuración de la página
@@ -330,7 +329,7 @@ def show_home_page():
 
 
 # MAIN APP LOGIC
-@log_streamlit_interaction('main_page_load')
+@log_streamlit_component('inicio_main')
 def main():
     """Función principal de la aplicación."""
     try:
