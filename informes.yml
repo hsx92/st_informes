@@ -241,26 +241,39 @@ informe:
 
     tabla_apn_jurisdiccion_entidad_programa_prov: &tabla_apn_jurisdiccion_entidad_programa_prov
       orden: 2005
-      titulo: "Presupuesto APN por jurisdicción, entidad y programa ejecutado en {{provincia}} (2025)"
-      subtitulo: " crédito devengado en millones de pesos a valores corrientes"
-      tipo_componente: "TABLA"
+      titulo: "Presupuesto APN por jurisdicción, entidad y programa ejecutado en {{provincia}}"
+      subtitulo: " crédito devengado en millones de pesos a valores corrientes (2025)"
+      tipo_componente: "TABLA_AGRUPADA"
       estado: true
       fuente: "DNIYES"
       parametros: ["provincia_id"]
       config:
-        pivot:
-          index: ["jurisdiccion_desc", "entidad_desc", "programa_desc"]
-          columns:
-          values:
-          aggfunc: "sum"
+        grouped_table:
+          group_columns: ["jurisdiccion_desc", "entidad_desc", "programa_desc"]
+          group_columns_labels: {
+            "jurisdiccion_desc": "Jurisdicción",
+            "entidad_desc": "Entidad",
+            "programa_desc": "Programa"
+          }
+          value_column: "credito_devengado"
+          value_label: "Crédito Devengado"
+          agg_function: "sum"
+          add_percentage: true
+          percentage_label: "(%) del total crédito devengado"
+          add_total_row: true
+          total_label: "Total general"
+          format_values: true
+          decimal_places: 0
+          percentage_decimals: 2
       plantilla_sql: |
         SELECT jurisdiccion_desc, entidad_desc, programa_desc, SUM(credito_devengado) as credito_devengado
         FROM apn_2020_2025
         WHERE ubicacion_geografica_desc4 = (
             SELECT region_iso FROM ref_provincia
             WHERE provincia_id = {{ provincia_id }}
-        )
-        GROUP BY jurisdiccion_desc, entidad_desc, programa_desc;
+        ) AND impacto_presupuestario_anio = 2025
+        GROUP BY jurisdiccion_desc, entidad_desc, programa_desc
+        ORDER BY jurisdiccion_desc, entidad_desc, programa_desc;
 
     grafico_evolucion_regional: &grafico_evolucion_regional
       orden: 2006
@@ -745,7 +758,7 @@ informe:
     tabla_patentes_sector: &tabla_patentes_sector
       orden: 4108
       titulo: "Patentes solicitadas por instituciones de ciencia, tecnología e innovación provinciales por sector de tecnología"
-      subtitulo: " (2014-{{anio}})"
+      subtitulo: "(2014-{{anio}})"
       tipo_componente: "TABLA"
       estado: true
       fuente: "DNIYES"
@@ -859,7 +872,7 @@ informe:
     tabla_articulos_q1_q2: &tabla_articulos_q1_q2
       orden: 4111
       titulo: "Cantidad de artículos publicados en revistas Q1 y Q2"
-      subtitulo: " (2019 - {{anio}})"
+      subtitulo: "(2019 - {{anio}})"
       tipo_componente: "TABLA"
       estado: true
       fuente: "DNIYES"

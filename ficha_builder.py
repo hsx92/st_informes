@@ -36,7 +36,7 @@ COLOR_DISCRETE_SEQUENCE = [
 COLORES_PONCHO = {
     # Colores primarios del sistema
     "primario": "#232D4F",           # Azul oficial
-    "secundario": "#2E7D32",         # Verde institucional
+    "secundario": "#354B6E",         # Azul secundario
     
     # Estados y alertas
     "exito": "#2E7D32",             # Verde
@@ -152,12 +152,30 @@ def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame
             try:
                 gt = (
                     GT(tabla)
-                    .tab_header(title=componente['titulo'])
+                    .tab_header(
+                        title=componente['titulo'],
+                        subtitle=componente['subtitulo'] if componente.get('subtitulo', False) else None
+                    )
                     .tab_stubhead(label='')
                     .opt_table_font(
                         font=google_font(name="Poppins"),
                     )
-                    # 1. Formato para el cuerpo de la primera columna (el índice)
+                    .tab_style(
+                        style=[
+                            style.text(color="white", size="20px", weight="bold"),
+                            style.borders(sides="all", color=COLORES_PONCHO["primario"], weight="2px"),
+                            style.css("padding-top: 10px; padding-bottom: 10px;")
+                        ],
+                        locations=loc.title()
+                    )
+                    .tab_style(
+                        style=[
+                            style.text(color="white", size="18px", weight="normal"),
+                            style.borders(sides="all", color=COLORES_PONCHO["primario"], weight="2px"),
+                            style.css("padding-bottom: 10px; padding-top: -10px;")
+                        ],
+                        locations=loc.subtitle()
+                    )
                     .tab_style(
                         style.css("padding-top: 25px; padding-bottom: 25px;"),  # El primer valor es el padding vertical (top/bottom)
                         locations=loc.body()
@@ -165,19 +183,19 @@ def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame
                     .tab_style(style=[
                         style.css("padding-top: 15px; padding-bottom: 15px;"),
                         style.text(font=google_font(name="Poppins"), align="center")
-                    ],  # El primer valor es el padding vertical (top/bottom)
-                        locations=[loc.header(), loc.column_header()]
+                    ],
+                        locations=loc.column_header()
                     )
-                    # 2. Formato para el encabezado de la primera columna
                     .tab_style([
-                        style.fill(color="#4D7AAE"),
+                        style.fill(color=COLORES_PONCHO["secundario"]),
                         style.text(font=google_font(name="Poppins"), weight="bold", color="white", align="center"),
                     ],
                         locations=loc.body(columns='')
                     )
-                    # 3. Formato para el encabezado de las otras columnas
-                    .tab_style(
-                        style.text(font=google_font(name="Poppins"), weight="bold", color="white", align="center"),
+                    .tab_style([
+                        style.text(font=google_font(name="Poppins"), weight="bold", color="white", align="center", v_align="middle"),
+                        style.borders(sides=["left", "right"], color=COLORES_PONCHO["secundario"], weight="2px"),
+                    ],
                         locations=loc.column_labels()
                     )
                     .tab_style(
@@ -199,10 +217,15 @@ def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame
                         sep_mark="."
                     )
                     .tab_options(
-                        heading_background_color="#54698B",
-                        column_labels_background_color="#54698B",  # Nuevo: Color de fondo para encabezados
-                        table_border_top_color="#54698B",
-                        table_border_bottom_color="#54698B",
+                        heading_background_color=COLORES_PONCHO["primario"],
+                        heading_border_bottom_color=COLORES_PONCHO["primario"],
+                        column_labels_background_color=COLORES_PONCHO["secundario"],
+                        column_labels_border_top_color=COLORES_PONCHO["primario"],
+                        column_labels_border_lr_color=COLORES_PONCHO["secundario"],
+                        table_border_top_color=COLORES_PONCHO["secundario"],
+                        table_border_bottom_color=COLORES_PONCHO["secundario"],
+                        table_border_left_color=COLORES_PONCHO["secundario"],
+                        table_border_right_color=COLORES_PONCHO["secundario"],
                         row_striping_include_stub=True,
                     )
                 )
@@ -216,6 +239,360 @@ def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame
             
     except Exception as e:
         logger.error(f"Error en tabla_pivot: {e}")
+        return None
+
+
+@log_execution(log_result=False)
+def tabla_agrupada(componente: dict, render_gt: bool = True) -> Union[pd.DataFrame, GT, None]:
+    """
+    Crea una tabla agrupada jerárquica con totales y porcentajes.
+    
+    Args:
+        componente: Diccionario con datos y configuración
+        render_gt: Si renderizar como great_tables o devolver DataFrame
+    
+    Returns:
+        GT object o DataFrame según render_gt
+    """
+    try:
+        logger.debug(f"Generando tabla agrupada para: {componente.get('titulo', 'sin título')}")
+        
+        df = componente['resultado_sql']
+        config = componente.get('config', {}).get('grouped_table', {})
+        
+        # Configuración
+        group_cols = config.get('group_columns', [])
+        group_cols_labels = config.get('group_columns_labels', {})
+        value_col = config.get('value_column', 'credito_devengado')
+        value_label = config.get('value_label', 'Crédito Devengado')
+        agg_func = config.get('agg_function', 'sum')
+        add_percentage = config.get('add_percentage', True)
+        percentage_label = config.get('percentage_label', '(%) del total crédito devengado')
+        add_total_row = config.get('add_total_row', True)
+        total_label = config.get('total_label', 'Total general')
+        format_values = config.get('format_values', True)
+        decimal_places = config.get('decimal_places', 0)
+        percentage_decimals = config.get('percentage_decimals', 2)
+        
+        # Validar que group_cols sea lista
+        if isinstance(group_cols, str):
+            group_cols = [group_cols]
+        
+        # 1. Agrupar y agregar datos
+        if group_cols:
+            tabla = df.groupby(group_cols, dropna=False).agg({value_col: agg_func}).reset_index()
+        else:
+            tabla = df.copy()
+        
+        # Renombrar columna de valores
+        tabla.rename(columns={value_col: value_label}, inplace=True)
+        # Renombrar columnas de agrupación si se proporcionaron etiquetas
+        for col, label in group_cols_labels.items():
+            if col in tabla.columns:
+                tabla.rename(columns={col: label}, inplace=True)
+                # Actualizar group_cols para usar las etiquetas
+                group_cols = [label if c == col else c for c in group_cols]
+        
+        # 2. Calcular porcentajes si está configurado
+        if add_percentage:
+            total = tabla[value_label].sum()
+            tabla[percentage_label] = (tabla[value_label] / total * 100)
+        
+        # 3. Formatear valores antes de agregar total
+        if format_values:
+            # Formatear valores numéricos
+            tabla[value_label] = tabla[value_label].round(decimal_places)
+            if decimal_places == 0:
+                tabla[value_label] = tabla[value_label].astype(int)
+            
+            # Formatear porcentajes
+            if add_percentage:
+                tabla[percentage_label] = tabla[percentage_label].apply(
+                    lambda x: f"{x:.{percentage_decimals}f}%"
+                )
+        
+        merge_info = {}
+        merge_info = _calcular_merge_info(tabla, group_cols)
+
+        # 4. Agregar fila de total si está configurado
+        if add_total_row:
+            total_row = {}
+            
+            # Llenar columnas de agrupación
+            for i, col in enumerate(group_cols):
+                total_row[col] = total_label if i == 0 else ''
+            
+            # Calcular total
+            if format_values:
+                # Si ya formateamos, necesitamos el total original
+                total_value = df[value_col].sum()
+                if decimal_places == 0:
+                    total_row[value_label] = int(round(total_value, decimal_places))
+                else:
+                    total_row[value_label] = round(total_value, decimal_places)
+            else:
+                total_row[value_label] = tabla[value_label].sum()
+            
+            # Agregar porcentaje total
+            if add_percentage:
+                total_row[percentage_label] = f"100.{percentage_decimals * '0'}%"
+            
+            # Agregar fila al DataFrame
+            tabla = pd.concat([tabla, pd.DataFrame([total_row])], ignore_index=True)
+        
+        # 5. Renderizar con great_tables si es necesario
+        if render_gt:
+            return _formatear_tabla_agrupada_gt(tabla, componente, config, group_cols, merge_info)
+        else:
+            return tabla
+            
+    except Exception as e:
+        logger.error(f"Error en tabla_agrupada: {e}")
+        return None
+
+
+def _calcular_merge_info(tabla: pd.DataFrame, group_cols: list) -> dict:
+    """
+    Calcula información sobre qué celdas deben aparecer "mergeadas" visualmente.
+    Retorna un diccionario con la información de grupos para cada columna.
+    """
+    merge_info = {}
+    
+    for col_idx, col in enumerate(group_cols):
+        groups = []
+        current_value = None
+        start_row = 0
+        
+        # Para columnas después de la primera, considerar cambios en columnas anteriores
+        if col_idx > 0:
+            prev_cols = group_cols[:col_idx]
+            
+            for row_idx in range(len(tabla)):
+                # Verificar si cambió alguna columna anterior o la actual
+                prev_changed = any(
+                    row_idx == 0 or tabla.iloc[row_idx][prev_col] != tabla.iloc[row_idx-1][prev_col]
+                    for prev_col in prev_cols
+                )
+                
+                current_changed = (
+                    row_idx == 0 or
+                    tabla.iloc[row_idx][col] != tabla.iloc[row_idx-1][col] or
+                    prev_changed
+                )
+                
+                if current_changed:
+                    if row_idx > 0:
+                        groups.append({
+                            'start': start_row,
+                            'end': row_idx - 1,
+                            'value': current_value,
+                            'show_value': True
+                        })
+                    start_row = row_idx
+                    current_value = tabla.iloc[row_idx][col]
+            
+            # Agregar el último grupo
+            groups.append({
+                'start': start_row,
+                'end': len(tabla) - 1,
+                'value': current_value,
+                'show_value': True
+            })
+        else:
+            # Para la primera columna, agrupar valores consecutivos iguales
+            for row_idx in range(len(tabla)):
+                if row_idx == 0 or tabla.iloc[row_idx][col] != tabla.iloc[row_idx-1][col]:
+                    if row_idx > 0:
+                        groups.append({
+                            'start': start_row,
+                            'end': row_idx - 1,
+                            'value': current_value,
+                            'show_value': True
+                        })
+                    start_row = row_idx
+                    current_value = tabla.iloc[row_idx][col]
+            
+            # Agregar el último grupo
+            groups.append({
+                'start': start_row,
+                'end': len(tabla) - 1,
+                'value': current_value,
+                'show_value': True
+            })
+        
+        merge_info[col] = groups
+    
+    return merge_info
+
+
+def _formatear_tabla_agrupada_gt(
+    tabla: pd.DataFrame, componente: dict, config: dict, group_cols: list, merge_info: dict
+) -> GT:
+    """
+    Aplica formato visual con great_tables para tabla agrupada jerárquica.
+    """
+    try:
+        # Crear copia del DataFrame para modificación visual
+        tabla_display = tabla.copy()
+        
+        # Aplicar merge visual: ocultar valores duplicados
+        if merge_info:
+            for col, groups in merge_info.items():
+                for group in groups:
+                    # Mantener solo el primer valor del grupo, limpiar el resto
+                    for row in range(group['start'] + 1, group['end'] + 1):
+                        tabla_display.at[row, col] = ''
+        
+        # Crear objeto GT con el DataFrame modificado
+        gt = GT(tabla_display)
+        
+        # Agregar título y subtítulo
+        if componente.get('titulo'):
+            gt = gt.tab_header(
+                title=componente['titulo'],
+                subtitle=componente.get('subtitulo', '')
+            )
+        
+        # Configurar fuente
+        gt = gt.opt_table_font(
+            font=google_font(name="Poppins")
+        )
+        
+        # Configurar opciones de tabla
+        gt = gt.tab_options(
+            heading_background_color=COLORES_PONCHO["primario"],
+            heading_padding="10px",
+            column_labels_background_color=COLORES_PONCHO["secundario"],
+            table_border_top_color=COLORES_PONCHO["secundario"],
+            table_border_bottom_color=COLORES_PONCHO["secundario"],
+            table_border_left_color=COLORES_PONCHO["secundario"],
+            table_border_right_color=COLORES_PONCHO["secundario"],
+            table_border_top_width="2px",
+            table_border_bottom_width="2px",
+            table_border_left_width="2px",
+            table_border_right_width="2px",
+            row_striping_include_stub=False,
+            data_row_padding="10px"
+        )
+        
+        # Estilo para encabezados de columna
+        gt = gt.tab_style(
+            style=[
+                style.text(color="white", weight="bold", align="center", v_align="middle"),
+                style.borders(sides="all", color=COLORES_PONCHO["secundario"], weight="2px")
+            ],
+            locations=loc.column_labels()
+        )
+        
+        # Estilo para el título si existe
+        gt = gt.tab_style(
+            style=[
+                style.text(color="white", size="20px", weight="bold"),
+                style.borders(sides="all", color=COLORES_PONCHO["primario"], weight="2px"),
+            ],
+            locations=loc.title()
+        )
+
+        # Estilo para el subtítulo si existe
+        gt = gt.tab_style(
+            style=[
+                style.text(color="white", size="16px", weight="normal"),
+                style.borders(sides="all", color=COLORES_PONCHO["primario"], weight="2px"),
+            ],
+            locations=loc.subtitle()
+        )
+
+        # Aplicar bordes azules a TODAS las celdas del cuerpo
+        gt = gt.tab_style(
+            style=style.borders(sides=['left', 'right'], color=COLORES_PONCHO["secundario"], weight="2px"),
+            locations=loc.body()
+        )
+
+        # Aplicar estilos específicos para simular celdas mergeadas
+        if merge_info:
+            for col_idx, (col, groups) in enumerate(merge_info.items()):
+                for group in groups:
+                    if group['end'] > group['start']:  # Solo si el grupo tiene más de una fila
+                        # Para la primera celda del grupo (donde se muestra el valor)
+                        gt = gt.tab_style(
+                            style=[
+                                style.text(align="center", v_align="middle", weight="normal"),
+                                style.borders(sides=["top", "left", "right"], color=COLORES_PONCHO["secundario"], weight="2px")
+                            ],
+                            locations=loc.body(columns=col, rows=[group['start']])
+                        )
+                        # Para la última celda del grupo
+                        gt = gt.tab_style(
+                            style=style.borders(
+                                sides=["bottom", "left", "right"],
+                                color=COLORES_PONCHO["secundario"],
+                                weight="2px"
+                            ),
+                            locations=loc.body(columns=col, rows=[group['end']])
+                        )
+                    else:
+                        # Grupo de una sola fila
+                        gt = gt.tab_style(
+                            style=[
+                                style.text(align="center", v_align="middle", weight="normal"),
+                                style.borders(sides=["top", "bottom", "left", "right"], color=COLORES_PONCHO["secundario"], weight="2px")
+                            ],
+                            locations=loc.body(columns=col, rows=[group['start']])
+                        )
+        
+        # Formatear columna de valores (centrada)
+        value_label = config.get('value_label', 'value')
+        gt = gt.tab_style(
+            style=style.text(align="center"),
+            locations=loc.body(columns=value_label)
+        )
+
+        # Formatear columna de porcentajes (centrada)
+        if config.get('add_percentage', True):
+            percentage_label = config.get('percentage_label', 'percentage')
+            gt = gt.tab_style(
+                style=style.text(align="center"),
+                locations=loc.body(columns=percentage_label)
+            )
+        
+        # Resaltar fila de total si existe
+        if config.get('add_total_row', True):
+            last_row = len(tabla) - 1
+            gt = gt.tab_style(
+                style=[
+                    style.fill(color=COLORES_PONCHO["gris_claro"]),
+                    style.text(weight="bold", align="center"),
+                    style.borders(sides="top", color=COLORES_PONCHO["secundario"], weight="2px"),
+                    style.borders(sides=["left", "right"], color=COLORES_PONCHO["gris_claro"], style="hidden")
+                ],
+                locations=loc.body(rows=[last_row])
+            )
+        
+        # Aplicar bordes más gruesos entre grupos principales (opcional)
+        if merge_info and group_cols:
+            first_col_groups = merge_info.get(group_cols[0], [])
+            for group in first_col_groups[:-1]:  # Todos excepto el último
+                if group['end'] < len(tabla) - 1:  # No aplicar si es antes del total
+                    gt = gt.tab_style(
+                        style=style.borders(
+                            sides="bottom",
+                            color=COLORES_PONCHO["secundario"],
+                            weight="2px"
+                        ),
+                        locations=loc.body(rows=[group['end']])
+                    )
+        
+        # Formatear números con separador de miles
+        gt = gt.fmt_integer(
+            columns=value_label,
+            use_seps=True,
+            sep_mark="."
+        )
+
+        return gt
+        
+    except Exception as e:
+        logger.error(f"Error formateando tabla agrupada con GT: {e}")
         return None
 
 
@@ -325,9 +702,13 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             )
 
             # ---
-
-            # tabla_apn_jurisdiccion_entidad_programa_prov_fig = tabla_pivot(DFs["componentes"]["tabla_apn_jurisdiccion_entidad_programa_prov"], render_gt=True)
-
+            if has_data(DFs["componentes"]["tabla_apn_jurisdiccion_entidad_programa_prov"]):
+                tabla_apn_jurisdiccion_entidad_programa_prov_fig = tabla_agrupada(
+                    componente=DFs["componentes"]["tabla_apn_jurisdiccion_entidad_programa_prov"],
+                    render_gt=True
+                )
+            else:
+                tabla_apn_jurisdiccion_entidad_programa_prov_fig = None
             # ---
 
             inversionID_fig = build_line(
@@ -580,7 +961,7 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
 
             DFs["componentes"]["grafico_expo_top5"]["figura"] = top5_exportaciones_fig
             DFs["componentes"]["grafico_evolucion_presupuesto_apn"]["figura"] = evolucion_presupuesto_apn_fig
-            # DFs["componentes"]["tabla_apn_jurisdiccion_entidad_programa_prov"]["figura"] = tabla_apn_jurisdiccion_entidad_programa_prov_fig
+            DFs["componentes"]["tabla_apn_jurisdiccion_entidad_programa_prov"]["figura"] = tabla_apn_jurisdiccion_entidad_programa_prov_fig
             DFs["componentes"]["grafico_evolucion_regional"]["figura"] = inversionID_fig
             DFs["componentes"]["grafico_inv_por_investigador"]["figura"] = inversionInvestigador_fig
             DFs["componentes"]["grafico_inv_empresaria_sector"]["figura"] = inversionEmpresas_fig

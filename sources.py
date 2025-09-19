@@ -323,6 +323,7 @@ def ejecutar_consulta_parametrizada(plantilla_sql: str, params: dict) -> pd.Data
                 column_names = [desc[0] for desc in cursor.description]
                 df = pd.DataFrame(rows, columns=column_names)
                 logger.info(f"Query successful: {len(df)} rows × {len(df.columns)} columns returned")
+                logger.debug(f"Query result columns: {df.columns.tolist()}", extra={"result": df.head().to_dict(orient='records')})
             else:
                 logger.warning("Query returned no results")
                 df = pd.DataFrame()

@@ -5,7 +5,6 @@ Incluye logging de aplicación, auditoría y monitoreo de rendimiento.
 
 import logging
 import logging.handlers
-import os
 import sys
 import json
 import traceback
@@ -39,7 +38,7 @@ LOG_LEVELS = {
 }
 
 # Obtener nivel de log del entorno o usar INFO por defecto
-LOG_LEVEL = LOG_LEVELS.get(os.getenv("LOG_LEVEL", "INFO").upper(), logging.INFO)
+LOG_LEVEL = LOG_LEVELS.get('DEBUG' if getattr(st.secrets, "DEBUG_MODE", False) else 'INFO', logging.INFO)
 
 # Thread-local storage para contexto
 _log_context = threading.local()
@@ -104,7 +103,7 @@ class CustomJSONFormatter(logging.Formatter):
                 'levelname', 'levelno', 'lineno', 'module', 'msecs',
                 'pathname', 'process', 'processName', 'relativeCreated',
                 'thread', 'threadName', 'exc_info', 'exc_text', 'stack_info',
-                'getMessage'
+                'getMessage', 'func_args', 'func_kwargs', 'function', 'success'
             ]:
                 log_obj[key] = value
                 
@@ -681,7 +680,7 @@ def log_context(**kwargs):
         _log_context.context = old_context
 
 
-# Decoradores mejorados
+# Decoradores
 
 def log_execution(
     logger: Optional[logging.Logger] = None,
@@ -720,8 +719,8 @@ def log_execution(
                     f"Ejecutando {func_name}",
                     extra={
                         "function": func_name,
-                        "args": str(args)[:200] if args else None,
-                        "kwargs": str(safe_kwargs)[:200] if safe_kwargs else None
+                        "func_args": str(args)[:200] if args else None,
+                        "func_kwargs": str(safe_kwargs)[:200] if safe_kwargs else None
                     }
                 )
             else:

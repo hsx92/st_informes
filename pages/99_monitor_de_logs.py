@@ -582,11 +582,31 @@ def render_detailed_logs(df: pd.DataFrame):
                 # Convertir row a dict y manejar tipos no serializables
                 row_dict = {}
                 for key, value in row.items():
-                    if pd.notna(value):
-                        if isinstance(value, pd.Timestamp):
-                            row_dict[key] = value.isoformat()
+                    # CORRECCIÓN: Manejar arrays y valores escalares correctamente
+                    try:
+                        # Verificar si el valor es un escalar
+                        if pd.api.types.is_scalar(value):
+                            # Para valores escalares, usar pd.notna normalmente
+                            if pd.notna(value):
+                                if isinstance(value, pd.Timestamp):
+                                    row_dict[key] = value.isoformat()
+                                else:
+                                    row_dict[key] = value
                         else:
-                            row_dict[key] = value
+                            # Para arrays, listas o Series, convertir a lista
+                            if hasattr(value, 'tolist'):
+                                # Es un array numpy o Series pandas
+                                row_dict[key] = value.tolist()
+                            elif isinstance(value, (list, tuple)):
+                                # Ya es una lista o tupla
+                                row_dict[key] = list(value)
+                            else:
+                                # Intentar convertir a string como fallback
+                                row_dict[key] = str(value)
+                    except Exception as e:
+                        # Si algo falla, convertir a string
+                        logger.debug(f"Error procesando valor para key '{key}': {e}")
+                        row_dict[key] = str(value) if value is not None else None
                 
                 st.json(row_dict)
     

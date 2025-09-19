@@ -371,11 +371,13 @@ def main():
                     delta=None,
                 )
             st.caption(f"Fuente: {DFs['componentes']['kpi_apn_devengado_nac']['fuente']} - Actualizado al 21/05/2025")
-            st.markdown("")
+            st.markdown("---")
+            render_table_with_source(DFs['componentes']['tabla_apn_jurisdiccion_entidad_programa_prov'])
+            st.markdown("---")
             render_chart_with_source(DFs['componentes']['grafico_evolucion_regional'])
-            st.markdown("")
+            st.markdown("---")
             render_chart_with_source(DFs['componentes']['grafico_inv_por_investigador'])
-            st.markdown("")
+            st.markdown("---    ")
             render_chart_with_source(DFs['componentes']['grafico_inv_empresaria_sector'])
 
         # Tab 3: Proyectos
