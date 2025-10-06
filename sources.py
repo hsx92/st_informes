@@ -6,43 +6,12 @@ import streamlit as st
 from jinja2 import Template
 from copy import deepcopy
 from typing import Dict
-from functools import wraps
+# from functools import wraps
 import time
 from logging_config import get_logger, log_database_operation, log_execution
 
 # Initialize logger for this module
 logger = get_logger(__name__)
-
-
-# Performance monitoring decorator
-def monitor_performance(threshold: float = 1.0):
-    """Decorator to monitor and log slow operations."""
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            start_time = time.time()
-            
-            try:
-                result = func(*args, **kwargs)
-                elapsed_time = time.time() - start_time
-                
-                if elapsed_time > threshold:
-                    logger.warning(
-                        f"Slow operation detected: {func.__name__} took {elapsed_time:.2f} seconds"
-                    )
-                else:
-                    logger.debug(f"{func.__name__} completed in {elapsed_time:.2f} seconds")
-                
-                return result
-            except Exception as e:
-                elapsed_time = time.time() - start_time
-                logger.error(
-                    f"{func.__name__} failed after {elapsed_time:.2f} seconds: {str(e)}"
-                )
-                raise
-        
-        return wrapper
-    return decorator
 
 
 # CONN CLASS with enhanced logging
@@ -178,7 +147,6 @@ def render_obj(obj, params):
     return obj
 
 
-@st.cache_data(ttl=600)
 @log_execution()
 def _load_informes() -> Dict[str, object]:
     """Load report configurations from YAML file."""

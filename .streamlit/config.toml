@@ -24,18 +24,23 @@ showErrorDetails = false  # En producción, no mostrar detalles de errores
 toolbarMode = "developer"  # minimal, developer, viewer
 
 [theme]
-# Tema oficial del Portal SICyT
-base = "dark"
+# Tema del Portal SICyT
+base = "light"
 
 # Colores oficiales de la identidad visual argentina
-primaryColor = "#7589A3"          # Azul SICyT
-backgroundColor = "#2C3C5F"       # Fondo principal oscuro
-secondaryBackgroundColor = "#354B6E"  # Fondo de barras laterales
-textColor = "#E3E7ED"            # Color de texto principal
+primaryColor = "#354B6E"          # Azul SICyT
+backgroundColor = "#eff2f7ff"
+secondaryBackgroundColor = "#9dafc5ff"  # Fondo de barras laterales
+textColor = "#232D4F"            # Color de texto principal
 
 # Tipografía
 font = "Poppins, 'Helvetica Neue', Arial, sans-serif"
 baseFontSize = 18  # Tamaño base para accesibilidad
+
+[theme.sidebar]
+backgroundColor = "#354B6E"
+secondaryBackgroundColor = "#8999acff"
+textColor = "#eff2f7ff"
 
 [logger]
 # Configuración de logging para aplicaciones gubernamentales

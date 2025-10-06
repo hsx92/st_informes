@@ -11,7 +11,7 @@ from streamlit_extras.metric_cards import style_metric_cards
 from sources import get_provincias
 from pdf_builder import ficha_provincial_pdf
 from ficha_builder import ficha_provincial_figs, preparar_data_pdf
-from css_utils import load_css, get_metric_css
+from css_utils import load_css, get_metric_css, get_colors
 from auth_manager import get_auth_manager, menu_with_redirect
 from logging_config import get_logger, get_audit_logger, log_streamlit_component
 from typing import Optional, Dict
@@ -19,6 +19,8 @@ from typing import Optional, Dict
 
 logger = get_logger('fichas_provinciales')
 audit_logger = get_audit_logger()
+
+COLORES_PONCHO = get_colors()
 
 
 def log_export_action(format_type: str):
@@ -50,7 +52,7 @@ page_specific_css = """
 }
 
 .stTabs [data-baseweb="tab"] {
-    color: #B4C6DB;
+    color: #eff2f7ff;
     font-weight: 500;
     transition: all 0.3s ease;
 }
@@ -59,19 +61,20 @@ page_specific_css = """
     background-color: #54698B !important;
     color: #FFFFFF !important;
     border-radius: 4px;
+    padding: 8px 16px;
+}
+
+.stTabs [aria-selected="true"][data-baseweb="tab"] {
+    background-color: rgba(53, 75, 110, 0.3) !important;
+    color: #FFFFFF !important;
+    border-radius: 8px;
+    padding: 8px;
 }
 
 /* Selectbox mejorado */
 .stSelectbox > div > div {
     background-color: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid #7589A3 !important;
-}
-
-/* Captions con mejor visibilidad */
-.stCaption {
-    color: #8B9DC3 !important;
-    font-style: italic;
-    font-size: 0.85rem;
 }
 
 /* Contenedor de métricas mejorado */
@@ -92,8 +95,8 @@ div[data-testid="metric-container"]:hover {
 
 /* Headers mejorados */
 h2 {
-    color: #E3E7ED !important;
-    border-bottom: 2px solid #54698B;
+    color: #2C3C5F !important;
+    border-bottom: 2px solid #2C3C5F;
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
 }
@@ -247,9 +250,9 @@ def main():
     # Header con ícono
     col1, col2 = st.columns([1, 9], vertical_alignment='center')
     with col1:
-        st.markdown("""
+        st.markdown(f"""
             <div class="icon-container">
-                <i class="icono-arg-ciencia-publicacion" style="font-size: 76px; color: #FFFFFF;"></i>
+                <i class="icono-arg-ciencia-publicacion" style="font-size: 76px; color: {COLORES_PONCHO["primario"]};"></i>
             </div>
             """, unsafe_allow_html=True)
     with col2:
@@ -585,17 +588,18 @@ def main():
         st.markdown("---")
 
         # --- SECCIÓN DE EXPORTACIÓN PDF ---
-        # st.markdown("### 📄 Exportar Reporte")
-        
-        # col1, col2, col3 = st.columns([1, 2, 1])
-        # with col2:
-        #     if st.button(
-        #         "🎯 Generar Reporte PDF",
-        #         use_container_width=True,
-        #         help="Generar un reporte PDF completo con todos los datos de la provincia",
-        #         type="primary"
-        #     ):
-        #         generate_pdf_report(st.session_state.provincia, DFs)
+        if auth_manager.has_role('admin'):
+            col1, col2, col3 = st.columns(3)
+            with col2:
+                if st.button(
+                    "Descargar ficha en PDF",
+                    use_container_width=True,
+                    help="Descargar un informe PDF completo con todos los datos de la provincia",
+                    type="primary",
+                    icon=":material/picture_as_pdf:",
+                    key="generate_pdf",
+                ):
+                    generate_pdf_report(st.session_state.provincia, DFs)
 
     else:
         # Mensaje cuando no hay provincia seleccionada

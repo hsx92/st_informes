@@ -12,10 +12,12 @@ import plotly.express as px
 from logging_config import get_logger, get_audit_logger, log_streamlit_component
 from auth_manager import get_auth_manager, menu_with_redirect
 from typing import Dict, List
-from css_utils import load_css
+from css_utils import load_css, get_colors
 
 logger = get_logger('log_monitor')
 audit_logger = get_audit_logger()
+
+COLORES_PONCHO = get_colors()
 
 # Configuración de la página
 st.set_page_config(
@@ -776,12 +778,12 @@ def main():
     """Función principal del monitor de logs."""
     
     # Header
-    col1, col2 = st.columns([1, 9], vertical_alignment='center')
+    col1, col2 = st.columns([1.5, 8.5], vertical_alignment='center')
     with col1:
         if st.secrets.get("USE_ICONS", False):
-            st.markdown("""
+            st.markdown(f"""
                 <div class="icon-container">
-                    <i class="icono-arg-lupa-engranaje" style="font-size: 76px; color: #FFFFFF;"></i>
+                    <i class="icono-arg-lupa-engranaje" style="font-size: 76px; color: {COLORES_PONCHO["primario"]};"></i>
                 </div>
                 """, unsafe_allow_html=True)
     with col2:

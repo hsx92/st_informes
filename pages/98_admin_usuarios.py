@@ -6,11 +6,13 @@ import streamlit as st
 import pandas as pd
 import time
 from auth_manager import get_auth_manager, menu_with_redirect
-from css_utils import load_css
+from css_utils import load_css, get_colors
 from logging_config import get_logger, get_audit_logger, log_streamlit_component
 
 logger = get_logger('admin_users')
 audit_logger = get_audit_logger()
+
+COLORES_PONCHO = get_colors()
 
 # Configuración de la página
 st.set_page_config(
@@ -64,12 +66,12 @@ def main():
     )
 
     # Header
-    col1, col2 = st.columns([1, 9], vertical_alignment='center')
+    col1, col2 = st.columns([1.5, 8.5], vertical_alignment='center')
     with col1:
         if st.secrets.get("USE_ICONS", False):
-            st.markdown("""
+            st.markdown(f"""
                 <div class="icon-container">
-                    <i class="icono-arg-usuarios" style="font-size: 76px; color: #FFFFFF;"></i>
+                    <i class="icono-arg-usuarios" style="font-size: 76px; color: {COLORES_PONCHO["primario"]};"></i>
                 </div>
                 """, unsafe_allow_html=True)
     with col2:

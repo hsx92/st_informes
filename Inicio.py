@@ -5,11 +5,13 @@ Utiliza streamlit-authenticator de forma correcta y completa.
 
 import streamlit as st
 from auth_manager import get_auth_manager, authenticated_menu, unauthenticated_menu
-from css_utils import load_css
+from css_utils import load_css, get_colors
 from logging_config import get_logger, get_audit_logger, log_execution, log_streamlit_component
 # Inicializar loggers
 logger = get_logger('inicio')
 audit_logger = get_audit_logger()
+
+COLORES_PONCHO = get_colors()
 
 # Configuración de la página
 st.set_page_config(
@@ -31,16 +33,6 @@ except Exception as e:
 
 # CSS personalizado
 custom_css = """
-    /* Estilos para el formulario de login */
-    div[data-testid="stForm"] {
-        max-width: 500px;
-        margin: auto;
-        padding: 2rem;
-        background-color: #232D4F;
-        border-radius: 10px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
     /* Estilos para métricas */
     div[data-testid="stMetricValue"] > div {
         color: #7589A3;
@@ -60,21 +52,21 @@ custom_css = """
     
     /* Estilos para las tarjetas de bienvenida */
     .welcome-card {
-        background-color: #ffffff;
+        background-color: #354B6E;
         padding: 1.5rem;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.12);
         margin-bottom: 1rem;
-        color: #232D4F;
+        color: #eff2f7ff;
     }
     
     .feature-card {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, #354B6E 0%, #91A1B5 100%);
         padding: 1.5rem;
         border-radius: 8px;
         margin-bottom: 1rem;
         transition: transform 0.3s ease;
-        color: #232D4F;
+        color: #eff2f7ff;
     }
     
     .feature-card:hover {

@@ -5,6 +5,7 @@ import textwrap
 from typing import Union
 from great_tables import GT, style, loc, google_font
 from sources import get_informe
+from css_utils import get_colors
 from fig_builders import build_line, build_bar, build_pie, build_treemap
 from logging_config import get_logger, log_execution, performance_tracking
 import time
@@ -12,7 +13,7 @@ import time
 # Inicializar logger
 logger = get_logger(__name__)
 
-pio.templates.default = 'seaborn'
+pio.templates.default = 'plotly_white'
 BASE_FONT = dict(family="Poppins", size=16)
 COLOR_DISCRETE_SEQUENCE = [
     "#0695D6",  # Azul primario oficial del gobierno argentino
@@ -33,30 +34,7 @@ COLOR_DISCRETE_SEQUENCE = [
 ]
 
 # Colores adicionales para casos específicos
-COLORES_PONCHO = {
-    # Colores primarios del sistema
-    "primario": "#232D4F",           # Azul oficial
-    "secundario": "#354B6E",         # Azul secundario
-    
-    # Estados y alertas
-    "exito": "#2E7D32",             # Verde
-    "advertencia": "#F57C00",        # Naranja
-    "error": "#D32F2F",             # Rojo
-    "info": "#0695D6",              # Azul primario
-    
-    # Grises institucionales
-    "gris_oscuro": "#37474F",       # Para textos principales
-    "gris_medio": "#78909C",        # Para textos secundarios
-    "gris_claro": "#ECEFF1",        # Para fondos suaves
-    
-    # Colores específicos para ciencia y tecnología
-    "innovacion": "#6A1B9A",        # Violeta
-    "datos": "#1565C0",             # Azul datos
-    "tecnologia": "#00695C",        # Verde azulado
-    "investigacion": "#AD1457",       # Rosa/magenta
-
-    "resaltado": "#E1CD4A",         # Amarillo dorado para destacar
-}
+COLORES_PONCHO = get_colors()
 
 
 # --- HELPERS --- #
@@ -243,7 +221,7 @@ def tabla_pivot(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame
 
 
 @log_execution(log_result=False)
-def tabla_agrupada(componente: dict, render_gt: bool = True) -> Union[pd.DataFrame, GT, None]:
+def tabla_agrupada(componente: dict, render_gt: bool = False) -> Union[pd.DataFrame, GT, None]:
     """
     Crea una tabla agrupada jerárquica con totales y porcentajes.
     
@@ -310,9 +288,6 @@ def tabla_agrupada(componente: dict, render_gt: bool = True) -> Union[pd.DataFra
                 tabla[percentage_label] = tabla[percentage_label].apply(
                     lambda x: f"{x:.{percentage_decimals}f}%"
                 )
-        
-        merge_info = {}
-        merge_info = _calcular_merge_info(tabla, group_cols)
 
         # 4. Agregar fila de total si está configurado
         if add_total_row:
@@ -339,8 +314,19 @@ def tabla_agrupada(componente: dict, render_gt: bool = True) -> Union[pd.DataFra
             
             # Agregar fila al DataFrame
             tabla = pd.concat([tabla, pd.DataFrame([total_row])], ignore_index=True)
+
+        # 5. Calcular información de merge visual
+        merge_info = {}
+        merge_info = _calcular_merge_info(tabla, group_cols)
+        # Aplicar merge visual: ocultar valores duplicados
+        if merge_info:
+            for col, groups in merge_info.items():
+                for group in groups:
+                    # Mantener solo el primer valor del grupo, limpiar el resto
+                    for row in range(group['start'] + 1, group['end'] + 1):
+                        tabla.at[row, col] = ''
         
-        # 5. Renderizar con great_tables si es necesario
+        # 6. Renderizar con great_tables si es necesario
         if render_gt:
             return _formatear_tabla_agrupada_gt(tabla, componente, config, group_cols, merge_info)
         else:
@@ -434,14 +420,6 @@ def _formatear_tabla_agrupada_gt(
     try:
         # Crear copia del DataFrame para modificación visual
         tabla_display = tabla.copy()
-        
-        # Aplicar merge visual: ocultar valores duplicados
-        if merge_info:
-            for col, groups in merge_info.items():
-                for group in groups:
-                    # Mantener solo el primer valor del grupo, limpiar el resto
-                    for row in range(group['start'] + 1, group['end'] + 1):
-                        tabla_display.at[row, col] = ''
         
         # Crear objeto GT con el DataFrame modificado
         gt = GT(tabla_display)
@@ -600,46 +578,126 @@ def _formatear_tabla_agrupada_gt(
 
 @log_execution(log_args=False)
 def preparar_data_pdf(data: dict):
-    """Prepara los datos para generación de PDF."""
+    """Prepara los datos para generación de PDF con validación mejorada."""
     logger.info("Iniciando preparación de datos para PDF")
     start_time = time.time()
     
     try:
+        componentes_procesados = {}
+        
         for nombre, componente in data["componentes"].items():
-            if nombre.startswith("kpi"):
-                continue
-            elif nombre.startswith("tabla"):
-                logger.debug(f"Procesando tabla: {nombre}")
-                data["componentes"][nombre]["df"] = tabla_pivot(componente)
-            elif nombre.startswith("grafico"):
-                width, height = (1080, None)
-                if nombre == "grafico_percepcion_calidad_vida":
-                    width, height = (None, 700)
-                if nombre == "grafico_percepcion_temas_prioritarios":
-                    width, height = (1080, 600)
-                    data["componentes"][nombre]["img"] = componente.get("figura").to_image(
-                        format="png", width=width, height=height, scale=1, validate=True
-                    )
-                    continue
-                if componente.get("figura") is not None:
-                    logger.debug(f"Convirtiendo gráfico a imagen: {nombre}")
-                    # Convertir la figura a imagen
-                    data["componentes"][nombre]["img"] = componente.get("figura").to_image(
-                        format="png", width=width, height=height, scale=2, validate=True
-                    )
+            try:
+                if nombre.startswith("kpi"):
+                    # Los KPIs no necesitan procesamiento adicional
+                    componentes_procesados[nombre] = componente
+                    
+                elif nombre.startswith("tabla"):
+                    logger.debug(f"Procesando tabla: {nombre}")
+                    # Generar DataFrame para la tabla
+                    if nombre == "tabla_apn_jurisdiccion_entidad_programa_prov":
+                        df = tabla_agrupada(componente, render_gt=False)
+                    else:
+                        df = tabla_pivot(componente, render_gt=False)
 
-        # Delete 'figura' and 'resultado_sql' from every 'componente'
-        for nombre, componente in data["componentes"].items():
+                    if df is not None and not df.empty:
+                        componente["df"] = df
+                        componente["tiene_datos"] = True
+                    else:
+                        componente["tiene_datos"] = False
+                        logger.warning(f"Tabla sin datos: {nombre}")
+                    componentes_procesados[nombre] = componente
+
+                elif nombre.startswith("grafico"):
+                    # Configuración adaptativa de dimensiones
+                    width, height = _get_optimal_dimensions(nombre, componente)
+                    
+                    if componente.get("figura") is not None:
+                        logger.debug(f"Convirtiendo gráfico a imagen: {nombre}")
+                        # Generar imagen con manejo de errores
+                        try:
+                            img_bytes = componente["figura"].to_image(
+                                format="png",
+                                width=width,
+                                height=height,
+                                scale=2,
+                                validate=False  # Desactivar validación para evitar errores inesperados
+                            )
+                            
+                            # Guardar imagen temporalmente
+                            img_path = f"temp/{nombre}.png"
+                            with open(img_path, 'wb') as f:
+                                f.write(img_bytes)
+                            
+                            componente["img"] = img_path
+                            componente["tiene_datos"] = True
+                            
+                        except Exception as e:
+                            logger.error(f"Error convirtiendo gráfico {nombre}: {e}")
+                            componente["tiene_datos"] = False
+                            print(e)
+                    else:
+                        componente["tiene_datos"] = False
+                        logger.warning(f"Gráfico sin figura: {nombre}")
+                    
+                    componentes_procesados[nombre] = componente
+                    
+            except Exception as e:
+                logger.error(f"Error procesando componente {nombre}: {e}")
+                componentes_procesados[nombre] = componente
+                componentes_procesados[nombre]["tiene_datos"] = False
+        
+        # Limpiar datos no necesarios
+        for nombre, componente in componentes_procesados.items():
             componente.pop("figura", None)
             componente.pop("resultado_sql", None)
-
+        
+        data["componentes"] = componentes_procesados
+        
         elapsed_time = time.time() - start_time
-        logger.info(f'Generación del diccionario de la ficha provincial completada en {elapsed_time:.2f}s')
+        logger.info(f'Preparación de datos completada en {elapsed_time:.2f}s')
+        
+        # Validación final
+        componentes_validos = sum(
+            1 for c in componentes_procesados.values()
+            if c.get("tiene_datos", False)
+        )
+        logger.info(f"Componentes válidos: {componentes_validos}/{len(componentes_procesados)}")
+        
         return data
         
     except Exception as e:
-        logger.error(f"Error en preparar_data_pdf: {e}")
+        logger.error(f"Error en preparar_data_pdf: {e}", exc_info=True)
         raise
+
+
+def _get_optimal_dimensions(nombre: str, componente: dict) -> tuple:
+    """Determina las dimensiones óptimas para cada tipo de gráfico."""
+    
+    # Configuraciones específicas por tipo de gráfico
+    dimensiones = {
+        "grafico_percepcion_calidad_vida": (1080, 700),
+        "grafico_percepcion_temas_prioritarios": (1080, 635),
+        "grafico_evolucion": (1080, 400),
+        "grafico_barh": (1080, None),  # Altura dinámica
+        "grafico_pie": (1080, 420),
+        "grafico_treemap": (1080, 400),
+        "default": (1080, 400)
+    }
+    
+    # Buscar configuración específica
+    for pattern, dims in dimensiones.items():
+        if pattern in nombre:
+            return dims
+    
+    # Si es gráfico de barras horizontal, calcular altura dinámica
+    if "barh" in componente.get("tipo_grafico", ""):
+        df = componente.get("resultado_sql")
+        if df is not None:
+            num_bars = len(df)
+            height = max(400, num_bars * 25 + 300)
+            return (1080, height)
+    
+    return dimensiones["default"]
 
 
 # --- FICHA PROVINCIAL --- #
@@ -675,7 +733,7 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             # FIGURAS
             logger.debug("Generando figuras...")
             
-            # Proceso de generación de figuras (código existente)
+            # Proceso de generación de figuras
             try:
                 DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1] = DFs["componentes"]["grafico_expo_top5"]['resultado_sql'].iloc[:, 1].apply(insertar_saltos)
             except IndexError as e:
@@ -685,20 +743,17 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
                 comp=DFs["componentes"]["grafico_expo_top5"],
                 orientation='h',
                 color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-                showlegend=False
             )
 
             # ---
 
             # Crear columna text_auto con formato personalizado y 'M' al final
-            DFs["componentes"]["grafico_evolucion_presupuesto_apn"]['resultado_sql']['text'] = DFs["componentes"]["grafico_evolucion_presupuesto_apn"]['resultado_sql']['credito_devengado'].apply(lambda x: f'{x:,.0f}'.replace(",", ".") + ' M' if pd.notnull(x) else '')
+            # DFs["componentes"]["grafico_evolucion_presupuesto_apn"]['resultado_sql']['text'] = DFs["componentes"]["grafico_evolucion_presupuesto_apn"]['resultado_sql']['credito_devengado'].apply(lambda x: f'{x:,.0f}'.replace(",", ".") + ' M' if pd.notnull(x) else '')
 
             evolucion_presupuesto_apn_fig = build_bar(
                 comp=DFs["componentes"]["grafico_evolucion_presupuesto_apn"],
                 orientation='v',
-                showlegend=False,
-                text=True,
-                hovertemplate='<b>%{x}</b><br>Crédito Devengado: %{y:,.0f} M<extra></extra>',
+                color_discrete_sequence=[COLORES_PONCHO["primario"]],
             )
 
             # ---
@@ -713,26 +768,27 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
 
             inversionID_fig = build_line(
                 comp=DFs["componentes"]["grafico_evolucion_regional"],
-                markers=True,)
-
+                markers=True,
+                hide_legend=True,
+                final_marker_text=True
+            )
             # ---
 
             inversionInvestigador_fig = build_bar(
                 comp=DFs["componentes"]["grafico_inv_por_investigador"],
                 orientation='h',
                 color_discrete_map=highlight_map(DFs["componentes"]["grafico_inv_por_investigador"]['resultado_sql']['unidad_territorial'], provincia),
-                showlegend=False
             )
 
             # ---
 
             DFs["componentes"]["grafico_inv_empresaria_sector"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_inv_empresaria_sector"]['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
+            DFs["componentes"]["grafico_inv_empresaria_sector"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_inv_empresaria_sector"]['resultado_sql'].iloc[:, 0].apply(lambda x: x.capitalize() if isinstance(x, str) else x)
 
             inversionEmpresas_fig = build_bar(
                 comp=DFs["componentes"]["grafico_inv_empresaria_sector"],
                 orientation='h',
-                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-                showlegend=False
+                color_discrete_sequence=[COLORES_PONCHO["primario"]]
             )
 
             # ---
@@ -743,12 +799,12 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
                 tabla_pfi_cruce_fig = None
 
             # ---
+            DFs["componentes"]["grafico_unidades_por_inst"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_unidades_por_inst"]['resultado_sql'].iloc[:, 0].apply(lambda x: x.title() if isinstance(x, str) else x)
 
             unidadesIDxinstitucion_fig = build_bar(
                 comp=DFs["componentes"]["grafico_unidades_por_inst"],
                 orientation='h',
-                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-                showlegend=False,
+                color_discrete_sequence=[COLORES_PONCHO["primario"]],
                 dynamic_height=True
             )
 
@@ -757,8 +813,7 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             equiposIDxTipo_fig = build_bar(
                 comp=DFs["componentes"]["grafico_equipos_por_tipo"],
                 orientation='h',
-                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-                showlegend=False
+                color_discrete_sequence=[COLORES_PONCHO["primario"]],
             )
 
             # ---
@@ -784,7 +839,7 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             )
 
             # ---
-
+            DFs["componentes"]["grafico_expo_intensidad"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_expo_intensidad"]['resultado_sql'].iloc[:, 0].replace('Sin Clasificar', 'Resto de las Exportaciones')
             exportacionesIntensidad_fig = build_pie(
                 comp=DFs["componentes"]["grafico_expo_intensidad"],
                 margin=dict(l=20, r=20, t=90, b=20)
@@ -794,6 +849,8 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
 
             evolucionExportaciones_fig = build_line(
                 comp=DFs["componentes"]["grafico_expo_evolucion"],
+                hide_legend=True,
+                final_marker_text=True,
                 margin=dict(l=20, r=20, t=90, b=20)
             )
 
@@ -813,6 +870,8 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
 
                 evolucionPatentes_fig = build_line(
                     comp=DFs["componentes"]["grafico_patentes_evolucion"],
+                    markers=True,
+                    markers_text=True,
                     margin=dict(l=20, r=20, t=90, b=20)
                 )
             else:
@@ -821,6 +880,9 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             # ---
 
             if has_data(DFs["componentes"]["tabla_patentes_sector"]):
+                # Primer letra de cada palabra mayúscula
+                DFs["componentes"]["tabla_patentes_sector"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["tabla_patentes_sector"]['resultado_sql'].iloc[:, 0].apply(lambda x: x.title() if isinstance(x, str) else x)
+                DFs["componentes"]["tabla_patentes_sector"]['resultado_sql'].iloc[:, 1] = DFs["componentes"]["tabla_patentes_sector"]['resultado_sql'].iloc[:, 1].apply(lambda x: x.title() if isinstance(x, str) else x)
                 tabla_patentes_sector_fig = tabla_pivot(DFs["componentes"]["tabla_patentes_sector"], render_gt=True)
             else:
                 tabla_patentes_sector_fig = None
@@ -843,12 +905,12 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             # --- HDP
 
             DFs["componentes"]["grafico_publicaciones_area"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_publicaciones_area"]['resultado_sql'].iloc[:, 0].apply(insertar_saltos)
+            DFs["componentes"]["grafico_publicaciones_area"]['resultado_sql'].iloc[:, 0] = DFs["componentes"]["grafico_publicaciones_area"]['resultado_sql'].iloc[:, 0].apply(lambda x: x.title() if isinstance(x, str) else x)
 
             publicacionesArea_fig = build_bar(
                 comp=DFs["componentes"]["grafico_publicaciones_area"],
                 orientation='h',
-                color_discrete_sequence=COLOR_DISCRETE_SEQUENCE,
-                showlegend=False,
+                color_discrete_sequence=[COLORES_PONCHO["primario"]]
             )
 
             # ---
@@ -859,9 +921,6 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
                 tabla_articulos_q1_q2_fig = None
 
             # ---
-
-            nBarras = 24
-            altura = 20 * nBarras + 300
 
             DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['resultado_sql'].iloc[:, 1] = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['resultado_sql'].iloc[:, 1].apply(insertar_saltos, width=20)
             percepcion_df = DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['resultado_sql'].copy()
@@ -894,7 +953,7 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
                 x=highlight_percepcion_df['variable'],
                 y=highlight_percepcion_df['valor'],
                 mode='markers',
-                marker=dict(color=COLORES_PONCHO["resaltado"], size=12, symbol='circle'),
+                marker=dict(color=COLORES_PONCHO["primario"], size=12, symbol='circle'),
                 name=provincia,
                 hovertext=highlight_percepcion_df['unidad_territorial'],
                 hovertemplate='<b>%{hovertext}</b><br>%{y}' + DFs["componentes"]["grafico_percepcion_temas_prioritarios"]['config']['layout']['yaxis']['ticksuffix'] + '<extra></extra>'
@@ -936,8 +995,8 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
 
             percepcionTemasPrioritarios_fig.update_layout(
                 title=full_title,
-                height=altura,
-                margin=dict(l=20, r=40, t=175, b=150),
+                height=900,
+                margin=dict(l=20, r=40, t=175, b=40),
                 legend_title_text="",
                 shapes=all_shapes
             )
@@ -946,13 +1005,13 @@ def ficha_provincial_figs(provincia_id: int, provincia: str, anio: int) -> dict:
             )
 
             # ---
+            DFs["componentes"]["grafico_percepcion_calidad_vida"]['resultado_sql']['valor'] = DFs["componentes"]["grafico_percepcion_calidad_vida"]['resultado_sql']['valor'].round(1)
 
             percepcionPublica_fig = build_bar(
                 comp=DFs["componentes"]["grafico_percepcion_calidad_vida"],
                 color_discrete_map=highlight_map(DFs["componentes"]["grafico_percepcion_calidad_vida"]['resultado_sql']['unidad_territorial'], provincia),
                 dynamic_height=True,
-                showlegend=False,
-                margin=dict(l=20, r=40, t=150, b=20)
+                margin=dict(l=20, r=40, t=150, b=20),
             )
 
             # --- FIN FIGURAS --- #

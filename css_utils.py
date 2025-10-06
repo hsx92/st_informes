@@ -60,3 +60,31 @@ def get_metric_css(theme: str = "dark") -> str:
             font-weight: 500;
         }
         """
+
+
+def get_colors() -> dict[str, str]:
+    """Return a dictionary of official colors used in the application."""
+    return {
+        # Colores primarios del sistema
+        "primario": "#232D4F",           # Azul oficial
+        "secundario": "#354B6E",         # Azul secundario
+        
+        # Estados y alertas
+        "exito": "#2E7D32",             # Verde
+        "advertencia": "#F57C00",        # Naranja
+        "error": "#D32F2F",             # Rojo
+        "info": "#0695D6",              # Azul primario
+        
+        # Grises institucionales
+        "gris_oscuro": "#37474F",       # Para textos principales
+        "gris_medio": "#78909C",        # Para textos secundarios
+        "gris_claro": "#ECEFF1",        # Para fondos suaves
+        
+        # Colores específicos para ciencia y tecnología
+        "innovacion": "#6A1B9A",        # Violeta
+        "datos": "#1565C0",             # Azul datos
+        "tecnologia": "#00695C",        # Verde azulado
+        "investigacion": "#AD1457",       # Rosa/magenta
+
+        "resaltado": "#F7D80E",         # Amarillo dorado para destacar
+    }

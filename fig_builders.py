@@ -3,7 +3,6 @@ from typing import Any, Mapping, Optional
 
 
 # --- HELPERS --- #
-
 def height_for_bars(n: int, per_bar: int = 22, base: int = 260,
                     min_h: int = 420, max_h: int = 3000) -> int:
     """Altura sugerida según cantidad de categorías (barras) para gráficos horizontales."""
@@ -28,11 +27,14 @@ def build_line(
     comp: Mapping[str, Any],
     *,
     markers: bool = True,
-    template: str = "seaborn",
+    markers_text: bool = False,
+    template: str = "plotly_white",
     color_discrete_sequence: Optional[list[str]] = None,
     color_discrete_map: Optional[dict[str, str]] = None,
     hovertemplate: Optional[str] = None,
+    hide_legend: Optional[bool] = False,
     margin: Optional[dict] = None,
+    final_marker_text: bool = False,
 ):
     df = comp["resultado_sql"]
     pm = comp["config"]["plot_mapping"]
@@ -42,6 +44,7 @@ def build_line(
         y=pm["y"],
         labels=pm.get("labels"),
         color=pm.get("color"),
+        text=pm["y"] if markers_text else None,
         title=comp["titulo"],
         subtitle=comp.get("subtitulo"),
         markers=markers,
@@ -53,13 +56,36 @@ def build_line(
         fig.update_traces(hovertemplate=hovertemplate)
     if margin:
         fig.update_layout(margin=margin)
+    if hide_legend:
+        fig.update_layout(showlegend=False)
+    if final_marker_text:
+        apply_config(fig, comp)
+        # Agregar texto al final de cada línea
+        for trace in fig.data:
+            scatter_fig = px.scatter(
+                x=[trace.x[-1]],
+                y=[trace.y[-1]],
+                size=[0],
+                text=[f"{trace.name}<br>{trace.y[-1]:,.0f} M"],
+            )
+            scatter_trace = scatter_fig.data[0]
+            scatter_trace.update(
+                textposition="top center",
+                textfont=dict(size=18),
+                showlegend=False,
+                cliponaxis=False,
+                marker=dict(color=trace.line.color, size=15),
+                hovertemplate=f"<b>{trace.name}</b><br>{trace.x[-1]}<br>{pm['labels'][pm['y']]}: {trace.y[-1]:,.0f}<extra></extra>",
+            )
+            fig.add_trace(scatter_trace)
+        return fig
     return apply_config(fig, comp)
 
 
 def build_pie(
     comp: Mapping[str, Any],
     *,
-    template: str = "seaborn",
+    template: str = "plotly_white",
     color_discrete_sequence: Optional[list[str]] = None,
     color_discrete_map: Optional[dict[str, str]] = None,
     hole: Optional[float] = None,
@@ -95,16 +121,13 @@ def build_pie(
 def build_bar(
     comp: Mapping[str, Any],
     *,
-    template: str = "seaborn",
+    template: str = "plotly_white",
     orientation: str = "h",
     height: Optional[int] = None,
     dynamic_height: bool = False,
     color_discrete_sequence: Optional[list[str]] = None,
     color_discrete_map: Optional[dict[str, str]] = None,
-    hovertemplate: Optional[str] = None,
-    showlegend: Optional[bool] = None,
     margin: Optional[dict] = None,
-    text: bool = False,
 ):
     df = comp["resultado_sql"]
     pm = comp["config"]["plot_mapping"]
@@ -120,7 +143,6 @@ def build_bar(
         orientation=orientation,
         color_discrete_sequence=color_discrete_sequence,
         color_discrete_map=color_discrete_map,
-        text=pm.get("text") if text else None,
     )
     if height is None and dynamic_height:
         n_cats = df[pm["y"]].nunique(dropna=True)
@@ -128,12 +150,6 @@ def build_bar(
         fig.update_layout(height=height)
     if height is not None:
         fig.update_layout(height=height)
-    if hovertemplate:
-        fig.update_traces(hovertemplate=hovertemplate)
-    if text:
-        fig.update_traces(textposition='outside', cliponaxis=False)
-    if showlegend is not None:
-        fig.update_layout(showlegend=showlegend)
     if orientation == 'h':
         if df[pm["x"]].dtype == "int64" or df[pm["x"]].dtype == "float64":
             max_x = df[pm["x"]].max()
@@ -153,7 +169,7 @@ def build_bar(
 def build_treemap(
     comp: Mapping[str, Any],
     *,
-    template: str = "seaborn",
+    template: str = "plotly_white",
     color_discrete_sequence: Optional[list[str]] = None,
     color_discrete_map: Optional[dict[str, str]] = None,
     corner_radius: int = 5,

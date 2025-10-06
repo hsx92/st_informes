@@ -29,6 +29,10 @@ logs/
 *.log.*
 InformesApp-dh.log*
 
+# Temp
+tmp/
+temp/
+
 # Configuración sensible
 .streamlit/credentials.yaml
 .streamlit/credentials.json
@@ -38,6 +42,8 @@ InformesApp-dh.log*
 # Archivos de desarrollo
 dev_utils.py
 pages/authTester.py
+pdf_builder copy.py
+postgresql_constructor.py
 
 # Output
 output/
